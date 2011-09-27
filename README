@@ -1,0 +1,45 @@
+Universal Binary JSON Java Library
+http://ubjson.org
+
+
+	<Actively under development, but the core I/O classes needed to read/write
+	the spec are in the repo now>
+
+
+Changelog
+---------
+09-27-11
+	* Initial check-in of core IO classes to read/write spec.
+
+
+License
+-------
+This library is released under the Apache 2 License. See LICENSE.
+
+
+Description
+-----------
+This project represents (the official?) Java implementations of the 
+Universal Binary JSON specification: http://ubjson.org
+
+
+Example
+-------
+Comming soon...
+
+
+Performance
+-----------
+Comming soon...
+
+
+Reference
+---------
+Universal Binary JSON Specification - http://ubjson.org
+JSON Specification - http://json.org
+
+
+Contact
+-------
+If you have questions, comments or bug reports for this software please contact
+us at: software@thebuzzmedia.com
