@@ -20,6 +20,7 @@ import static org.ubjson.io.IConstants.*;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharsetEncoder;
@@ -112,38 +113,18 @@ public class UBJOutputStream extends FilterOutputStream implements IUBJOutput {
 	}
 
 	@Override
-	public void writeHuge(char[] huge) throws IllegalArgumentException,
+	public void writeHuge(BigDecimal huge) throws IllegalArgumentException,
 			IOException {
-		if (huge == null)
-			throw new IllegalArgumentException("huge cannot be null.");
-
-		writeHuge(huge, 0, huge.length);
-	}
-
-	@Override
-	public void writeHuge(char[] huge, int index, int length)
-			throws IllegalArgumentException, IOException {
 		if (huge == null)
 			throw new IllegalArgumentException("huge cannot be null");
 
+		String hugeText = huge.toString();
+
 		// Write header
-		writeInt32(HUGE, length);
+		writeInt32(HUGE, hugeText.length());
 
 		// Write body
-		writeCharBuffer(CharBuffer.wrap(huge, index, length));
-	}
-
-	@Override
-	public void writeHuge(String huge) throws IllegalArgumentException,
-			IOException {
-		if (huge == null)
-			throw new IllegalArgumentException("huge cannot be null");
-
-		// Write header
-		writeInt32(HUGE, huge.length());
-
-		// Write body - CB uses a reflection-optimized wrapper for String.
-		writeCharBuffer(CharBuffer.wrap(huge));
+		writeCharBuffer(CharBuffer.wrap(hugeText));
 	}
 
 	@Override

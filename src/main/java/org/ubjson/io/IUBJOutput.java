@@ -16,6 +16,7 @@
 package org.ubjson.io;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 
 public interface IUBJOutput {
 	public void writeNull() throws IOException;
@@ -30,13 +31,7 @@ public interface IUBJOutput {
 
 	public void writeDouble(double value) throws IOException;
 
-	public void writeHuge(char[] huge) throws IllegalArgumentException,
-			IOException;
-
-	public void writeHuge(char[] huge, int index, int length)
-			throws IllegalArgumentException, IOException;
-
-	public void writeHuge(String huge) throws IllegalArgumentException,
+	public void writeHuge(BigDecimal huge) throws IllegalArgumentException,
 			IOException;
 
 	public void writeString(char[] text) throws IllegalArgumentException,
