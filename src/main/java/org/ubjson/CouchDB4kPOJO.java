@@ -1,0 +1,110 @@
+package org.ubjson;
+
+import java.io.Serializable;
+
+public class CouchDB4kPOJO implements Serializable {
+	public String data3 = "ColreUHAtuYoUOx1N4ZloouQt2o6ugnUT6eYtS10gu7niM8i0vEiNufpk1RlMQXaHXlIwQBDsMFDFUQcFeg2vW5eD259Xm";
+	public String data4 = "zCxriJhL726WNNTdJJzurgSA8vKT6rHA0cFCb9koZcLUMXg4rmoXVPqIHWYaCV0ovl2t6xm7I1Hm36jXpLlXEb8fRfbwBeTW2V0OAsVqYH8eAT";
+	public String data0 = "9EVqHm5ARqcEB5jq2D14U2bCJPyBY0JWDr1Tjh8gTB0sWUNjqYiWDxFzlx6S";
+	public String data7 = "Bi1ujcgEvfADfBeyZudE7nwxc3Ik8qpYjsJIfKmwOMEbV2L3Bi0x2tcRpGuf4fiyvIbypDvJN1PPdQtfQW1Gv6zccXHwwZwKzUq6";
+	public Data5 data5 = new Data5();
+
+	public String[] strings = {
+			"edx5XzRkPVeEW2MBQzQMcUSuMI4FntjhlJ9VGhQaBHKPEazAaT",
+			"2fQUbzRUax4A",
+			"jURcBZ0vrJcmf2roZUMzZJQoTsKZDIdj7KhO7itskKvM80jBU9",
+			"8jKLmo3N2zYdKyTyfTczfr2x6bPaarorlnTNJ7r8lIkiZyBvrP",
+			"jbUeAVOdBSPzYmYhH0sabUHUH39O5e",
+			"I8yAQKZsyZhMfpzWjArQU9pQ6PfU6b14q2eWvQjtCUdgAUxFjg",
+			"97N8ZmGcxRZO4ZabzRRcY4KVHqxJwQ8qY", "0DtY1aWXmUfJENt9rYW9",
+			"DtpBUEppPwMnWexi8eIIxlXRO3GUpPgeNFG9ONpWJYvk8xBkVj",
+			"YsX8V2xOrTw6LhNIMMhO4F4VXFyXUXFr66L3sTkLWgFA9NZuBV",
+			"fKYYthv8iFvaYoFoYZyB",
+			"zGuLsPXoJqMbO4PcePteZfDMYFXdWtvNF8WvaplXypsd6" };
+	public String data1 = "9EVqHm5ARqcEB5jq21v2g0jVcG9CXB0Abk7uAF4NHYyTzeF3TnHhpZBECD14U2bCJPyBY0JWDr1Tjh8gTB0sWUNjqYiWDxFzlx6S";
+	public int[] integers = { 756509, 116117, 776378, 275045, 703447, 50156,
+			685803, 147958, 941747, 905651, 57367, 530248, 312888, 740951,
+			988947, 450154 };
+	public MoreNested moreNested = new MoreNested();
+
+	public class Data5 implements Serializable {
+		public int[] integers = { 756509, 116117, 776378, 275045, 703447,
+				50156, 685803, 147958, 941747, 905651, 57367, 530248, 312888,
+				740951, 988947, 450154 };
+		public double float1 = 76.572;
+		public double float2 = 83.5299;
+		public Data5Nested1 nested1 = new Data5Nested1();
+		public Data5Nested2 nested2 = new Data5Nested2();
+	}
+
+	public class MoreNested implements Serializable {
+		public int[] integers = { 756509, 116117, 776378, 275045, 703447,
+				50156, 685803, 147958, 941747, 905651, 57367, 530248, 312888,
+				740951, 988947, 450154 };
+		public double float1 = 76.572;
+		public double float2 = 83.5299;
+		public MoreNested1 nested1 = new MoreNested1();
+		public MoreNested2 nested2 = new MoreNested2();
+	}
+
+	public class MoreNested1 implements Serializable {
+		public int[] integers = { 756509, 116117, 776378, 275045, 703447,
+				50156, 685803, 147958, 941747, 905651, 57367, 530248, 312888,
+				740951, 988947, 450154 };
+	}
+
+	public class MoreNested2 implements Serializable {
+		public String[] strings = { "2fQUbzRUax4A",
+				"jURcBZ0vrJcmf2roZUMzZJQoTsKZDIdj7KhO7itskKvM80jBU9",
+				"8jKLmo3N2zYdKyTyfTczfr2x6bPaarorlnTNJ7r8lIkiZyBvrP",
+				"jbUeAVOdBSPzYmYhH0sabUHUH39O5e",
+				"I8yAQKZsyZhMfpzWjArQU9pQ6PfU6b14q2eWvQjtCUdgAUxFjg",
+				"97N8ZmGcxRZO4ZabzRRcY4KVHqxJwQ8qY", "0DtY1aWXmUfJENt9rYW9",
+				"DtpBUEppPwMnWexi8eIIxlXRO3GUpPgeNFG9ONpWJYvk8xBkVj",
+				"YsX8V2xOrTw6LhNIMMhO4F4VXFyXUXFr66L3sTkLWgFA9NZuBV",
+				"fKYYthv8iFvaYoFoYZyB",
+				"zGuLsPXoJqMbO4PcePteZfDMYFXdWtvNF8WvaplXypsd6" };
+		public int[] integers = { 756509, 116117, 776378, 57367, 530248,
+				312888, 740951, 988947, 450154 };
+	}
+
+	public class Data5Nested1 implements Serializable {
+		public int[] integers = { 756509, 116117, 776378, 275045, 703447,
+				50156, 685803, 147958, 941747, 905651, 57367, 530248, 312888,
+				740951, 988947, 450154 };
+		public double[] floats = { 43121609.5543, 99454976.3019,
+				32945584.756, 18122905.9212, 45893183.44, 63052200.6225,
+				69032152.6897, 3748217.6946, 75449850.474, 37111527.415,
+				84852536.859, 32906366.487, 27027600.417, 63874310.5614,
+				39440408.51, 97176857.1716, 97438252.1171, 49728043.5056,
+				40818570.245, 41415831.8949, 24796297.4251, 2819085.3449,
+				84263963.4848, 74503228.6878, 67925677.403, 4758851.9417,
+				75227407.9214, 76946667.8403, 72518275.9469, 94167085.9588,
+				75883067.8321, 27389831.6101, 57987075.5053, 1298995.2674,
+				14590614.6939, 45292214.2242, 3332166.364, 53784167.729,
+				25193846.1867, 81456965.477, 68532032.39, 73820009.7952,
+				57736110.5717, 37304166.7363, 20054244.864, 29746392.7397,
+				86467624.6, 45192685.8793, 44008816.5186, 1861872.8736,
+				14595859.467, 87795257.6703, 57768720.8303, 18290154.3126,
+				45893183.44, 63052200.6225, 69032152.6897, 3748217.6946,
+				75449850.474, 37111527.415, 84852536.859, 32906366.487,
+				27027600.417, 63874310.5614, 39440408.51, 97176857.1716,
+				97438252.1171, 49728043.5056, 40818570.245, 41415831.8949,
+				24796297.4251, 2819085.3449, 84263963.4848, 74503228.6878,
+				67925677.403, 4758851.9417, 75227407.9214, 76946667.8403,
+				72518275.9469, 94167085.9588, 75883067.8321, 27389831.6101,
+				57987075.5053, 1298995.2674, 80858801.2712, 98262252.4656,
+				51612877.944, 33397812.7835, 36089655.3049, 50164685.8153,
+				16852105.5192, 61171929.752, 86376339.7175, 73009014.5521,
+				7397302.331, 34345128.9589, 98343269.4418, 95039116.9058,
+				44833102.5752, 51052997.8873, 22719195.6783, 64883244.8699 };
+	}
+
+	public class Data5Nested2 implements Serializable {
+		public int[] integers = { 756509, 116117, 776378, 275045, 703447,
+				50156, 685803, 147958, 941747, 905651, 57367, 530248, 312888,
+				740951, 988947, 450154 };
+		public double double1 = 76.572f;
+		public double double2 = 83.5299f;
+	}
+}

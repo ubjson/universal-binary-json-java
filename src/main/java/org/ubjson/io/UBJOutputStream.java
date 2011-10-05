@@ -15,7 +15,7 @@
  */
 package org.ubjson.io;
 
-import static org.ubjson.io.IConstants.*;
+import static org.ubjson.IConstants.*;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;
