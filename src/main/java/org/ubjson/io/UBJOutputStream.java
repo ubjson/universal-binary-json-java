@@ -137,11 +137,6 @@ public class UBJOutputStream extends FilterOutputStream {
 
 	public void writeHuge(BigDecimal huge) throws IllegalArgumentException,
 			IOException {
-		writeHuge(huge, false);
-	}
-
-	public void writeHuge(BigDecimal huge, boolean autoCompact)
-			throws IllegalArgumentException, IOException {
 		if (huge == null)
 			throw new IllegalArgumentException("huge cannot be null");
 
@@ -149,7 +144,7 @@ public class UBJOutputStream extends FilterOutputStream {
 		int length = hugeText.length();
 
 		// Write header
-		if (autoCompact && length < 255) {
+		if (length < 255) {
 			out.write(HUGE_COMPACT);
 			out.write(length);
 		} else {
@@ -163,16 +158,11 @@ public class UBJOutputStream extends FilterOutputStream {
 
 	public void writeString(char[] text) throws IllegalArgumentException,
 			IOException {
-		writeString(text, false);
-	}
-
-	public void writeString(char[] text, boolean autoCompact)
-			throws IllegalArgumentException, IOException {
 		if (text == null)
 			throw new IllegalArgumentException("text cannot be null");
 
 		// Write header
-		if (autoCompact && text.length < 255) {
+		if (text.length < 255) {
 			out.write(STRING_COMPACT);
 			out.write(text.length);
 		} else {
@@ -186,16 +176,11 @@ public class UBJOutputStream extends FilterOutputStream {
 
 	public void writeString(char[] text, int index, int length)
 			throws IllegalArgumentException, IOException {
-		writeString(text, index, length, false);
-	}
-
-	public void writeString(char[] text, int index, int length,
-			boolean autoCompact) throws IllegalArgumentException, IOException {
 		if (text == null)
 			throw new IllegalArgumentException("text cannot be null");
 
 		// Write header
-		if (autoCompact && length < 255) {
+		if (length < 255) {
 			out.write(STRING_COMPACT);
 			out.write(length);
 		} else {
@@ -209,18 +194,13 @@ public class UBJOutputStream extends FilterOutputStream {
 
 	public void writeString(String text) throws IllegalArgumentException,
 			IOException {
-		writeString(text, false);
-	}
-
-	public void writeString(String text, boolean autoCompact)
-			throws IllegalArgumentException, IOException {
 		if (text == null)
 			throw new IllegalArgumentException("text cannot be null");
 
 		int length = text.length();
 
 		// Write header
-		if (autoCompact && length < 255) {
+		if (length < 255) {
 			out.write(STRING_COMPACT);
 			out.write(length);
 		} else {
@@ -234,17 +214,12 @@ public class UBJOutputStream extends FilterOutputStream {
 
 	public void writeArrayHeader(int elementCount)
 			throws IllegalArgumentException, IOException {
-		writeArrayHeader(elementCount, false);
-	}
-
-	public void writeArrayHeader(int elementCount, boolean autoCompact)
-			throws IllegalArgumentException, IOException {
 		if (elementCount < 0)
 			throw new IllegalArgumentException("elementCount [" + elementCount
 					+ "] must be >= 0.");
 
 		// <= because of 255 (0xFF) meaning unbounded container
-		if (autoCompact && elementCount <= 255) {
+		if (elementCount <= 255) {
 			out.write(ARRAY_COMPACT);
 			out.write(elementCount);
 		} else {
@@ -254,17 +229,12 @@ public class UBJOutputStream extends FilterOutputStream {
 	}
 
 	public void writeObjectHeader(int elementCount) throws IOException {
-		writeObjectHeader(elementCount, false);
-	}
-
-	public void writeObjectHeader(int elementCount, boolean autoCompact)
-			throws IOException {
 		if (elementCount < 0)
 			throw new IllegalArgumentException("elementCount [" + elementCount
 					+ "] must be >= 0.");
 
 		// <= because of 255 (0xFF) meaning unbounded container
-		if (autoCompact && elementCount <= 255) {
+		if (elementCount <= 255) {
 			out.write(OBJECT_COMPACT);
 			out.write(elementCount);
 		} else {
