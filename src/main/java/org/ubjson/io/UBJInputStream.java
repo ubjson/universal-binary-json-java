@@ -15,45 +15,47 @@
  */
 package org.ubjson.io;
 
-import static org.ubjson.IConstants.*;
-import static org.ubjson.io.IMarker.*;
+import static org.ubjson.io.IDataType.ARRAY;
+import static org.ubjson.io.IDataType.ARRAY_COMPACT;
+import static org.ubjson.io.IDataType.BYTE;
+import static org.ubjson.io.IDataType.DOUBLE;
+import static org.ubjson.io.IDataType.FLOAT;
+import static org.ubjson.io.IDataType.HUGE;
+import static org.ubjson.io.IDataType.HUGE_COMPACT;
+import static org.ubjson.io.IDataType.INT16;
+import static org.ubjson.io.IDataType.INT32;
+import static org.ubjson.io.IDataType.INT64;
+import static org.ubjson.io.IDataType.OBJECT;
+import static org.ubjson.io.IDataType.OBJECT_COMPACT;
+import static org.ubjson.io.IDataType.STRING;
+import static org.ubjson.io.IDataType.STRING_COMPACT;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.CharsetDecoder;
+
+import org.ubjson.io.charset.StreamDecoder;
 
 public class UBJInputStream extends FilterInputStream {
-	private byte peek;
-	private boolean empty;
+	private byte type;
 
+	private byte[] int16Buffer;
 	private byte[] int32Buffer;
 	private byte[] int64Buffer;
 
-	private byte[] buffer;
-	private CharsetDecoder decoder;
+	private StreamDecoder decoder;
 
 	public UBJInputStream(InputStream in) {
 		super(in);
 
-		peek = INVALID;
-		empty = false;
+		type = -1;
 
+		int16Buffer = new byte[2];
 		int32Buffer = new byte[4];
 		int64Buffer = new byte[8];
 
-		/*
-		 * REMINDER: This is not the entire read buffer, this is just the local
-		 * buffer used by this class to pull content from the InputStream. The
-		 * InputStream, if the user wants buffering, should be a
-		 * BufferedInputStream instance with a user-configured buffer from the
-		 * primary source.
-		 */
-		buffer = new byte[16384];
-		decoder = UTF_8_CHARSET.newDecoder();
+		decoder = new StreamDecoder();
 	}
 
 	@Override
@@ -101,89 +103,65 @@ public class UBJInputStream extends FilterInputStream {
 		return in.markSupported();
 	}
 
-	public byte nextMarker() throws IOException {
-		// Avoid IOException, once empty, always report empty.
-		if (empty)
-			return INVALID;
+	public byte nextType() throws IOException {
+		if (type == -1)
+			return -1;
 
-		peek = (byte) in.read();
-
-		// Update empty state
-		empty = (peek == INVALID);
-
-		return peek;
-	}
-	
-	public void readNoop() throws IOException, DataFormatException {
-		verifyNextMarker(NOOP);
-		peek = INVALID;
-	}
-
-	public void readNull() throws IOException, DataFormatException {
-		verifyNextMarker(NULL);
-		peek = INVALID;
-	}
-
-	public boolean readBoolean() throws IOException, DataFormatException {
-		if (peek == INVALID)
-			peek = (byte) in.read();
-
-		boolean b;
-
-		switch (peek) {
-		case TRUE:
-			b = true;
-			break;
-
-		case FALSE:
-			b = false;
-			break;
-
-		default:
-			throw new DataFormatException("Encountered a byte value of " + peek
-					+ " instead of the expected byte value of " + TRUE + " or "
-					+ FALSE + " (char='T' or 'F').");
-		}
-
-		peek = INVALID;
-		return b;
+		return (type = (byte) in.read());
 	}
 
 	public byte readByte() throws IOException, DataFormatException {
-		verifyNextMarker(BYTE);
-		peek = INVALID;
+		checkType("BYTE", BYTE);
 		return (byte) in.read();
 	}
 
+	public int readInt16() throws IOException, DataFormatException {
+		checkType("INT16", INT16);
+		return readInt16Impl();
+	}
+
 	public int readInt32() throws IOException, DataFormatException {
-		verifyNextMarker(INT32);
-		peek = INVALID;
+		checkType("INT32", INT32);
 		return readInt32Impl();
 	}
 
 	public long readInt64() throws IOException, DataFormatException {
-		verifyNextMarker(INT64);
-		peek = INVALID;
+		checkType("INT64", INT64);
 		return readInt64Impl();
 	}
 
+	public float readFloat() throws IOException, DataFormatException {
+		checkType("FLOAT", FLOAT);
+		return Float.intBitsToFloat(readInt32Impl());
+	}
+
 	public double readDouble() throws IOException, DataFormatException {
-		verifyNextMarker(DOUBLE);
-		peek = INVALID;
+		checkType("DOUBLE", DOUBLE);
 		return Double.longBitsToDouble(readInt64Impl());
 	}
 
 	public BigDecimal readHuge() throws IOException, DataFormatException {
-		verifyNextMarker(HUGE);
-		peek = INVALID;
+		checkTypes("HUGE", HUGE, HUGE_COMPACT);
 
-		int length = readInt32Impl();
+		int byteLength = 0;
 
-		if (length < 0)
-			throw new DataFormatException("Read a negative length of ["
-					+ length + "] for a huge value, but length must be >= 0.");
+		switch (type) {
+		case HUGE:
+			byteLength = readInt32Impl();
+			break;
 
-		return new BigDecimal(readStringAsChars(length));
+		case HUGE_COMPACT:
+			byteLength = in.read();
+			break;
+		}
+
+		if (byteLength < 0)
+			throw new DataFormatException(
+					"Encountered an invalid (negative) length of ["
+							+ byteLength
+							+ "] specified for the (numeric) HUGE value. Length must be >= 0.");
+
+		return new BigDecimal(decoder.decode(in, byteLength));
 	}
 
 	public String readString() throws IOException, DataFormatException {
@@ -191,28 +169,88 @@ public class UBJInputStream extends FilterInputStream {
 	}
 
 	public char[] readStringAsChars() throws IOException, DataFormatException {
-		verifyNextMarker(STRING);
-		peek = INVALID;
+		checkTypes("STRING", STRING, STRING_COMPACT);
 
-		int length = readInt32Impl();
+		int byteLength = 0;
 
-		if (length < 0)
-			throw new DataFormatException("Read a negative length of ["
-					+ length + "] for string value, but length must be >= 0.");
+		switch (type) {
+		case STRING:
+			byteLength = readInt32Impl();
+			break;
 
-		return readStringAsChars(length);
+		case STRING_COMPACT:
+			byteLength = in.read();
+			break;
+		}
+
+		if (byteLength < 0)
+			throw new DataFormatException(
+					"Encountered an invalid (negative) length of ["
+							+ byteLength
+							+ "] specified for the STRING value. Length must be >= 0.");
+
+		return decoder.decode(in, byteLength);
 	}
 
-	public int readArrayHeader() throws IOException, DataFormatException {
-		verifyNextMarker(ARRAY);
-		peek = INVALID;
-		return readInt32Impl();
+	public int readArrayLength() throws IOException, DataFormatException {
+		checkTypes("ARRAY", ARRAY, ARRAY_COMPACT);
+
+		int count = 0;
+
+		switch (type) {
+		case ARRAY:
+			count = readInt32Impl();
+			break;
+
+		case ARRAY_COMPACT:
+			count = in.read();
+			break;
+		}
+
+		if (count < 0)
+			throw new DataFormatException(
+					"Encountered an invalid (negative) length of ["
+							+ count
+							+ "] specified for the ARRAY value. Length must be >= 0.");
+
+		return count;
 	}
 
-	public int readObjectHeader() throws IOException, DataFormatException {
-		verifyNextMarker(OBJECT);
-		peek = INVALID;
-		return readInt32Impl();
+	public int readObjectLength() throws IOException, DataFormatException {
+		checkTypes("OBJECT", OBJECT, OBJECT_COMPACT);
+
+		int count = 0;
+
+		switch (type) {
+		case OBJECT:
+			count = readInt32Impl();
+			break;
+
+		case OBJECT_COMPACT:
+			count = in.read();
+			break;
+		}
+
+		if (count < 0)
+			throw new DataFormatException(
+					"Encountered an invalid (negative) length of ["
+							+ count
+							+ "] specified for the OBJECT value. Length must be >= 0.");
+
+		return count;
+	}
+
+	protected short readInt16Impl() throws IOException {
+		int read = in.read(int16Buffer);
+
+		if (read < int16Buffer.length)
+			throw new DataFormatException(
+					"Attempted to read "
+							+ int16Buffer.length
+							+ " bytes to reconstruct the INT16 value, instead was only able to read "
+							+ read + " bytes.");
+
+		return (short) (((int) int16Buffer[0] << 8) + ((int) int16Buffer[1] << 0));
 	}
 
 	protected int readInt32Impl() throws IOException {
@@ -222,7 +260,7 @@ public class UBJInputStream extends FilterInputStream {
 			throw new DataFormatException(
 					"Attempted to read "
 							+ int32Buffer.length
-							+ " bytes to reconstruct the int32 value, instead was only able to read "
+							+ " bytes to reconstruct the INT32 value, instead was only able to read "
 							+ read + " bytes.");
 
 		return (((int) int32Buffer[0] << 24) + ((int) int32Buffer[1] << 16)
@@ -236,7 +274,7 @@ public class UBJInputStream extends FilterInputStream {
 			throw new DataFormatException(
 					"Attempted to read "
 							+ int64Buffer.length
-							+ " bytes to reconstruct the int64 value, instead was only able to read "
+							+ " bytes to reconstruct the INT64 value, instead was only able to read "
 							+ read + " bytes.");
 
 		return (((long) int64Buffer[0] << 56)
@@ -248,61 +286,23 @@ public class UBJInputStream extends FilterInputStream {
 				+ (((long) int64Buffer[6] & 255) << 8) + (((long) int64Buffer[7] & 255) << 0));
 	}
 
-	// TODO: This is not right, the length is the byte length not char length
-	// this only works with ASCII.
-	protected char[] readStringAsChars(int length) throws IOException {
-		/*
-		 * CharsetDecoder can only decode into a CharBuffer, so we wrap our
-		 * return array with one, fill it up, then return the now-populated
-		 * array with our decoded chars. 
-		 */
-		char[] text = new char[length];
-		CharBuffer output = CharBuffer.wrap(text);
-
-		int read = 0;
-		int remaining = length;
-		decoder.reset();
-
-		while (remaining > 0
-				&& (read = in.read(buffer, 0, remaining)) != INVALID) {
-			// Update the remaining amount that needs to be read.
-			remaining -= read;
-
-			// Wrap and decode the resulting bytes.
-			ByteBuffer temp = ByteBuffer.wrap(buffer, 0, read);
-
-			if (remaining == 0)
-				decoder.decode(temp, output, true);
-			else
-				decoder.decode(temp, output, false);
-		}
-
-		// Flush any pending content to the output array.
-		decoder.flush(output);
-
-		return text;
+	private void checkType(String typeLabel, byte expectedType)
+			throws DataFormatException {
+		if (type != expectedType)
+			throw new DataFormatException("Unable to read " + typeLabel
+					+ " value. The last type read was " + type + " (char='"
+					+ ((char) type) + "') but the expected type was "
+					+ expectedType + " (char='" + ((char) expectedType) + "').");
 	}
 
-	private void verifyNextMarker(byte expected) throws IOException,
-			DataFormatException {
-		if (peek == INVALID) {
-			nextMarker();
-
-			if (peek == INVALID)
-				throw new IOException(
-						"End of Stream encountered while trying to read the next ASCII value marker.");
-		}
-
-		if (peek != expected)
-			throw new DataFormatException(
-					"Encountered a byte value of "
-							+ peek
-							+ " (char='"
-							+ ((char) peek)
-							+ "') instead of the expected byte value "
-							+ expected
-							+ " (char='"
-							+ ((char) expected)
-							+ "') while parsing this stream of Universal Binary JSON data.");
+	private void checkTypes(String typeLabel, byte expectedType1,
+			byte expectedType2) throws DataFormatException {
+		if (type != expectedType1 && type != expectedType2)
+			throw new DataFormatException("Unable to read " + typeLabel
+					+ " value. The last type read was " + type + " (char='"
+					+ ((char) type) + "') but the expected types were "
+					+ expectedType1 + " (char='" + ((char) expectedType1)
+					+ "') or " + expectedType2 + " (char='"
+					+ ((char) expectedType2) + "'); neither were found.");
 	}
 }

@@ -1,10 +1,10 @@
 package org.ubjson.io;
 
-public interface IMarker {
+public interface IDataType {
 	// General Types
 	public static final byte NOOP = 'N';
 	public static final byte NULL = 'Z';
-	
+
 	// Boolean Types
 	public static final byte TRUE = 'T';
 	public static final byte FALSE = 'F';

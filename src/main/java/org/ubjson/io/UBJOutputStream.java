@@ -15,38 +15,47 @@
  */
 package org.ubjson.io;
 
-import static org.ubjson.IConstants.*;
+import static org.ubjson.io.IDataType.ARRAY;
+import static org.ubjson.io.IDataType.ARRAY_COMPACT;
+import static org.ubjson.io.IDataType.BYTE;
+import static org.ubjson.io.IDataType.DOUBLE;
+import static org.ubjson.io.IDataType.FALSE;
+import static org.ubjson.io.IDataType.FLOAT;
+import static org.ubjson.io.IDataType.HUGE;
+import static org.ubjson.io.IDataType.HUGE_COMPACT;
+import static org.ubjson.io.IDataType.INT16;
+import static org.ubjson.io.IDataType.INT32;
+import static org.ubjson.io.IDataType.INT64;
+import static org.ubjson.io.IDataType.NOOP;
+import static org.ubjson.io.IDataType.NULL;
+import static org.ubjson.io.IDataType.OBJECT;
+import static org.ubjson.io.IDataType.OBJECT_COMPACT;
+import static org.ubjson.io.IDataType.STRING;
+import static org.ubjson.io.IDataType.STRING_COMPACT;
+import static org.ubjson.io.IDataType.TRUE;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
-import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.charset.CharsetEncoder;
 
-public class UBJOutputStream extends FilterOutputStream implements IUBJOutput {
+import org.ubjson.io.charset.StreamEncoder;
+
+public class UBJOutputStream extends FilterOutputStream {
+	private byte[] int16Buffer;
 	private byte[] int32Buffer;
 	private byte[] int64Buffer;
 
-	private ByteBuffer output;
-	private CharsetEncoder encoder;
+	private StreamEncoder encoder;
 
 	public UBJOutputStream(OutputStream out) {
 		super(out);
+		encoder = new StreamEncoder();
 
-		int32Buffer = new byte[5];
-		int64Buffer = new byte[9];
-
-		/*
-		 * REMINDER: This is not the entire write buffer, this is just the local
-		 * buffer used by this class to push content to the OutputStream. The
-		 * OutputStream, if the user wants buffering, should be a
-		 * BufferedOutputStream instance with a user-configured buffer for the
-		 * primary destination.
-		 */
-		output = ByteBuffer.allocate(16384);
-		encoder = UTF_8_CHARSET.newEncoder();
+		int16Buffer = new byte[2];
+		int32Buffer = new byte[4];
+		int64Buffer = new byte[8];
 	}
 
 	@Override
@@ -80,150 +89,222 @@ public class UBJOutputStream extends FilterOutputStream implements IUBJOutput {
 		out.close();
 	}
 
-	@Override
+	public void writeNoop() throws IOException {
+		out.write(NOOP);
+	}
+
 	public void writeNull() throws IOException {
 		out.write(NULL);
 	}
 
-	@Override
 	public void writeBoolean(boolean value) throws IOException {
 		out.write(value ? TRUE : FALSE);
 	}
 
-	@Override
 	public void writeByte(byte value) throws IOException {
 		out.write(BYTE);
 		out.write(value);
 	}
 
-	@Override
+	public void writeInt16(short value) throws IOException {
+		out.write(INT16);
+		writeInt16Impl(value);
+	}
+
 	public void writeInt32(int value) throws IOException {
-		writeInt32(INT32, value);
+		out.write(INT32);
+		writeInt32Impl(value);
 	}
 
-	@Override
 	public void writeInt64(long value) throws IOException {
-		writeInt64(INT64, value);
+		out.write(INT64);
+		writeInt64Impl(value);
 	}
 
-	@Override
+	public void writeFloat(float value) throws IOException {
+		out.write(FLOAT);
+
+		// IEEE 754 single precision floating point format (as long).
+		writeInt32Impl(Float.floatToIntBits(value));
+	}
+
 	public void writeDouble(double value) throws IOException {
+		out.write(DOUBLE);
+
 		// IEEE 754 double precision floating point format (as long).
-		writeInt64(DOUBLE, Double.doubleToLongBits(value));
+		writeInt64Impl(Double.doubleToLongBits(value));
 	}
 
-	@Override
 	public void writeHuge(BigDecimal huge) throws IllegalArgumentException,
 			IOException {
+		writeHuge(huge, false);
+	}
+
+	public void writeHuge(BigDecimal huge, boolean autoCompact)
+			throws IllegalArgumentException, IOException {
 		if (huge == null)
 			throw new IllegalArgumentException("huge cannot be null");
 
 		String hugeText = huge.toString();
+		int length = hugeText.length();
 
 		// Write header
-		writeInt32(HUGE, hugeText.length());
+		if (autoCompact && length < 255) {
+			out.write(HUGE_COMPACT);
+			out.write(length);
+		} else {
+			out.write(HUGE);
+			writeInt32Impl(length);
+		}
 
 		// Write body
-		writeCharBuffer(CharBuffer.wrap(hugeText));
+		encoder.encode(CharBuffer.wrap(hugeText), out);
 	}
 
-	@Override
 	public void writeString(char[] text) throws IllegalArgumentException,
 			IOException {
-		if (text == null)
-			throw new IllegalArgumentException("text cannot be null");
-
-		writeString(text, 0, text.length);
+		writeString(text, false);
 	}
 
-	@Override
-	public void writeString(char[] text, int index, int length)
+	public void writeString(char[] text, boolean autoCompact)
 			throws IllegalArgumentException, IOException {
 		if (text == null)
 			throw new IllegalArgumentException("text cannot be null");
 
 		// Write header
-		writeInt32(STRING, length);
+		if (autoCompact && text.length < 255) {
+			out.write(STRING_COMPACT);
+			out.write(text.length);
+		} else {
+			out.write(STRING);
+			writeInt32Impl(text.length);
+		}
 
 		// Write body
-		writeCharBuffer(CharBuffer.wrap(text, index, length));
+		encoder.encode(CharBuffer.wrap(text), out);
 	}
 
-	@Override
-	public void writeString(String text) throws IllegalArgumentException,
-			IOException {
+	public void writeString(char[] text, int index, int length)
+			throws IllegalArgumentException, IOException {
+		writeString(text, index, length, false);
+	}
+
+	public void writeString(char[] text, int index, int length,
+			boolean autoCompact) throws IllegalArgumentException, IOException {
 		if (text == null)
 			throw new IllegalArgumentException("text cannot be null");
 
 		// Write header
-		writeInt32(STRING, text.length());
+		if (autoCompact && length < 255) {
+			out.write(STRING_COMPACT);
+			out.write(length);
+		} else {
+			out.write(STRING);
+			writeInt32Impl(length);
+		}
+
+		// Write body
+		encoder.encode(CharBuffer.wrap(text, index, length), out);
+	}
+
+	public void writeString(String text) throws IllegalArgumentException,
+			IOException {
+		writeString(text, false);
+	}
+
+	public void writeString(String text, boolean autoCompact)
+			throws IllegalArgumentException, IOException {
+		if (text == null)
+			throw new IllegalArgumentException("text cannot be null");
+
+		int length = text.length();
+
+		// Write header
+		if (autoCompact && length < 255) {
+			out.write(STRING_COMPACT);
+			out.write(length);
+		} else {
+			out.write(STRING);
+			writeInt32Impl(length);
+		}
 
 		// Write body - CB uses a reflection-optimized wrapper for String.
-		writeCharBuffer(CharBuffer.wrap(text));
+		encoder.encode(CharBuffer.wrap(text), out);
 	}
 
-	@Override
-	public void writeArrayHeader(int elementCount) throws IOException {
-		writeInt32(ARRAY, elementCount);
+	public void writeArrayHeader(int elementCount)
+			throws IllegalArgumentException, IOException {
+		writeArrayHeader(elementCount, false);
 	}
 
-	@Override
+	public void writeArrayHeader(int elementCount, boolean autoCompact)
+			throws IllegalArgumentException, IOException {
+		if (elementCount < 0)
+			throw new IllegalArgumentException("elementCount [" + elementCount
+					+ "] must be >= 0.");
+
+		// <= because of 255 (0xFF) meaning unbounded container
+		if (autoCompact && elementCount <= 255) {
+			out.write(ARRAY_COMPACT);
+			out.write(elementCount);
+		} else {
+			out.write(ARRAY);
+			writeInt32Impl(elementCount);
+		}
+	}
+
 	public void writeObjectHeader(int elementCount) throws IOException {
-		writeInt32(OBJECT, elementCount);
+		writeObjectHeader(elementCount, false);
 	}
 
-	protected void writeInt32(byte type, int value) throws IOException {
+	public void writeObjectHeader(int elementCount, boolean autoCompact)
+			throws IOException {
+		if (elementCount < 0)
+			throw new IllegalArgumentException("elementCount [" + elementCount
+					+ "] must be >= 0.");
+
+		// <= because of 255 (0xFF) meaning unbounded container
+		if (autoCompact && elementCount <= 255) {
+			out.write(OBJECT_COMPACT);
+			out.write(elementCount);
+		} else {
+			out.write(OBJECT);
+			writeInt32Impl(elementCount);
+		}
+	}
+
+	protected void writeInt16Impl(short value) throws IOException {
 		// Fill write buffer
-		int32Buffer[0] = type;
-		int32Buffer[1] = (byte) ((value >>> 24) & 0xFF);
-		int32Buffer[2] = (byte) ((value >>> 16) & 0xFF);
-		int32Buffer[3] = (byte) ((value >>> 8) & 0xFF);
-		int32Buffer[4] = (byte) ((value >>> 0) & 0xFF);
+		int16Buffer[0] = (byte) ((value >>> 8) & 0xFF);
+		int16Buffer[1] = (byte) ((value >>> 0) & 0xFF);
+
+		// Write it in one chunk.
+		out.write(int16Buffer);
+	}
+
+	protected void writeInt32Impl(int value) throws IOException {
+		// Fill write buffer
+		int32Buffer[0] = (byte) ((value >>> 24) & 0xFF);
+		int32Buffer[1] = (byte) ((value >>> 16) & 0xFF);
+		int32Buffer[2] = (byte) ((value >>> 8) & 0xFF);
+		int32Buffer[3] = (byte) ((value >>> 0) & 0xFF);
 
 		// Write it in one chunk.
 		out.write(int32Buffer);
 	}
 
-	protected void writeInt64(byte type, long value) throws IOException {
+	protected void writeInt64Impl(long value) throws IOException {
 		// Fill write buffer
-		int64Buffer[0] = type;
-		int64Buffer[1] = (byte) (value >>> 56);
-		int64Buffer[2] = (byte) (value >>> 48);
-		int64Buffer[3] = (byte) (value >>> 40);
-		int64Buffer[4] = (byte) (value >>> 32);
-		int64Buffer[5] = (byte) (value >>> 24);
-		int64Buffer[6] = (byte) (value >>> 16);
-		int64Buffer[7] = (byte) (value >>> 8);
-		int64Buffer[8] = (byte) (value >>> 0);
+		int64Buffer[0] = (byte) (value >>> 56);
+		int64Buffer[1] = (byte) (value >>> 48);
+		int64Buffer[2] = (byte) (value >>> 40);
+		int64Buffer[3] = (byte) (value >>> 32);
+		int64Buffer[4] = (byte) (value >>> 24);
+		int64Buffer[5] = (byte) (value >>> 16);
+		int64Buffer[6] = (byte) (value >>> 8);
+		int64Buffer[7] = (byte) (value >>> 0);
 
 		// Write it in one chunk
 		out.write(int64Buffer);
-	}
-
-	protected void writeCharBuffer(CharBuffer input) throws IOException {
-		encoder.reset();
-
-		// Keep encoding as long as we have content to encode.
-		while (input.hasRemaining()) {
-			output.clear();
-			encoder.encode(input, output, false);
-
-			// Flip output buffer so it can be read.
-			output.flip();
-
-			// Read back and write out encoded bytes to output stream.
-			out.write(output.array(), 0, output.remaining());
-		}
-
-		// Encoder cleanup. End and flush.
-		output.clear();
-		encoder.encode(input, output, true);
-		encoder.flush(output);
-
-		// If cleanup resulting in more bytes, write them out too.
-		if (output.hasRemaining()) {
-			output.flip();
-			out.write(output.array(), 0, output.remaining());
-		}
 	}
 }
