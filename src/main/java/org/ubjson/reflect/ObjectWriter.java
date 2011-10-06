@@ -2,7 +2,6 @@ package org.ubjson.reflect;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.Field;
 
 import org.ubjson.io.UBJOutputStream;
 
@@ -10,21 +9,25 @@ import org.ubjson.io.UBJOutputStream;
  * TODO: For method caching, might speed up access time if the Method arg we store
  * is the tuple of the method AND the shortened name so we don't have to process
  * each time.
- * 
- * TODO: This and IReflectWriter could probably be merged in some way...
  */
 public class ObjectWriter implements IObjectWriter {
-	private IReflectWriter<Field> fieldWriter;
+	private IReflectWriter fieldWriter;
 
 	@Override
 	public void writeObject(UBJOutputStream out, Object obj)
 			throws IllegalArgumentException, IOException {
-		writeObject(out, obj, AccessType.FIELDS);
+		writeObject(out, obj, AccessType.FIELDS, false);
 	}
 
 	@Override
-	public void writeObject(UBJOutputStream out, Object obj, AccessType type)
+	public void writeObject(UBJOutputStream out, Object obj, boolean autoCompact)
 			throws IllegalArgumentException, IOException {
+		writeObject(out, obj, AccessType.FIELDS, autoCompact);
+	}
+
+	@Override
+	public void writeObject(UBJOutputStream out, Object obj, AccessType type,
+			boolean autoCompact) throws IllegalArgumentException, IOException {
 		if (out == null)
 			throw new IllegalArgumentException("out cannot be null");
 		if (obj == null)
@@ -43,7 +46,7 @@ public class ObjectWriter implements IObjectWriter {
 			if (fieldWriter == null)
 				fieldWriter = new FieldReflectWriter();
 
-			fieldWriter.dispatchWrite(out, null, obj);
+			fieldWriter.dispatchWrite(out, null, obj, autoCompact);
 		} else if (type == AccessType.METHODS) {
 			// TODO: implement
 		}
