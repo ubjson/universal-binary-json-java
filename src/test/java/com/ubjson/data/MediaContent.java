@@ -21,7 +21,7 @@ public class MediaContent {
 			new Image("http://javaone.com/keynote_small.jpg",
 					"Javaone Keynote", 320, 240, "SMALL") };
 
-	public class Media {
+	public static class Media {
 		public String uri = "http://javaone.com/keynote.mpg";
 		public String title = "Javaone Keynote";
 		public int width = 640;
@@ -35,7 +35,7 @@ public class MediaContent {
 		public String copyright = null;
 	}
 
-	public class Image {
+	public static class Image {
 		public String uri;
 		public String title;
 		public int width;
