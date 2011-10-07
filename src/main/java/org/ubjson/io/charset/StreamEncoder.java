@@ -33,6 +33,7 @@ public class StreamEncoder {
 		if (text == null || !text.hasRemaining())
 			return;
 
+		encoder.reset();
 		ByteBuffer dest = ByteBuffer.wrap(writeBuffer);
 
 		while (text.hasRemaining()) {
