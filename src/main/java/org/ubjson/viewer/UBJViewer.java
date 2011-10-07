@@ -37,7 +37,7 @@ public class UBJViewer {
 		byte type = INVALID;
 		int depth = 0;
 
-		while ((type = uin.nextMarker()) != -1) {
+		while ((type = uin.nextType()) != -1) {
 			switch (type) {
 			case NULL:
 				printf(depth, "null");
@@ -76,11 +76,11 @@ public class UBJViewer {
 				break;
 
 			case ARRAY:
-				printf(depth++, "array [length=%d]", uin.readArrayHeader());
+				printf(depth++, "array [length=%d]", uin.readArrayLength());
 				break;
 
 			case OBJECT:
-				printf(depth++, "object [length=%d]", uin.readObjectHeader());
+				printf(depth++, "object [length=%d]", uin.readObjectLength());
 				break;
 			}
 		}

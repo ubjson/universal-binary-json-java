@@ -33,8 +33,8 @@ public class FieldReflectWriter implements IReflectWriter {
 	}
 
 	@Override
-	public void dispatchWrite(UBJOutputStream out, String name, Object value,
-			boolean autoCompact) throws IllegalArgumentException, IOException {
+	public void dispatchWrite(UBJOutputStream out, String name, Object value)
+			throws IllegalArgumentException, IOException {
 		if (out == null)
 			throw new IllegalArgumentException("out cannot be null");
 
@@ -46,20 +46,20 @@ public class FieldReflectWriter implements IReflectWriter {
 			if (Boolean.class.isAssignableFrom(type))
 				writeBoolean(out, name, (Boolean) value);
 			else if (Number.class.isAssignableFrom(type))
-				writeNumber(out, name, type, (Number) value, autoCompact);
+				writeNumber(out, name, type, (Number) value);
 			else if (String.class.isAssignableFrom(type))
-				writeString(out, name, (String) value, autoCompact);
+				writeString(out, name, (String) value);
 			else if (type.isArray()) {
 				String typeName = type.getComponentType().getName();
 
 				if ("char".equals(typeName))
-					writeString(out, name, (char[]) value, autoCompact);
+					writeString(out, name, (char[]) value);
 				else
-					writeArray(out, name, value, autoCompact);
+					writeArray(out, name, value);
 			} else if (Collection.class.isAssignableFrom(type))
-				writeArray(out, name, (Collection<?>) value, autoCompact);
+				writeArray(out, name, (Collection<?>) value);
 			else
-				writeObject(out, name, type, value, autoCompact);
+				writeObject(out, name, type, value);
 		}
 	}
 
@@ -79,9 +79,13 @@ public class FieldReflectWriter implements IReflectWriter {
 
 	@Override
 	public void writeNumber(UBJOutputStream out, String name, Class<?> type,
-			Number value, boolean autoCompact) throws IllegalArgumentException,
-			IOException {
+			Number value) throws IllegalArgumentException, IOException {
 		writeName(out, name);
+
+		// TODO: Compaction should use the smallest numeric type.
+		if (autoCompact) {
+
+		}
 
 		if (Byte.class.isAssignableFrom(type))
 			out.writeByte((Byte) value);
@@ -92,7 +96,7 @@ public class FieldReflectWriter implements IReflectWriter {
 		else if (Double.class.isAssignableFrom(type))
 			out.writeDouble((Double) value);
 		else if (BigDecimal.class.isAssignableFrom(type))
-			out.writeHuge((BigDecimal) value, autoCompact);
+			out.writeHuge((BigDecimal) value);
 		else
 			throw new IllegalArgumentException("Writing a numeric value ["
 					+ value + "] of type [" + type
@@ -100,41 +104,41 @@ public class FieldReflectWriter implements IReflectWriter {
 	}
 
 	@Override
-	public void writeString(UBJOutputStream out, String name, char[] value,
-			boolean autoCompact) throws IllegalArgumentException, IOException {
+	public void writeString(UBJOutputStream out, String name, char[] value)
+			throws IllegalArgumentException, IOException {
 		writeName(out, name);
-		out.writeString(value, autoCompact);
+		out.writeString(value);
 	}
 
 	@Override
-	public void writeString(UBJOutputStream out, String name, String value,
-			boolean autoCompact) throws IllegalArgumentException, IOException {
+	public void writeString(UBJOutputStream out, String name, String value)
+			throws IllegalArgumentException, IOException {
 		writeName(out, name);
-		out.writeString(value, autoCompact);
+		out.writeString(value);
 	}
 
 	@Override
-	public void writeArray(UBJOutputStream out, String name, Object array,
-			boolean autoCompact) throws IllegalArgumentException, IOException {
+	public void writeArray(UBJOutputStream out, String name, Object array)
+			throws IllegalArgumentException, IOException {
 		writeName(out, name);
 
 		int length = Array.getLength(array);
-		out.writeArrayHeader(length, autoCompact);
+		out.writeArrayHeader(length);
 
 		listPush();
 		for (int i = 0; i < length; i++)
-			dispatchWrite(out, null, Array.get(array, i), autoCompact);
+			dispatchWrite(out, null, Array.get(array, i));
 		listPop();
 	}
 
 	@Override
 	public void writeArray(UBJOutputStream out, String name,
-			Collection<?> collection, boolean autoCompact)
-			throws IllegalArgumentException, IOException {
+			Collection<?> collection) throws IllegalArgumentException,
+			IOException {
 		writeName(out, name);
 
 		int length = collection.size();
-		out.writeArrayHeader(length, autoCompact);
+		out.writeArrayHeader(length);
 
 		Class<?> cType = collection.getClass();
 
@@ -143,20 +147,19 @@ public class FieldReflectWriter implements IReflectWriter {
 			List<?> list = (List<?>) collection;
 
 			for (int i = 0; i < length; i++)
-				dispatchWrite(out, name, list.get(i), autoCompact);
+				dispatchWrite(out, name, list.get(i));
 		} else {
 			Iterator<?> i = collection.iterator();
 
 			while (i.hasNext())
-				dispatchWrite(out, name, i.next(), autoCompact);
+				dispatchWrite(out, name, i.next());
 		}
 		listPop();
 	}
 
 	@Override
 	public void writeObject(UBJOutputStream out, String name, Class<?> type,
-			Object obj, boolean autoCompact) throws IllegalArgumentException,
-			IOException {
+			Object obj) throws IllegalArgumentException, IOException {
 		if (!Serializable.class.isAssignableFrom(type))
 			return;
 
@@ -182,7 +185,7 @@ public class FieldReflectWriter implements IReflectWriter {
 			fieldCache.put(type, fieldList);
 		}
 
-		out.writeObjectHeader(fieldList.size(), autoCompact);
+		out.writeObjectHeader(fieldList.size());
 
 		for (int i = 0, length = fieldList.size(); i < length; i++) {
 			Field f = fieldList.get(i);
@@ -194,13 +197,13 @@ public class FieldReflectWriter implements IReflectWriter {
 				// no-op, the value will be written as null.
 			}
 
-			dispatchWrite(out, f.getName(), fValue, autoCompact);
+			dispatchWrite(out, f.getName(), fValue);
 		}
 	}
 
 	private void writeName(UBJOutputStream out, String name) throws IOException {
 		if (listDepth == 0 && name != null)
-			out.writeString(name, true);
+			out.writeString(name);
 	}
 
 	private void listPush() throws RuntimeException {

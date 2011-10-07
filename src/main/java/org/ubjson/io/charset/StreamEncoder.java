@@ -40,15 +40,14 @@ public class StreamEncoder {
 			dest.clear();
 			encoder.encode(text, dest, false);
 
-			stream.write(writeBuffer, 0, dest.remaining());
+			stream.write(writeBuffer, 0, dest.position());
 		}
 
 		dest.clear();
 		encoder.encode(text, dest, true);
 		encoder.flush(dest);
-		dest.flip();
 
-		if (dest.hasRemaining())
-			stream.write(writeBuffer, 0, dest.remaining());
+		if (dest.position() > 0)
+			stream.write(writeBuffer, 0, dest.position());
 	}
 }
