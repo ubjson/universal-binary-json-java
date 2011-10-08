@@ -37,6 +37,12 @@ import java.math.BigDecimal;
 
 import org.ubjson.io.charset.StreamDecoder;
 
+/*
+ * TODO: Break the nextType into a separate specialized stream that extends this
+ * one that provides a pull-parser style parsing use to this.
+ * 
+ * Otherwise make this class all manual-call like default JDK streams.
+ */
 public class UBJInputStream extends FilterInputStream {
 	private byte type;
 
