@@ -15,20 +15,7 @@
  */
 package org.ubjson.io;
 
-import static org.ubjson.io.IDataType.ARRAY;
-import static org.ubjson.io.IDataType.ARRAY_COMPACT;
-import static org.ubjson.io.IDataType.BYTE;
-import static org.ubjson.io.IDataType.DOUBLE;
-import static org.ubjson.io.IDataType.FLOAT;
-import static org.ubjson.io.IDataType.HUGE;
-import static org.ubjson.io.IDataType.HUGE_COMPACT;
-import static org.ubjson.io.IDataType.INT16;
-import static org.ubjson.io.IDataType.INT32;
-import static org.ubjson.io.IDataType.INT64;
-import static org.ubjson.io.IDataType.OBJECT;
-import static org.ubjson.io.IDataType.OBJECT_COMPACT;
-import static org.ubjson.io.IDataType.STRING;
-import static org.ubjson.io.IDataType.STRING_COMPACT;
+import static org.ubjson.io.IDataType.*;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -37,25 +24,15 @@ import java.math.BigDecimal;
 
 import org.ubjson.io.charset.StreamDecoder;
 
-/*
- * TODO: Break the nextType into a separate specialized stream that extends this
- * one that provides a pull-parser style parsing use to this.
- * 
- * Otherwise make this class all manual-call like default JDK streams.
- */
 public class UBJInputStream extends FilterInputStream {
-	private byte type;
+	protected StreamDecoder decoder;
 
 	private byte[] int16Buffer;
 	private byte[] int32Buffer;
 	private byte[] int64Buffer;
 
-	private StreamDecoder decoder;
-
 	public UBJInputStream(InputStream in) {
 		super(in);
-
-		type = -1;
 
 		int16Buffer = new byte[2];
 		int32Buffer = new byte[4];
@@ -109,74 +86,49 @@ public class UBJInputStream extends FilterInputStream {
 		return in.markSupported();
 	}
 
-	public byte nextType() throws IOException {
-		return (type = (byte) in.read());
-	}
-
 	public byte readByte() throws IOException, DataFormatException {
 		checkType("BYTE", BYTE);
-		byte b = (byte) in.read();
-
-		type = -1;
-		return b;
+		return (byte) in.read();
 	}
 
 	public short readInt16() throws IOException, DataFormatException {
 		checkType("INT16", INT16);
-		short s = readInt16Impl();
-
-		type = -1;
-		return s;
+		return readInt16Impl();
 	}
 
 	public int readInt32() throws IOException, DataFormatException {
 		checkType("INT32", INT32);
-		int i = readInt32Impl();
-
-		type = -1;
-		return i;
+		return readInt32Impl();
 	}
 
 	public long readInt64() throws IOException, DataFormatException {
 		checkType("INT64", INT64);
-		long l = readInt64Impl();
-
-		type = -1;
-		return l;
+		return readInt64Impl();
 	}
 
 	public float readFloat() throws IOException, DataFormatException {
 		checkType("FLOAT", FLOAT);
-		float f = Float.intBitsToFloat(readInt32Impl());
-
-		type = -1;
-		return f;
+		return Float.intBitsToFloat(readInt32Impl());
 	}
 
 	public double readDouble() throws IOException, DataFormatException {
 		checkType("DOUBLE", DOUBLE);
-		double d = Double.longBitsToDouble(readInt64Impl());
-
-		type = -1;
-		return d;
+		return Double.longBitsToDouble(readInt64Impl());
 	}
 
 	public BigDecimal readHuge() throws IOException, DataFormatException {
-		checkTypes("HUGE", HUGE_COMPACT, HUGE);
-
+		byte type = checkTypes("HUGE", HUGE_COMPACT, HUGE);
 		int byteLength = 0;
 
 		switch (type) {
-		case HUGE:
-			byteLength = readInt32Impl();
-			break;
-
 		case HUGE_COMPACT:
 			byteLength = in.read();
 			break;
-		}
 
-		type = -1;
+		case HUGE:
+			byteLength = readInt32Impl();
+			break;
+		}
 
 		if (byteLength < 0)
 			throw new DataFormatException(
@@ -192,21 +144,18 @@ public class UBJInputStream extends FilterInputStream {
 	}
 
 	public char[] readStringAsChars() throws IOException, DataFormatException {
-		checkTypes("STRING", STRING_COMPACT, STRING);
-
+		byte type = checkTypes("STRING", STRING_COMPACT, STRING);
 		int byteLength = 0;
 
 		switch (type) {
-		case STRING:
-			byteLength = readInt32Impl();
-			break;
-
 		case STRING_COMPACT:
 			byteLength = in.read();
 			break;
-		}
 
-		type = -1;
+		case STRING:
+			byteLength = readInt32Impl();
+			break;
+		}
 
 		if (byteLength < 0)
 			throw new DataFormatException(
@@ -218,21 +167,18 @@ public class UBJInputStream extends FilterInputStream {
 	}
 
 	public int readArrayLength() throws IOException, DataFormatException {
-		checkTypes("ARRAY", ARRAY_COMPACT, ARRAY);
-
+		byte type = checkTypes("ARRAY", ARRAY_COMPACT, ARRAY);
 		int count = 0;
 
 		switch (type) {
-		case ARRAY:
-			count = readInt32Impl();
-			break;
-
 		case ARRAY_COMPACT:
 			count = in.read();
 			break;
-		}
 
-		type = -1;
+		case ARRAY:
+			count = readInt32Impl();
+			break;
+		}
 
 		if (count < 0)
 			throw new DataFormatException(
@@ -244,21 +190,18 @@ public class UBJInputStream extends FilterInputStream {
 	}
 
 	public int readObjectLength() throws IOException, DataFormatException {
-		checkTypes("OBJECT", OBJECT_COMPACT, OBJECT);
-
+		byte type = checkTypes("OBJECT", OBJECT_COMPACT, OBJECT);
 		int count = 0;
 
 		switch (type) {
-		case OBJECT:
-			count = readInt32Impl();
-			break;
-
 		case OBJECT_COMPACT:
 			count = in.read();
 			break;
-		}
 
-		type = -1;
+		case OBJECT:
+			count = readInt32Impl();
+			break;
+		}
 
 		if (count < 0)
 			throw new DataFormatException(
@@ -315,34 +258,22 @@ public class UBJInputStream extends FilterInputStream {
 				+ (((long) int64Buffer[6] & 255) << 8) + (((long) int64Buffer[7] & 255) << 0));
 	}
 
-	private void checkType(String typeLabel, byte expectedType)
+	protected byte checkType(String typeLabel, byte expectedType)
 			throws DataFormatException, IOException {
-		/*
-		 * Auto-peek at the next byte if necessary. This allows people to use
-		 * the UBJ streams in a manual serial/deserialization pattern of calling
-		 * the read/write methods back to back with no intervening nextType()
-		 * calls required.
-		 */
-		if (type == -1)
-			nextType();
+		byte type = (byte) in.read();
 
 		if (type != expectedType)
 			throw new DataFormatException("Unable to read " + typeLabel
 					+ " value. The last type read was " + type + " (char='"
 					+ ((char) type) + "') but the expected type was "
 					+ expectedType + " (char='" + ((char) expectedType) + "').");
+
+		return type;
 	}
 
-	private void checkTypes(String typeLabel, byte expectedType1,
+	protected byte checkTypes(String typeLabel, byte expectedType1,
 			byte expectedType2) throws DataFormatException, IOException {
-		/*
-		 * Auto-peek at the next byte if necessary. This allows people to use
-		 * the UBJ streams in a manual serial/deserialization pattern of calling
-		 * the read/write methods back to back with no intervening nextType()
-		 * calls required.
-		 */
-		if (type == -1)
-			nextType();
+		byte type = (byte) in.read();
 
 		if (type != expectedType1 && type != expectedType2)
 			throw new DataFormatException("Unable to read " + typeLabel
@@ -351,5 +282,7 @@ public class UBJInputStream extends FilterInputStream {
 					+ expectedType1 + " (char='" + ((char) expectedType1)
 					+ "') or " + expectedType2 + " (char='"
 					+ ((char) expectedType2) + "'); neither were found.");
+
+		return type;
 	}
 }
