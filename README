@@ -2,18 +2,21 @@ Universal Binary JSON Java Library
 http://ubjson.org
 
 
-	<Actively under development, but the core I/O classes needed to read/write
-	the spec are in the repo now>
+	<Under Active Development, notes below...>
 
 
 Changelog
 ---------
 10-10-11
 	* com.ubjson.io AND com.ubjson.io.charset are finalized against the 
-	Draft 8 specification. 
+	Draft 8 specification.
 	
 	* The lowest level UBJInput/OuputStream classes were tightened up to run as 
 	fast as possible showing an 800ns-per-op improvement in speed.
+	
+	* Profiled core UBJInput/OuputStream classes using HPROF for a few million
+	iterations and found no memory leaks and no performance traps; everything at
+	that low level is as tight as it can be.
 	
 	* Stream-parsing facilities were moved out of the overloaded UBJInputStream
 	class and into their own subclass called UBJInputStreamParser which operates
@@ -24,6 +27,9 @@ Changelog
 	
 	Will begin reworking the Reflection based Object mapping in the 
 	org.ubjson.reflect package now that the core IO classes are finalized.
+	
+	* Removed all old scratch test files from the org.ubjson package, this was
+	confusing.
 
 09-27-11
 	* Initial check-in of core IO classes to read/write spec.
