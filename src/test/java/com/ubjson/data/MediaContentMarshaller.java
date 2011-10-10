@@ -134,13 +134,6 @@ public class MediaContentMarshaller {
 			throw new RuntimeException(
 					"Did not read NULL value for copyright field.");
 
-//		/*
-//		 * TODO: If this is required to manually move the pointer forward, need
-//		 * to rethink not requiring the manual nextType, this sort of sucks as
-//		 * there are different rules for each field apparently.
-//		 */
-//		in.nextType();
-		
 		// images array
 		in.readStringAsChars();
 		in.readArrayLength();
