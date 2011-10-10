@@ -8,6 +8,23 @@ http://ubjson.org
 
 Changelog
 ---------
+10-10-11
+	* com.ubjson.io AND com.ubjson.io.charset are finalized against the 
+	Draft 8 specification. 
+	
+	* The lowest level UBJInput/OuputStream classes were tightened up to run as 
+	fast as possible showing an 800ns-per-op improvement in speed.
+	
+	* Stream-parsing facilities were moved out of the overloaded UBJInputStream
+	class and into their own subclass called UBJInputStreamParser which operates
+	exactly like a pull-parsing scenario (calling nextType then switching on the
+	value and pulling the appropriate value out of the stream).
+	
+	* More example testing/benchmarking data checked into /test/java/com/ubjson/data
+	
+	Will begin reworking the Reflection based Object mapping in the 
+	org.ubjson.reflect package now that the core IO classes are finalized.
+
 09-27-11
 	* Initial check-in of core IO classes to read/write spec.
 
