@@ -260,7 +260,14 @@ public class UBJInputStream extends FilterInputStream {
 
 	protected byte checkType(String typeLabel, byte expectedType)
 			throws DataFormatException, IOException {
-		byte type = (byte) in.read();
+		byte type = -1;
+
+		/*
+		 * Keep reading in the "next" byte, marking the beginning of the next
+		 * element, skipping all NOOP markers we run into.
+		 */
+		while ((type = (byte) in.read()) != NOOP)
+			;
 
 		if (type != expectedType)
 			throw new DataFormatException("Unable to read " + typeLabel
@@ -273,7 +280,14 @@ public class UBJInputStream extends FilterInputStream {
 
 	protected byte checkTypes(String typeLabel, byte expectedType1,
 			byte expectedType2) throws DataFormatException, IOException {
-		byte type = (byte) in.read();
+		byte type = -1;
+
+		/*
+		 * Keep reading in the "next" byte, marking the beginning of the next
+		 * element, skipping all NOOP markers we run into.
+		 */
+		while ((type = (byte) in.read()) != NOOP)
+			;
 
 		if (type != expectedType1 && type != expectedType2)
 			throw new DataFormatException("Unable to read " + typeLabel
