@@ -18,6 +18,7 @@ package org.ubjson.io;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public class UBJInputStreamParser extends UBJInputStream {
 	private byte peek;
@@ -81,8 +82,18 @@ public class UBJInputStreamParser extends UBJInputStream {
 	}
 
 	@Override
-	public BigDecimal readHuge() throws IOException, DataFormatException {
-		BigDecimal bd = super.readHuge();
+	public BigInteger readHugeAsBigInteger() throws IOException,
+			DataFormatException {
+		BigInteger bi = super.readHugeAsBigInteger();
+		peek = -1;
+
+		return bi;
+	}
+
+	@Override
+	public BigDecimal readHugeAsBigDecimal() throws IOException,
+			DataFormatException {
+		BigDecimal bd = super.readHugeAsBigDecimal();
 		peek = -1;
 
 		return bd;
