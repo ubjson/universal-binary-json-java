@@ -38,6 +38,7 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.CharBuffer;
 
 import org.ubjson.io.charset.StreamEncoder;
@@ -133,6 +134,27 @@ public class UBJOutputStream extends FilterOutputStream {
 
 		// IEEE 754 double precision floating point format (as long).
 		writeInt64Impl(Double.doubleToLongBits(value));
+	}
+
+	public void writeHuge(BigInteger huge) throws IllegalArgumentException,
+			IOException {
+		if (huge == null)
+			throw new IllegalArgumentException("huge cannot be null");
+
+		String hugeText = huge.toString();
+		int length = hugeText.length();
+
+		// Write header
+		if (length < 255) {
+			out.write(HUGE_COMPACT);
+			out.write(length);
+		} else {
+			out.write(HUGE);
+			writeInt32Impl(length);
+		}
+
+		// Write body
+		encoder.encode(CharBuffer.wrap(hugeText), out);
 	}
 
 	public void writeHuge(BigDecimal huge) throws IllegalArgumentException,
