@@ -12,7 +12,7 @@
          "Bill Gates",
          "Steve Jobs"
       ],
-      "player":"Java",
+      "player":"JAVA",
       "copyright":null
    },
    "Images":[
@@ -21,14 +21,14 @@
          "title":"Javaone Keynote",
          "width":1024,
          "height":768,
-         "size":"Large"
+         "size":"LARGE"
       },
       {
          "uri":"http://javaone.com/keynote_small.jpg",
          "title":"Javaone Keynote",
          "width":320,
          "height":240,
-         "size":"Small"
+         "size":"SMALL"
       }
    ]
 }
