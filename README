@@ -7,6 +7,21 @@ http://ubjson.org
 
 Changelog
 ---------
+10-14-11
+	* ObjectWriter rewritten and works correctly. Tested with the example test
+	data and wrote out the compressed and uncompressed formats files correctly
+	from their original object representation.
+	
+	* Added support for reading and writing huge values as BigInteger as well
+	as BigDecimal.
+	
+	* Added automatic numeric storage compression support to ObjectWriter - based
+	on the numeric value (regardless of type) the value will be stored as the
+	smallest possible representation in the UBJ format if requested.
+	
+	* Added mapping support for BigDecimal, BigInteger, AtomicInteger and 
+	AtomicLong to ObjectWriter.
+
 10-10-11
 	* com.ubjson.io AND com.ubjson.io.charset are finalized against the 
 	Draft 8 specification.
