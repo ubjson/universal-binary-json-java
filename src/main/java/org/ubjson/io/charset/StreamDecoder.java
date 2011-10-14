@@ -24,7 +24,7 @@ import java.nio.charset.CharsetDecoder;
 
 public class StreamDecoder {
 	public static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
-	
+
 	private static final char[] EMPTY = new char[0];
 
 	private byte[] readBuffer;
@@ -45,20 +45,20 @@ public class StreamDecoder {
 		decoder = charset.newDecoder();
 	}
 
-	public char[] decode(InputStream stream, int length)
+	public char[] decode(InputStream stream, int byteLength)
 			throws IllegalArgumentException, IOException {
 		if (stream == null)
 			throw new IllegalArgumentException("stream cannot be null");
-		if (length < 0)
-			throw new IllegalArgumentException("length [" + length
+		if (byteLength < 0)
+			throw new IllegalArgumentException("byteLength [" + byteLength
 					+ "] must be >= 0.");
-		
+
 		// short-circuit
-		if(length == 0)
+		if (byteLength == 0)
 			return EMPTY;
 
 		int charCount = 0;
-		char[] chars = new char[length];
+		char[] chars = new char[byteLength];
 
 		// Reuse the backing decode buffer.
 		CharBuffer dest = CharBuffer.wrap(decodeBuffer);
@@ -66,10 +66,10 @@ public class StreamDecoder {
 		int bytesRead = 0;
 		decoder.reset();
 
-		while (length > 0
-				&& (bytesRead = stream.read(readBuffer, 0, length)) != -1) {
-			length -= bytesRead;
-			boolean done = (length == 0);
+		while (byteLength > 0
+				&& (bytesRead = stream.read(readBuffer, 0, byteLength)) != -1) {
+			byteLength -= bytesRead;
+			boolean done = (byteLength == 0);
 
 			ByteBuffer src = ByteBuffer.wrap(readBuffer, 0, bytesRead);
 			dest.clear();
@@ -81,12 +81,12 @@ public class StreamDecoder {
 			charCount += remaining;
 		}
 
-		if (length > 0)
+		if (byteLength > 0)
 			throw new IOException(
 					"End of Stream encountered before all requested bytes ["
-							+ (length + bytesRead)
+							+ (byteLength + bytesRead)
 							+ "] could be read. Unable to read the last "
-							+ length + " remaining bytes.");
+							+ byteLength + " remaining bytes.");
 
 		dest.clear();
 		decoder.flush(dest);
