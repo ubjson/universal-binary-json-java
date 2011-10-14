@@ -16,7 +16,6 @@
 package org.ubjson.reflect.write;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -40,23 +39,37 @@ import org.ubjson.io.UBJOutputStream;
  * it is found to be faster to avoid the reflection into the class.
  */
 public class ObjectWriter implements IObjectWriter {
-	private long listDepth;
+	private enum CType {
+		ARRAY, OBJECT;
+	}
 
 	private AccessType accessType;
 	private boolean compactNumberStorage;
 
+	private CStack cstate;
+
+	public ObjectWriter() {
+		cstate = new CStack();
+	}
+
 	@Override
 	public void reset() {
-		listDepth = 1;
-
 		accessType = null;
 		compactNumberStorage = false;
+		cstate.reset();
 	}
 
 	@Override
 	public void writeObject(UBJOutputStream out, Object obj)
 			throws IllegalArgumentException, IOException {
 		writeObject(out, obj, AccessType.FIELDS, false);
+	}
+
+	@Override
+	public void writeObject(UBJOutputStream out, Object obj,
+			boolean compactNumberStorage) throws IllegalArgumentException,
+			IOException {
+		writeObject(out, obj, AccessType.FIELDS, compactNumberStorage);
 	}
 
 	@Override
@@ -76,13 +89,6 @@ public class ObjectWriter implements IObjectWriter {
 		if (type == null)
 			throw new IllegalArgumentException("type cannot be null");
 
-		Class<?> clazz = obj.getClass();
-
-		// Base-line sanity check.
-		if (!Serializable.class.isAssignableFrom(clazz))
-			throw new IllegalArgumentException(
-					"Root object 'obj' does not implement Serializable; unable to reflect into the first level of the instance to retrieve values for processing.");
-
 		// Reset the writer's state since we are going to do work now.
 		reset();
 
@@ -90,7 +96,16 @@ public class ObjectWriter implements IObjectWriter {
 		this.accessType = type;
 
 		// Begin recursing on the object and writing it out.
-		dispatchWrite(out, null, obj);
+		// dispatchWrite(out, null, obj);
+		switch (accessType) {
+		case FIELDS:
+			writeObjectByFields(out, null, obj.getClass(), obj);
+			break;
+
+		case METHODS:
+			// TODO: implement
+			break;
+		}
 	}
 
 	/*
@@ -125,7 +140,7 @@ public class ObjectWriter implements IObjectWriter {
 			else {
 				switch (accessType) {
 				case FIELDS:
-					writeObjectByFields(out, name, type, value);
+					writeObjectByFields(out, type.getSimpleName(), type, value);
 					break;
 
 				case METHODS:
@@ -178,6 +193,8 @@ public class ObjectWriter implements IObjectWriter {
 				else
 					value = (long) iv;
 			}
+
+			type = value.getClass();
 		}
 
 		if (Byte.class.isAssignableFrom(type))
@@ -231,10 +248,10 @@ public class ObjectWriter implements IObjectWriter {
 		int length = Array.getLength(array);
 		out.writeArrayHeader(length);
 
-		listPush();
+		cstate.push(CType.ARRAY);
 		for (int i = 0; i < length; i++)
 			dispatchWrite(out, null, Array.get(array, i));
-		listPop();
+		cstate.pop();
 	}
 
 	protected void writeArray(UBJOutputStream out, String name,
@@ -247,7 +264,7 @@ public class ObjectWriter implements IObjectWriter {
 
 		Class<?> cType = collection.getClass();
 
-		listPush();
+		cstate.push(CType.ARRAY);
 		if (List.class.isAssignableFrom(cType)) {
 			List<?> list = (List<?>) collection;
 
@@ -259,15 +276,12 @@ public class ObjectWriter implements IObjectWriter {
 			while (i.hasNext())
 				dispatchWrite(out, name, i.next());
 		}
-		listPop();
+		cstate.pop();
 	}
 
 	protected void writeObjectByFields(UBJOutputStream out, String name,
 			Class<?> type, Object obj) throws IllegalArgumentException,
 			IOException {
-		if (!Serializable.class.isAssignableFrom(type))
-			return;
-
 		writeName(out, name);
 
 		// TODO: Optimization, Cache these processed lists.
@@ -288,6 +302,7 @@ public class ObjectWriter implements IObjectWriter {
 
 		out.writeObjectHeader(fieldList.size());
 
+		cstate.push(CType.OBJECT);
 		for (int i = 0, length = fieldList.size(); i < length; i++) {
 			Field f = fieldList.get(i);
 			Object fValue = null;
@@ -300,6 +315,7 @@ public class ObjectWriter implements IObjectWriter {
 
 			dispatchWrite(out, f.getName(), fValue);
 		}
+		cstate.pop();
 	}
 
 	/*
@@ -308,24 +324,33 @@ public class ObjectWriter implements IObjectWriter {
 	 * ========================================================================
 	 */
 
-	private void listPush() throws RuntimeException {
-		listDepth = listDepth << 1;
-
-		if (listDepth < 0)
-			throw new RuntimeException(
-					"Excessive Recursion: Reflection has recursed more than 64 levels deep into Array or Object elements to try and write this object; this is not supported.");
-	}
-
-	private void listPop() throws RuntimeException {
-		if (listDepth == 0)
-			throw new RuntimeException(
-					"Uneven Recursion Return: Attempted to decrease current object recursion depth, but the depth was already 0. This is likely the result of unbalanced Array or Object recursion code.");
-
-		listDepth = listDepth >> 1;
-	}
-
 	private void writeName(UBJOutputStream out, String name) throws IOException {
-		if (listDepth == 0 && name != null && !name.isEmpty())
+		if (cstate.peek() != CType.ARRAY && name != null && !name.isEmpty())
 			out.writeString(name);
+	}
+
+	private class CStack {
+		private int pos;
+		private CType[] levels;
+
+		public CStack() {
+			levels = new CType[128];
+		}
+
+		public void reset() {
+			pos = -1;
+		}
+
+		public void push(CType type) {
+			levels[++pos] = type;
+		}
+
+		public CType peek() {
+			return (pos < 0 ? null : levels[pos]);
+		}
+
+		public CType pop() {
+			return levels[pos--];
+		}
 	}
 }

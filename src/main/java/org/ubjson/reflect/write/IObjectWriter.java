@@ -29,6 +29,10 @@ public interface IObjectWriter {
 	public void writeObject(UBJOutputStream out, Object obj)
 			throws IllegalArgumentException, IOException;
 
+	public void writeObject(UBJOutputStream out, Object obj,
+			boolean compactNumberStorage) throws IllegalArgumentException,
+			IOException;
+
 	public void writeObject(UBJOutputStream out, Object obj, AccessType type)
 			throws IllegalArgumentException, IOException;
 
