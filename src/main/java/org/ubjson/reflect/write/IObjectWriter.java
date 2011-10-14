@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ubjson.reflect;
+package org.ubjson.reflect.write;
 
 import java.io.IOException;
 
@@ -24,14 +24,15 @@ public interface IObjectWriter {
 		FIELDS, METHODS
 	}
 
+	public void reset();
+
 	public void writeObject(UBJOutputStream out, Object obj)
 			throws IllegalArgumentException, IOException;
 
-	public void writeObject(UBJOutputStream out, Object obj,
-			boolean useSmallestNumericStorage) throws IllegalArgumentException,
-			IOException;
+	public void writeObject(UBJOutputStream out, Object obj, AccessType type)
+			throws IllegalArgumentException, IOException;
 
 	public void writeObject(UBJOutputStream out, Object obj, AccessType type,
-			boolean useSmallestNumericStorage) throws IllegalArgumentException,
+			boolean compactNumberStorage) throws IllegalArgumentException,
 			IOException;
 }
