@@ -136,103 +136,102 @@ public class UBJOutputStream extends FilterOutputStream {
 		writeInt64Impl(Double.doubleToLongBits(value));
 	}
 
-	public void writeHuge(BigInteger huge) throws IOException {
+	public void writeHuge(BigInteger huge) throws IllegalArgumentException,
+			IOException {
 		if (huge == null)
-			writeNull();
-		else {
-			String hugeText = huge.toString();
-			int length = hugeText.length();
+			throw new IllegalArgumentException("huge cannot be null");
 
-			// Write header
-			if (length < 255) {
-				out.write(HUGE_COMPACT);
-				out.write(length);
-			} else {
-				out.write(HUGE);
-				writeInt32Impl(length);
-			}
+		String hugeText = huge.toString();
+		int length = hugeText.length();
 
-			// Write body
-			encoder.encode(CharBuffer.wrap(hugeText), out);
+		// Write header
+		if (length < 255) {
+			out.write(HUGE_COMPACT);
+			out.write(length);
+		} else {
+			out.write(HUGE);
+			writeInt32Impl(length);
 		}
+
+		// Write body
+		encoder.encode(CharBuffer.wrap(hugeText), out);
 	}
 
-	public void writeHuge(BigDecimal huge) throws IOException {
+	public void writeHuge(BigDecimal huge) throws IllegalArgumentException,
+			IOException {
 		if (huge == null)
-			writeNull();
-		else {
-			String hugeText = huge.toString();
-			int length = hugeText.length();
+			throw new IllegalArgumentException("huge cannot be null");
 
-			// Write header
-			if (length < 255) {
-				out.write(HUGE_COMPACT);
-				out.write(length);
-			} else {
-				out.write(HUGE);
-				writeInt32Impl(length);
-			}
+		String hugeText = huge.toString();
+		int length = hugeText.length();
 
-			// Write body
-			encoder.encode(CharBuffer.wrap(hugeText), out);
+		// Write header
+		if (length < 255) {
+			out.write(HUGE_COMPACT);
+			out.write(length);
+		} else {
+			out.write(HUGE);
+			writeInt32Impl(length);
 		}
+
+		// Write body
+		encoder.encode(CharBuffer.wrap(hugeText), out);
 	}
 
-	public void writeString(char[] text) throws IOException {
+	public void writeString(char[] text) throws IllegalArgumentException,
+			IOException {
 		if (text == null)
-			writeNull();
-		else {
-			// Write header
-			if (text.length < 255) {
-				out.write(STRING_COMPACT);
-				out.write(text.length);
-			} else {
-				out.write(STRING);
-				writeInt32Impl(text.length);
-			}
+			throw new IllegalArgumentException("text cannot be null");
 
-			// Write body
-			encoder.encode(CharBuffer.wrap(text), out);
+		// Write header
+		if (text.length < 255) {
+			out.write(STRING_COMPACT);
+			out.write(text.length);
+		} else {
+			out.write(STRING);
+			writeInt32Impl(text.length);
 		}
+
+		// Write body
+		encoder.encode(CharBuffer.wrap(text), out);
 	}
 
 	public void writeString(char[] text, int index, int length)
-			throws IOException {
+			throws IllegalArgumentException, IOException {
 		if (text == null)
-			writeNull();
-		else {
-			// Write header
-			if (length < 255) {
-				out.write(STRING_COMPACT);
-				out.write(length);
-			} else {
-				out.write(STRING);
-				writeInt32Impl(length);
-			}
+			throw new IllegalArgumentException("text cannot be null");
 
-			// Write body
-			encoder.encode(CharBuffer.wrap(text, index, length), out);
+		// Write header
+		if (length < 255) {
+			out.write(STRING_COMPACT);
+			out.write(length);
+		} else {
+			out.write(STRING);
+			writeInt32Impl(length);
 		}
+
+		// Write body
+		encoder.encode(CharBuffer.wrap(text, index, length), out);
 	}
 
-	public void writeString(String text) throws IOException {
+	public void writeString(String text) throws IllegalArgumentException,
+			IOException {
 		if (text == null)
-			writeNull();
-		else {
-			int length = text.length();
+			throw new IllegalArgumentException("text cannot be null");
 
-			// Write header
-			if (length < 255) {
-				out.write(STRING_COMPACT);
-				out.write(length);
-			} else {
-				out.write(STRING);
-				writeInt32Impl(length);
-			}
+		int length = text.length();
 
-			// Write body - CB uses a reflection-optimized wrapper for String.
-			encoder.encode(CharBuffer.wrap(text), out);
+		// Write header
+		if (length < 255) {
+			out.write(STRING_COMPACT);
+			out.write(length);
+		} else {
+			out.write(STRING);
+			writeInt32Impl(length);
 		}
+
+		// Write body - CB uses a reflection-optimized wrapper for String.
+		encoder.encode(CharBuffer.wrap(text), out);
 	}
 
 	public void writeArrayHeader(int elementCount)
