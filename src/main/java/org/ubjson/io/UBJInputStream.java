@@ -25,6 +25,23 @@ import java.math.BigInteger;
 
 import org.ubjson.io.charset.StreamDecoder;
 
+/*
+ * TODO: Need to add support for returning null from the read methods that
+ * process objects (readHuge, readString) because the OutputStream supports
+ * writing out null values for example: 
+ * "username": null
+ * 
+ * When reading that in using this class, you assume "username" value is a String,
+ * so you go to read it in with readString and getting back a null instead of
+ * throwing an exception is a valid use case.
+ * 
+ * Need to modify checkType methods.
+ * 
+ * TODO: NOTE, 'null' is a valid value to ANY type, so it can technically be the result from
+ * any of the read operations as per JSON spec.
+ * 
+ * Need to think about the implications of this more.
+ */
 public class UBJInputStream extends FilterInputStream {
 	protected StreamDecoder decoder;
 
