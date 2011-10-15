@@ -21,6 +21,10 @@ Changelog
 	
 	* Added mapping support for BigDecimal, BigInteger, AtomicInteger and 
 	AtomicLong to ObjectWriter.
+	
+	* Added readNull and readBoolean to the UBJInputStream and 
+	UBJInputStreamParser implementations to make the API feel complete and feel
+	more natural to use.
 
 10-10-11
 	* com.ubjson.io AND com.ubjson.io.charset are finalized against the 
