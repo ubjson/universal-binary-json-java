@@ -319,11 +319,8 @@ public class UBJInputStream extends FilterInputStream {
 			throws DataFormatException, IOException {
 		byte type = -1;
 
-		/*
-		 * Keep reading in the "next" byte, marking the beginning of the next
-		 * element, skipping all NOOP markers we run into.
-		 */
-		while ((type = (byte) in.read()) != NOOP)
+		// Read next byte, re-trying if NOOP is encountered;
+		while ((type = (byte) in.read()) == NOOP)
 			;
 
 		if (type != expectedType)
@@ -339,11 +336,8 @@ public class UBJInputStream extends FilterInputStream {
 			byte expectedType2) throws DataFormatException, IOException {
 		byte type = -1;
 
-		/*
-		 * Keep reading in the "next" byte, marking the beginning of the next
-		 * element, skipping all NOOP markers we run into.
-		 */
-		while ((type = (byte) in.read()) != NOOP)
+		// Read next byte, re-trying if NOOP is encountered;
+		while ((type = (byte) in.read()) == NOOP)
 			;
 
 		if (type != expectedType1 && type != expectedType2)
