@@ -87,6 +87,16 @@ public class UBJInputStream extends FilterInputStream {
 		return in.markSupported();
 	}
 
+	public Object readNull() throws IOException, DataFormatException {
+		checkType("NULL", NULL);
+		return null;
+	}
+
+	public boolean readBoolean() throws IOException, DataFormatException {
+		byte type = checkTypes("BOOLEAN", TRUE, FALSE);
+		return (type == TRUE ? true : false);
+	}
+
 	public byte readByte() throws IOException, DataFormatException {
 		checkType("BYTE", BYTE);
 		return (byte) in.read();

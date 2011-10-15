@@ -34,6 +34,22 @@ public class UBJInputStreamParser extends UBJInputStream {
 	}
 
 	@Override
+	public Object readNull() throws IOException, DataFormatException {
+		super.readNull();
+		peek = -1;
+
+		return null;
+	}
+
+	@Override
+	public boolean readBoolean() throws IOException, DataFormatException {
+		boolean b = super.readBoolean();
+		peek = -1;
+
+		return b;
+	}
+
+	@Override
 	public byte readByte() throws IOException, DataFormatException {
 		byte b = super.readByte();
 		peek = -1;
