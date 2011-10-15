@@ -87,7 +87,7 @@ public class UBJInputStream extends FilterInputStream {
 		return in.markSupported();
 	}
 
-	public Object readNull() throws IOException, DataFormatException {
+	public <T> T readNull() throws IOException, DataFormatException {
 		checkType("NULL", NULL);
 		return null;
 	}
