@@ -34,7 +34,7 @@ public class UBJInputStreamParser extends UBJInputStream {
 	}
 
 	@Override
-	public Object readNull() throws IOException, DataFormatException {
+	public <T> T readNull() throws IOException, DataFormatException {
 		super.readNull();
 		peek = -1;
 
