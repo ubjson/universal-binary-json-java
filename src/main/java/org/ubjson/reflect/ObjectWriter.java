@@ -31,12 +31,16 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.ubjson.io.UBJOutputStream;
 
 /*
- * TODO: For method (access type) caching, might speed up access time if the Method arg we store
- * is the tuple of the method AND the shortened name so we don't have to process
- * each time.
+ * TODO: Optimization, cache filtered field & method Lists in an LRUCache after
+ * they are calculated.
  * 
- * TODO: All of the isAssignableFrom calls should be benchmarked and cached if
- * it is found to be faster to avoid the reflection into the class.
+ * TODO: Optimization, benchmark (and possibly cache) the calls to isAssignableFrom
+ * to avoid the reflection calls when the same types of objects come through over
+ * and over again.
+ * 
+ * TODO: Optimization, when doing METHOD access to values on the objects, caching
+ * the processed field names (from the getters) so the strings don't have to be
+ * created each time would be good.
  */
 public class ObjectWriter implements IObjectWriter {
 	private enum CType {
@@ -96,7 +100,6 @@ public class ObjectWriter implements IObjectWriter {
 		this.accessType = type;
 
 		// Begin recursing on the object and writing it out.
-		// dispatchWrite(out, null, obj);
 		switch (accessType) {
 		case FIELDS:
 			writeObjectByFields(out, null, obj.getClass(), obj);
