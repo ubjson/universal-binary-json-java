@@ -18,10 +18,10 @@ public class TwitterTimelineMarshaller {
 		out.writeByte((byte) tt.retweet_count);
 
 		out.writeString("in_reply_to_screen_name");
-		out.writeString(tt.in_reply_to_screen_name);
+		out.writeNull();
 
 		out.writeString("in_reply_to_user_id");
-		out.writeString(tt.in_reply_to_user_id);
+		out.writeNull();
 
 		out.writeString("truncated");
 		out.writeBoolean(tt.truncated);
@@ -33,7 +33,7 @@ public class TwitterTimelineMarshaller {
 		out.writeBoolean(tt.possibly_sensitive);
 
 		out.writeString("in_reply_to_status_id_str");
-		out.writeString(tt.in_reply_to_status_id_str);
+		out.writeNull();
 
 		// Entities start
 		out.writeString("entities");
@@ -66,19 +66,19 @@ public class TwitterTimelineMarshaller {
 		// Entities end
 
 		out.writeString("geo");
-		out.writeString(tt.geo);
+		out.writeNull();
 
 		out.writeString("place");
-		out.writeString(tt.place);
+		out.writeNull();
 
 		out.writeString("coordinates");
-		out.writeString(tt.coordinates);
+		out.writeNull();
 
 		out.writeString("created_at");
 		out.writeString(tt.created_at);
 
 		out.writeString("in_reply_to_user_id_str");
-		out.writeString(tt.in_reply_to_status_id_str);
+		out.writeNull();
 
 		// User start
 		out.writeString("user");
@@ -200,13 +200,13 @@ public class TwitterTimelineMarshaller {
 		// User end
 
 		out.writeString("contributors");
-		out.writeString(tt.contributors);
+		out.writeNull();
 
 		out.writeString("source");
 		out.writeString(tt.source);
 
 		out.writeString("in_reply_to_status_id");
-		out.writeString(tt.in_reply_to_status_id);
+		out.writeNull();
 
 		out.writeString("favorited");
 		out.writeBoolean(tt.favorited);
@@ -227,14 +227,209 @@ public class TwitterTimelineMarshaller {
 
 		in.readStringAsChars();
 		tt.id_str = in.readString();
-		
+
 		in.readStringAsChars();
 		tt.retweet_count = in.readByte();
-		
+
 		in.readStringAsChars();
-		tt.in_reply_to_screen_name = in.readString();
-		
-		// TODO: in progress
+		tt.in_reply_to_screen_name = in.readNull();
+
+		in.readStringAsChars();
+		tt.in_reply_to_user_id = in.readNull();
+
+		in.readStringAsChars();
+		tt.truncated = in.readBoolean();
+
+		in.readStringAsChars();
+		tt.retweeted = in.readBoolean();
+
+		in.readStringAsChars();
+		tt.possibly_sensitive = in.readBoolean();
+
+		in.readStringAsChars();
+		tt.in_reply_to_status_id_str = in.readNull();
+
+		// Entities
+		in.readStringAsChars();
+		in.readObjectLength();
+
+		// Entities:URL
+		in.readStringAsChars();
+		in.readObjectLength();
+
+		in.readStringAsChars();
+		tt.entities.urls.url = in.readString();
+
+		in.readStringAsChars();
+		tt.entities.urls.display_url = in.readString();
+
+		in.readStringAsChars();
+		in.readArrayLength();
+		tt.entities.urls.indices[0] = in.readByte();
+		tt.entities.urls.indices[1] = in.readByte();
+
+		in.readStringAsChars();
+		tt.entities.urls.expanded_url = in.readString();
+		// Entities:URL end
+
+		in.readStringAsChars();
+		in.readArrayLength();
+
+		in.readStringAsChars();
+		in.readArrayLength();
+		// Entities end
+
+		in.readStringAsChars();
+		tt.geo = in.readNull();
+
+		in.readStringAsChars();
+		tt.place = in.readNull();
+
+		in.readStringAsChars();
+		tt.coordinates = in.readNull();
+
+		in.readStringAsChars();
+		tt.created_at = in.readString();
+
+		in.readStringAsChars();
+		tt.in_reply_to_user_id_str = in.readNull();
+
+		// User
+		in.readStringAsChars();
+		in.readObjectLength();
+
+		in.readStringAsChars();
+		tt.user.id_str = in.readString();
+
+		in.readStringAsChars();
+		tt.user.profile_link_color = in.readString();
+
+		in.readStringAsChars();
+		tt.user.protectedd = in.readBoolean();
+
+		in.readStringAsChars();
+		tt.user.url = in.readString();
+
+		in.readStringAsChars();
+		tt.user.screen_name = in.readString();
+
+		in.readStringAsChars();
+		tt.user.statuses_count = in.readInt16();
+
+		in.readStringAsChars();
+		tt.user.profile_image_url = in.readString();
+
+		in.readStringAsChars();
+		tt.user.name = in.readString();
+
+		in.readStringAsChars();
+		tt.user.default_profile_image = in.readBoolean();
+
+		in.readStringAsChars();
+		tt.user.default_profile = in.readBoolean();
+
+		in.readStringAsChars();
+		tt.user.profile_background_color = in.readString();
+
+		in.readStringAsChars();
+		tt.user.lang = in.readString();
+
+		in.readStringAsChars();
+		tt.user.profile_background_tile = in.readBoolean();
+
+		in.readStringAsChars();
+		tt.user.utc_offset = in.readInt32();
+
+		in.readStringAsChars();
+		tt.user.description = in.readString();
+
+		in.readStringAsChars();
+		tt.user.is_translator = in.readBoolean();
+
+		in.readStringAsChars();
+		tt.user.show_all_inline_media = in.readBoolean();
+
+		in.readStringAsChars();
+		tt.user.contributors_enabled = in.readBoolean();
+
+		in.readStringAsChars();
+		tt.user.profile_background_image_url_https = in.readString();
+
+		in.readStringAsChars();
+		tt.user.created_at = in.readString();
+
+		in.readStringAsChars();
+		tt.user.profile_sidebar_fill_color = in.readString();
+
+		in.readStringAsChars();
+		tt.user.follow_request_sent = in.readBoolean();
+
+		in.readStringAsChars();
+		tt.user.friends_count = in.readInt16();
+
+		in.readStringAsChars();
+		tt.user.followers_count = in.readInt16();
+
+		in.readStringAsChars();
+		tt.user.time_zone = in.readString();
+
+		in.readStringAsChars();
+		tt.user.favourites_count = in.readByte();
+
+		in.readStringAsChars();
+		tt.user.profile_sidebar_border_color = in.readString();
+
+		in.readStringAsChars();
+		tt.user.profile_image_url_https = in.readString();
+
+		in.readStringAsChars();
+		tt.user.following = in.readBoolean();
+
+		in.readStringAsChars();
+		tt.user.geo_enabled = in.readBoolean();
+
+		in.readStringAsChars();
+		tt.user.notifications = in.readBoolean();
+
+		in.readStringAsChars();
+		tt.user.profile_use_background_image = in.readBoolean();
+
+		in.readStringAsChars();
+		tt.user.listed_count = in.readByte();
+
+		in.readStringAsChars();
+		tt.user.verified = in.readBoolean();
+
+		in.readStringAsChars();
+		tt.user.profile_text_color = in.readString();
+
+		in.readStringAsChars();
+		tt.user.location = in.readString();
+
+		in.readStringAsChars();
+		tt.user.id = in.readInt32();
+
+		in.readStringAsChars();
+		tt.user.profile_background_image_url = in.readString();
+		// User end
+
+		in.readStringAsChars();
+		tt.contributors = in.readNull();
+
+		in.readStringAsChars();
+		tt.source = in.readString();
+
+		in.readStringAsChars();
+		tt.in_reply_to_status_id = in.readNull();
+
+		in.readStringAsChars();
+		tt.favorited = in.readBoolean();
+
+		in.readStringAsChars();
+		tt.id = in.readInt64();
+
+		in.readStringAsChars();
+		tt.text = in.readString();
 
 		return tt;
 	}
