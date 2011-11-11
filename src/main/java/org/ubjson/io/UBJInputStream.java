@@ -158,6 +158,50 @@ public class UBJInputStream extends FilterInputStream {
 		return Double.longBitsToDouble(readInt64Impl());
 	}
 
+	public byte[] readHugeAsBytes() throws IOException, DataFormatException {
+		byte type = checkTypes("HUGE", HUGE_COMPACT, HUGE);
+		int byteLength = 0;
+
+		switch (type) {
+		case HUGE_COMPACT:
+			byteLength = in.read();
+			break;
+
+		case HUGE:
+			byteLength = readInt32Impl();
+			break;
+		}
+
+		if (byteLength < 0)
+			throw new DataFormatException(
+					"Encountered an invalid (negative) length of ["
+							+ byteLength
+							+ "] specified for the (numeric) HUGE value. Length must be >= 0.");
+
+		int read = 0;
+		int total = 0;
+		byte[] buffer = new byte[byteLength];
+
+		/*
+		 * Keep reading from the stream until we have collected all the bytes
+		 * necessary to reconstitute the BigInteger.
+		 */
+		while ((read = in.read(buffer, total, byteLength - read)) > -1) {
+			total += read;
+		}
+
+		// Make sure we got all the bytes we were promised.
+		if (total < byteLength)
+			throw new IOException(
+					"End of Stream was encountered while trying to read all of the bytes representing this HUGE value ("
+							+ byteLength
+							+ " bytes). Only "
+							+ total
+							+ " bytes could be read.");
+
+		return buffer;
+	}
+
 	public char[] readHugeAsChars() throws IOException, DataFormatException {
 		byte type = checkTypes("HUGE", HUGE_COMPACT, HUGE);
 		int byteLength = 0;
