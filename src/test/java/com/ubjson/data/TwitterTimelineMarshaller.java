@@ -232,10 +232,12 @@ public class TwitterTimelineMarshaller {
 		tt.retweet_count = in.readByte();
 
 		in.readStringAsChars();
-		tt.in_reply_to_screen_name = in.readNull();
+		// tt.in_reply_to_screen_name =
+		in.readNull();
 
 		in.readStringAsChars();
-		tt.in_reply_to_user_id = in.readNull();
+		// tt.in_reply_to_user_id =
+		in.readNull();
 
 		in.readStringAsChars();
 		tt.truncated = in.readBoolean();
@@ -247,7 +249,8 @@ public class TwitterTimelineMarshaller {
 		tt.possibly_sensitive = in.readBoolean();
 
 		in.readStringAsChars();
-		tt.in_reply_to_status_id_str = in.readNull();
+		// tt.in_reply_to_status_id_str =
+		in.readNull();
 
 		// Entities
 		in.readStringAsChars();
@@ -280,19 +283,23 @@ public class TwitterTimelineMarshaller {
 		// Entities end
 
 		in.readStringAsChars();
-		tt.geo = in.readNull();
+		// tt.geo =
+		in.readNull();
 
 		in.readStringAsChars();
-		tt.place = in.readNull();
+		// tt.place =
+		in.readNull();
 
 		in.readStringAsChars();
-		tt.coordinates = in.readNull();
+		// tt.coordinates =
+		in.readNull();
 
 		in.readStringAsChars();
 		tt.created_at = in.readString();
 
 		in.readStringAsChars();
-		tt.in_reply_to_user_id_str = in.readNull();
+		// tt.in_reply_to_user_id_str =
+		in.readNull();
 
 		// User
 		in.readStringAsChars();
@@ -414,13 +421,15 @@ public class TwitterTimelineMarshaller {
 		// User end
 
 		in.readStringAsChars();
-		tt.contributors = in.readNull();
+		// tt.contributors =
+		in.readNull();
 
 		in.readStringAsChars();
 		tt.source = in.readString();
 
 		in.readStringAsChars();
-		tt.in_reply_to_status_id = in.readNull();
+		// tt.in_reply_to_status_id =
+		in.readNull();
 
 		in.readStringAsChars();
 		tt.favorited = in.readBoolean();
