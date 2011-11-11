@@ -97,19 +97,26 @@ public class UBJInputStreamParser extends UBJInputStream {
 	}
 
 	@Override
+	public char[] readHugeAsChars() throws IOException, DataFormatException {
+		char[] h = super.readHugeAsChars();
+		peek = -1;
+		return h;
+	}
+
+	@Override
 	public BigInteger readHugeAsBigInteger() throws IOException,
 			DataFormatException {
-		BigInteger bi = super.readHugeAsBigInteger();
+		BigInteger h = super.readHugeAsBigInteger();
 		peek = -1;
-		return bi;
+		return h;
 	}
 
 	@Override
 	public BigDecimal readHugeAsBigDecimal() throws IOException,
 			DataFormatException {
-		BigDecimal bd = super.readHugeAsBigDecimal();
+		BigDecimal h = super.readHugeAsBigDecimal();
 		peek = -1;
-		return bd;
+		return h;
 	}
 
 	@Override

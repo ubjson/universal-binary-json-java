@@ -139,6 +139,24 @@ public class UBJOutputStream extends FilterOutputStream {
 		writeInt64Impl(Double.doubleToLongBits(value));
 	}
 
+	public void writeHuge(char[] huge) throws IllegalArgumentException,
+			IOException {
+		if (huge == null)
+			throw new IllegalArgumentException("huge cannot be null");
+
+		// Write header
+		if (huge.length < 255) {
+			out.write(HUGE_COMPACT);
+			out.write(huge.length);
+		} else {
+			out.write(HUGE);
+			writeInt32Impl(huge.length);
+		}
+
+		// Write body
+		encoder.encode(CharBuffer.wrap(huge), out);
+	}
+
 	public void writeHuge(BigInteger huge) throws IllegalArgumentException,
 			IOException {
 		if (huge == null)
