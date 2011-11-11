@@ -41,18 +41,6 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-/*
- * TODO: Need to add support for reading streaming containers.
- * 
- * Change 1: readArrayLength should return -1 when a COMPACT 'a' is read and length
- * is 255.
- * Change 2: readObjectLength should return -1 when a COMPACT 'o' is read and
- * length is 255.
- * 
- * NOTE: StreamParser is the only one that can support reading streaming
- * containers, because it has the variable return type from nextType where the
- * 'E' would be reported correctly to the caller.
- */
 public class UBJInputStream extends FilterInputStream {
 	protected StreamDecoder decoder;
 
