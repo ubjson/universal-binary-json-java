@@ -1,4 +1,4 @@
-package com.ubjson.reflect;
+package com.ubjson.io.reflect;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
