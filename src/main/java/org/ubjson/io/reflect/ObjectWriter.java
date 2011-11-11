@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ubjson.reflect;
+package org.ubjson.io.reflect;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
