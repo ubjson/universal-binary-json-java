@@ -314,7 +314,7 @@ public class UBJInputStream extends FilterInputStream {
 		 * Put another way, keep reading until we find a valid marker byte value
 		 * or hit the end of stream.
 		 */
-		while ((b = (byte) in.read()) != -1 && b != NOOP)
+		while ((b = (byte) in.read()) != -1 && b == NOOP)
 			;
 
 		return b;
