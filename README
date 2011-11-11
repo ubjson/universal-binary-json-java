@@ -7,6 +7,37 @@ http://ubjson.org
 
 Changelog
 ---------
+11-10-11
+	* DRAFT 8 Spec Support Added.
+
+	* Added support for the END marker (readEnd) to the InputStreams which is
+	required for proper unbounded-container support.
+	
+	* Added support for the END marker (writeEnd) to UBJOutputStream.
+	
+	UBJInputStreamParser must be used for properly support unbounded-containers
+	because you never know when the 'E' will be encountered marking the end;
+	so the caller needs to pay attention to the type marker that nextType()
+	returns and respond accordingly.
+	
+	* readArrayLength and readObjectLenght were modified to return -1 when an 
+	unbounded container length is encountered (255).
+
+	* Fixed UBJInputStreamParser.nextType to correctly skip past any NOOP
+	markers found in the underlying stream before returning a valid next type.
+	
+	* Normalized all reading of "next byte" to the singular
+	UBJInputStream.nextMarker method -- correctly skips over NOOP until end of 
+	stream OR until the next valid marker byte, then returns it.
+
+	* Modified readNull behavior to have no return type. It is already designed
+	to throw an exception when 'NULL' isn't found, no need for the additional
+	return type.
+	
+	* Renamed IDataType to IMarkerType to follow the naming convention for the
+	marker bytes set forth by the spec doc.
+
+
 10-14-11
 	* ObjectWriter rewritten and works correctly. Tested with the example test
 	data and wrote out the compressed and uncompressed formats files correctly
@@ -52,6 +83,21 @@ Changelog
 
 09-27-11
 	* Initial check-in of core IO classes to read/write spec.
+
+
+Status
+------
+Using the standard UBJInputStream, UBJInputStreamParser and UBJOutputStream
+implementations to manually read/write UBJ objects is stable and tuned for
+optimal performance.
+
+Automatic mapping of objects to/from UBJ format via the reflection-based 
+implementation is not tuned yet. Writing is implemented, but not tuned for
+optimal performance and reading still has to be written.
+
+	* org.ubjson.io - STABLE
+	* org.ubjson.charset - STABLE
+	* org.ubjson.reflect - IN-PROGRESS
 
 
 License
