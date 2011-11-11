@@ -34,6 +34,21 @@ Changelog
 	to throw an exception when 'NULL' isn't found, no need for the additional
 	return type.
 	
+	* Refactored StreamDecoder and StreamEncoder into the core IO package, 
+	because they are part of core IO.
+	
+	* Refactored StreamParser into the io.parser package to more clearly denote
+	its relationship to the core IO classes. It is a slightly higher level
+	abstraction ontop of the core IO, having it along side the core IO classes
+	while .reflect was a subpackage was confusing and suggested that 
+	StreamParser was somehow intended as a swapable replacement for 
+	UBJInputStream which is not how it is intended to be used.
+	
+	* Refactored org.ubjson.reflect to org.ubjson.io.reflect to more correctly
+	communicate the relationship -- the reflection-based classes are built on
+	the core IO classes and are just a higher abstraction to interact with UBJSON
+	with.
+	
 	* Renamed IDataType to IMarkerType to follow the naming convention for the
 	marker bytes set forth by the spec doc.
 

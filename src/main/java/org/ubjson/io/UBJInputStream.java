@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import org.ubjson.io.charset.StreamDecoder;
 
 /*
  * TODO: Need to add support for reading streaming containers.

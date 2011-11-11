@@ -42,7 +42,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.CharBuffer;
 
-import org.ubjson.io.charset.StreamEncoder;
 
 public class UBJOutputStream extends FilterOutputStream {
 	private byte[] int16Buffer;
