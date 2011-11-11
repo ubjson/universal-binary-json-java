@@ -25,7 +25,7 @@ import java.nio.charset.CharsetDecoder;
 public class StreamDecoder {
 	public static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
-	private static final char[] EMPTY = new char[0];
+	public static final char[] EMPTY = new char[0];
 
 	private byte[] readBuffer;
 	private char[] decodeBuffer;
@@ -58,6 +58,17 @@ public class StreamDecoder {
 			return EMPTY;
 
 		int charCount = 0;
+
+		/*
+		 * Byte to Char conversion can never result in *more* chars than bytes,
+		 * so assume up front that our character count result will be equal to
+		 * the number of bytes we decode (i.e. ASCII). If that guess was wrong,
+		 * it is corrected below before returning.
+		 * 
+		 * This is better than trying to guess via the Decoder's
+		 * averageBytesPerChar value and happen to get it wrong in the middle of
+		 * decoding then needing to re-adjust the array on the fly then.
+		 */
 		char[] chars = new char[byteLength];
 
 		// Reuse the backing decode buffer.
