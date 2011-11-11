@@ -15,14 +15,31 @@
  */
 package org.ubjson.io;
 
-import static org.ubjson.io.IMarkerType.*;
+import static org.ubjson.io.IMarkerType.ARRAY;
+import static org.ubjson.io.IMarkerType.ARRAY_COMPACT;
+import static org.ubjson.io.IMarkerType.BYTE;
+import static org.ubjson.io.IMarkerType.DOUBLE;
+import static org.ubjson.io.IMarkerType.END;
+import static org.ubjson.io.IMarkerType.FALSE;
+import static org.ubjson.io.IMarkerType.FLOAT;
+import static org.ubjson.io.IMarkerType.HUGE;
+import static org.ubjson.io.IMarkerType.HUGE_COMPACT;
+import static org.ubjson.io.IMarkerType.INT16;
+import static org.ubjson.io.IMarkerType.INT32;
+import static org.ubjson.io.IMarkerType.INT64;
+import static org.ubjson.io.IMarkerType.NOOP;
+import static org.ubjson.io.IMarkerType.NULL;
+import static org.ubjson.io.IMarkerType.OBJECT;
+import static org.ubjson.io.IMarkerType.OBJECT_COMPACT;
+import static org.ubjson.io.IMarkerType.STRING;
+import static org.ubjson.io.IMarkerType.STRING_COMPACT;
+import static org.ubjson.io.IMarkerType.TRUE;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
 
 /*
  * TODO: Need to add support for reading streaming containers.

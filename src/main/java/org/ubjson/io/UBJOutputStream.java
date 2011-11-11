@@ -42,7 +42,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.CharBuffer;
 
-
 public class UBJOutputStream extends FilterOutputStream {
 	private byte[] int16Buffer;
 	private byte[] int32Buffer;
