@@ -2,7 +2,6 @@ package com.ubjson.io;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -20,16 +19,6 @@ public class CouchDB4kBenchmark {
 			new NullOutputStream());
 
 	public static void main(String[] args) throws IOException {
-		if(true) {
-			FileOutputStream out = new FileOutputStream("CouchDB4k.ubj");
-			CouchDB4kMarshaller.serialize(new CouchDB4k(), new UBJOutputStream(out));
-			out.flush();
-			out.close();
-			
-			System.exit(0);
-		}
-		
-		
 		// Write a single CouchDB4k out to byte[]
 		RawByteArrayOutputStream rbaos = new RawByteArrayOutputStream(1024);
 		UBJOutputStream stream = new UBJOutputStream(rbaos);
