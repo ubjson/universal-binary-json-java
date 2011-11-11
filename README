@@ -20,6 +20,20 @@ Changelog
 	so the caller needs to pay attention to the type marker that nextType()
 	returns and respond accordingly.
 	
+	* Added readHugeAsBytes to InputStream implementations, allowing the bytes
+	used to represent a HUGE to be read in their raw form with no decoding.
+	
+	This can save on processing as BigInteger and BigDecimal do their own decoding
+	of byte[] directly.
+	
+	* Added readHugeAsChars to InputStream implementations, allowing a HUGE 
+	value to be read in as a raw char[] without trying to decode it to a 
+	BigInteger or BigDecimal.
+	
+	* Added writeHuge(char[]) to support writing out HUGE values directly from
+	their raw char[] form without trying to decode from a BigInteger or
+	BigDecimal.
+	
 	* readArrayLength and readObjectLenght were modified to return -1 when an 
 	unbounded container length is encountered (255).
 
@@ -33,6 +47,14 @@ Changelog
 	* Modified readNull behavior to have no return type. It is already designed
 	to throw an exception when 'NULL' isn't found, no need for the additional
 	return type.
+	
+	* Began work on a simple abstract representation of the UBJ data types as
+	objects that can be assembled into maps and lists and written/read easily
+	using the IO package.
+	
+	This is intended to be a higher level of abstraction than the IO streams,
+	but lower level (and faster) than the reflection-based work that inspects
+	user-provided classes.
 	
 	* Refactored StreamDecoder and StreamEncoder into the core IO package, 
 	because they are part of core IO.
@@ -111,8 +133,9 @@ implementation is not tuned yet. Writing is implemented, but not tuned for
 optimal performance and reading still has to be written.
 
 	* org.ubjson.io - STABLE
-	* org.ubjson.charset - STABLE
-	* org.ubjson.reflect - IN-PROGRESS
+	* org.ubjson.io.parser - STABLE
+	* org.ubjson.io.reflect - ALPHA
+	* org.ubjson.model - BETA
 
 
 License
