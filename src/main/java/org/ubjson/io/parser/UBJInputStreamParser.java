@@ -97,6 +97,13 @@ public class UBJInputStreamParser extends UBJInputStream {
 	}
 
 	@Override
+	public byte[] readHugeAsBytes() throws IOException, DataFormatException {
+		byte[] h = super.readHugeAsBytes();
+		peek = -1;
+		return h;
+	}
+
+	@Override
 	public char[] readHugeAsChars() throws IOException, DataFormatException {
 		char[] h = super.readHugeAsChars();
 		peek = -1;
