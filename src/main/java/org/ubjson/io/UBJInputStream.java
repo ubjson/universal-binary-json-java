@@ -455,7 +455,7 @@ public class UBJInputStream extends FilterInputStream {
 
 		if (type != expectedType)
 			throw new DataFormatException("Unable to read " + typeLabel
-					+ " value. The last type read was " + type + " (char='"
+					+ " value. The type read was " + type + " (char='"
 					+ ((char) type) + "') but the expected type was "
 					+ expectedType + " (char='" + ((char) expectedType) + "').");
 
@@ -468,7 +468,7 @@ public class UBJInputStream extends FilterInputStream {
 
 		if (type != expectedType1 && type != expectedType2)
 			throw new DataFormatException("Unable to read " + typeLabel
-					+ " value. The last type read was " + type + " (char='"
+					+ " value. The type read was " + type + " (char='"
 					+ ((char) type) + "') but the expected types were "
 					+ expectedType1 + " (char='" + ((char) expectedType1)
 					+ "') or " + expectedType2 + " (char='"

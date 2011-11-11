@@ -162,7 +162,7 @@ public class UBJInputStreamParser extends UBJInputStream {
 
 		if (peek != expectedType)
 			throw new DataFormatException("Unable to read " + typeLabel
-					+ " value. The last type read was " + peek + " (char='"
+					+ " value. The type read was " + peek + " (char='"
 					+ ((char) peek) + "') but the expected type was "
 					+ expectedType + " (char='" + ((char) expectedType) + "').");
 
@@ -184,7 +184,7 @@ public class UBJInputStreamParser extends UBJInputStream {
 
 		if (peek != expectedType1 && peek != expectedType2)
 			throw new DataFormatException("Unable to read " + typeLabel
-					+ " value. The last type read was " + peek + " (char='"
+					+ " value. The type read was " + peek + " (char='"
 					+ ((char) peek) + "') but the expected types were "
 					+ expectedType1 + " (char='" + ((char) expectedType1)
 					+ "') or " + expectedType2 + " (char='"
