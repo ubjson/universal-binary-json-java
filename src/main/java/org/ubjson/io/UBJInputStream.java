@@ -15,7 +15,7 @@
  */
 package org.ubjson.io;
 
-import static org.ubjson.io.IDataType.*;
+import static org.ubjson.io.IMarkerType.*;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -25,6 +25,18 @@ import java.math.BigInteger;
 
 import org.ubjson.io.charset.StreamDecoder;
 
+/*
+ * TODO: Need to add support for reading streaming containers.
+ * 
+ * Change 1: readArrayLength should return -1 when a COMPACT 'a' is read and length
+ * is 255.
+ * Change 2: readObjectLength should return -1 when a COMPACT 'o' is read and
+ * length is 255.
+ * 
+ * NOTE: StreamParser is the only one that can support reading streaming
+ * containers, because it has the variable return type from nextType where the
+ * 'E' would be reported correctly to the caller.
+ */
 public class UBJInputStream extends FilterInputStream {
 	protected StreamDecoder decoder;
 
@@ -87,9 +99,12 @@ public class UBJInputStream extends FilterInputStream {
 		return in.markSupported();
 	}
 
-	public <T> T readNull() throws IOException, DataFormatException {
+	public void readEnd() throws IOException, DataFormatException {
+		checkType("END", END);
+	}
+
+	public void readNull() throws IOException, DataFormatException {
 		checkType("NULL", NULL);
-		return null;
 	}
 
 	public boolean readBoolean() throws IOException, DataFormatException {
@@ -230,6 +245,16 @@ public class UBJInputStream extends FilterInputStream {
 		switch (type) {
 		case ARRAY_COMPACT:
 			count = in.read();
+
+			/*
+			 * Streaming Support: When using the 'a' marker, when a length of
+			 * 255 is specified, that means an unbounded container that is
+			 * terminated with an 'E' marker.
+			 * 
+			 * We use -1 to indicate this scenario to the caller.
+			 */
+			if (count == 255)
+				count = -1;
 			break;
 
 		case ARRAY:
@@ -253,6 +278,16 @@ public class UBJInputStream extends FilterInputStream {
 		switch (type) {
 		case OBJECT_COMPACT:
 			count = in.read();
+
+			/*
+			 * Streaming Support: When using the 'o' marker, when a length of
+			 * 255 is specified, that means an unbounded container that is
+			 * terminated with an 'E' marker.
+			 * 
+			 * We use -1 to indicate this scenario to the caller.
+			 */
+			if (count == 255)
+				count = -1;
 			break;
 
 		case OBJECT:
@@ -267,6 +302,22 @@ public class UBJInputStream extends FilterInputStream {
 							+ "] specified for the OBJECT value. Length must be >= 0.");
 
 		return count;
+	}
+
+	protected byte nextMarker() throws IOException {
+		byte b = -1;
+
+		/*
+		 * Keep reading bytes from the underlying stream as long as we are
+		 * seeing NOOP bytes or stop as soon as we hit the end of the stream.
+		 * 
+		 * Put another way, keep reading until we find a valid marker byte value
+		 * or hit the end of stream.
+		 */
+		while ((b = (byte) in.read()) != -1 && b != NOOP)
+			;
+
+		return b;
 	}
 
 	protected short readInt16Impl() throws IOException {
@@ -317,11 +368,7 @@ public class UBJInputStream extends FilterInputStream {
 
 	protected byte checkType(String typeLabel, byte expectedType)
 			throws DataFormatException, IOException {
-		byte type = -1;
-
-		// Read next byte, re-trying if NOOP is encountered;
-		while ((type = (byte) in.read()) == NOOP)
-			;
+		byte type = nextMarker();
 
 		if (type != expectedType)
 			throw new DataFormatException("Unable to read " + typeLabel
@@ -334,11 +381,7 @@ public class UBJInputStream extends FilterInputStream {
 
 	protected byte checkTypes(String typeLabel, byte expectedType1,
 			byte expectedType2) throws DataFormatException, IOException {
-		byte type = -1;
-
-		// Read next byte, re-trying if NOOP is encountered;
-		while ((type = (byte) in.read()) == NOOP)
-			;
+		byte type = nextMarker();
 
 		if (type != expectedType1 && type != expectedType2)
 			throw new DataFormatException("Unable to read " + typeLabel

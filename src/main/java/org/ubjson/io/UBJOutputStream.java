@@ -15,24 +15,25 @@
  */
 package org.ubjson.io;
 
-import static org.ubjson.io.IDataType.ARRAY;
-import static org.ubjson.io.IDataType.ARRAY_COMPACT;
-import static org.ubjson.io.IDataType.BYTE;
-import static org.ubjson.io.IDataType.DOUBLE;
-import static org.ubjson.io.IDataType.FALSE;
-import static org.ubjson.io.IDataType.FLOAT;
-import static org.ubjson.io.IDataType.HUGE;
-import static org.ubjson.io.IDataType.HUGE_COMPACT;
-import static org.ubjson.io.IDataType.INT16;
-import static org.ubjson.io.IDataType.INT32;
-import static org.ubjson.io.IDataType.INT64;
-import static org.ubjson.io.IDataType.NOOP;
-import static org.ubjson.io.IDataType.NULL;
-import static org.ubjson.io.IDataType.OBJECT;
-import static org.ubjson.io.IDataType.OBJECT_COMPACT;
-import static org.ubjson.io.IDataType.STRING;
-import static org.ubjson.io.IDataType.STRING_COMPACT;
-import static org.ubjson.io.IDataType.TRUE;
+import static org.ubjson.io.IMarkerType.ARRAY;
+import static org.ubjson.io.IMarkerType.ARRAY_COMPACT;
+import static org.ubjson.io.IMarkerType.BYTE;
+import static org.ubjson.io.IMarkerType.DOUBLE;
+import static org.ubjson.io.IMarkerType.END;
+import static org.ubjson.io.IMarkerType.FALSE;
+import static org.ubjson.io.IMarkerType.FLOAT;
+import static org.ubjson.io.IMarkerType.HUGE;
+import static org.ubjson.io.IMarkerType.HUGE_COMPACT;
+import static org.ubjson.io.IMarkerType.INT16;
+import static org.ubjson.io.IMarkerType.INT32;
+import static org.ubjson.io.IMarkerType.INT64;
+import static org.ubjson.io.IMarkerType.NOOP;
+import static org.ubjson.io.IMarkerType.NULL;
+import static org.ubjson.io.IMarkerType.OBJECT;
+import static org.ubjson.io.IMarkerType.OBJECT_COMPACT;
+import static org.ubjson.io.IMarkerType.STRING;
+import static org.ubjson.io.IMarkerType.STRING_COMPACT;
+import static org.ubjson.io.IMarkerType.TRUE;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;
@@ -88,6 +89,10 @@ public class UBJOutputStream extends FilterOutputStream {
 		}
 
 		out.close();
+	}
+
+	public void writeEnd() throws IOException {
+		out.write(END);
 	}
 
 	public void writeNoop() throws IOException {
@@ -240,8 +245,13 @@ public class UBJOutputStream extends FilterOutputStream {
 			throw new IllegalArgumentException("elementCount [" + elementCount
 					+ "] must be >= 0.");
 
-		// <= because of 255 (0xFF) meaning unbounded container
-		if (elementCount <= 255) {
+		/*
+		 * Streaming Support: If the element count is 255 or smaller, write it
+		 * out in compact representation. The value 255 (0xFF) specifically will
+		 * signify an unbounded container that must be terminated with a
+		 * trailing 'E' at some point.
+		 */
+		if (elementCount < 256) {
 			out.write(ARRAY_COMPACT);
 			out.write(elementCount);
 		} else {
@@ -255,8 +265,13 @@ public class UBJOutputStream extends FilterOutputStream {
 			throw new IllegalArgumentException("elementCount [" + elementCount
 					+ "] must be >= 0.");
 
-		// <= because of 255 (0xFF) meaning unbounded container
-		if (elementCount <= 255) {
+		/*
+		 * Streaming Support: If the element count is 255 or smaller, write it
+		 * out in compact representation. The value 255 (0xFF) specifically will
+		 * signify an unbounded container that must be terminated with a
+		 * trailing 'E' at some point.
+		 */
+		if (elementCount < 256) {
 			out.write(OBJECT_COMPACT);
 			out.write(elementCount);
 		} else {
