@@ -19,21 +19,21 @@ import static org.ubjson.io.IMarkerType.HUGE;
 import static org.ubjson.io.IMarkerType.HUGE_COMPACT;
 
 import java.io.IOException;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import org.ubjson.io.DataFormatException;
 import org.ubjson.io.UBJOutputStream;
 import org.ubjson.io.parser.UBJInputStreamParser;
 
-public class HugeBigDecimalValue extends AbstractValue<BigDecimal> {
+public class BigIntegerHugeValue extends AbstractValue<BigInteger> {
 	protected int length = -1;
 
-	public HugeBigDecimalValue(BigDecimal value)
+	public BigIntegerHugeValue(BigInteger value)
 			throws IllegalArgumentException {
 		super(value);
 	}
 
-	public HugeBigDecimalValue(UBJInputStreamParser in)
+	public BigIntegerHugeValue(UBJInputStreamParser in)
 			throws IllegalArgumentException, IOException, DataFormatException {
 		super(in);
 	}
@@ -61,6 +61,6 @@ public class HugeBigDecimalValue extends AbstractValue<BigDecimal> {
 		if (in == null)
 			throw new IllegalArgumentException("in cannot be null");
 
-		value = in.readHugeAsBigDecimal();
+		value = in.readHugeAsBigInteger();
 	}
 }
