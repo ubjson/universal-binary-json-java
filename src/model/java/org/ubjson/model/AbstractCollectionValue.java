@@ -1,4 +1,4 @@
-package org.ubjson.spec;
+package org.ubjson.model;
 
 import static org.ubjson.io.IMarkerType.ARRAY;
 import static org.ubjson.io.IMarkerType.ARRAY_COMPACT;
@@ -28,8 +28,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.ubjson.io.UBJOutputStream;
-import org.ubjson.spec.value.AbstractValue;
-import org.ubjson.spec.value.IValue;
 
 public abstract class AbstractCollectionValue<T> extends AbstractValue<T> {
 	protected void writeValue(UBJOutputStream out, IValue<?> value)

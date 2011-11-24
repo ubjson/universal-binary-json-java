@@ -13,29 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ubjson.spec.value;
+package org.ubjson.model;
 
-import static org.ubjson.io.IMarkerType.DOUBLE;
+import static org.ubjson.io.IMarkerType.HUGE;
+import static org.ubjson.io.IMarkerType.HUGE_COMPACT;
 
 import java.io.IOException;
+import java.math.BigInteger;
 
 import org.ubjson.io.DataFormatException;
 import org.ubjson.io.UBJOutputStream;
 import org.ubjson.io.parser.UBJInputStreamParser;
 
-public class DoubleValue extends AbstractValue<Double> {
-	public DoubleValue(Double value) throws IllegalArgumentException {
+public class BigIntegerHugeValue extends AbstractValue<BigInteger> {
+	protected int length = -1;
+
+	public BigIntegerHugeValue(BigInteger value)
+			throws IllegalArgumentException {
 		super(value);
 	}
 
-	public DoubleValue(UBJInputStreamParser in)
+	public BigIntegerHugeValue(UBJInputStreamParser in)
 			throws IllegalArgumentException, IOException, DataFormatException {
 		super(in);
 	}
 
 	@Override
 	public byte getType() {
-		return DOUBLE;
+		if (length == -1)
+			length = value.toString().length();
+
+		return (length < 255 ? HUGE_COMPACT : HUGE);
 	}
 
 	@Override
@@ -44,7 +52,7 @@ public class DoubleValue extends AbstractValue<Double> {
 		if (out == null)
 			throw new IllegalArgumentException("out cannot be null");
 
-		out.writeDouble(value);
+		out.writeHuge(value);
 	}
 
 	@Override
@@ -53,6 +61,6 @@ public class DoubleValue extends AbstractValue<Double> {
 		if (in == null)
 			throw new IllegalArgumentException("in cannot be null");
 
-		value = in.readDouble();
+		value = in.readHugeAsBigInteger();
 	}
 }

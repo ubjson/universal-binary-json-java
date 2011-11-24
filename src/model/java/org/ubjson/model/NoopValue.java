@@ -13,37 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ubjson.spec.value;
+package org.ubjson.model;
 
-import static org.ubjson.io.IMarkerType.HUGE;
-import static org.ubjson.io.IMarkerType.HUGE_COMPACT;
+import static org.ubjson.io.IMarkerType.NOOP;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 
 import org.ubjson.io.DataFormatException;
 import org.ubjson.io.UBJOutputStream;
 import org.ubjson.io.parser.UBJInputStreamParser;
 
-public class BigDecimalHugeValue extends AbstractValue<BigDecimal> {
-	protected int length = -1;
-
-	public BigDecimalHugeValue(BigDecimal value)
-			throws IllegalArgumentException {
-		super(value);
+public class NoopValue extends AbstractValue<Void> {
+	public NoopValue() {
+		// default
 	}
 
-	public BigDecimalHugeValue(UBJInputStreamParser in)
-			throws IllegalArgumentException, IOException, DataFormatException {
+	public NoopValue(UBJInputStreamParser in) throws IllegalArgumentException,
+			IOException, DataFormatException {
 		super(in);
 	}
 
 	@Override
 	public byte getType() {
-		if (length == -1)
-			length = value.toString().length();
-
-		return (length < 255 ? HUGE_COMPACT : HUGE);
+		return NOOP;
 	}
 
 	@Override
@@ -52,15 +44,13 @@ public class BigDecimalHugeValue extends AbstractValue<BigDecimal> {
 		if (out == null)
 			throw new IllegalArgumentException("out cannot be null");
 
-		out.writeHuge(value);
+		out.writeNoop();
 	}
 
 	@Override
 	public void deserialize(UBJInputStreamParser in)
 			throws IllegalArgumentException, IOException, DataFormatException {
-		if (in == null)
-			throw new IllegalArgumentException("in cannot be null");
-
-		value = in.readHugeAsBigDecimal();
+		throw new UnsupportedOperationException(
+				"UBJInputStream(Parser) does not support reading NOOP bytes directly as every read operation implicitly skips NOOP markers when it finds them inside the stream.");
 	}
 }

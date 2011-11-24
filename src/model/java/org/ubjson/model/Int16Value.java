@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ubjson.spec.value;
+package org.ubjson.model;
 
-import static org.ubjson.io.IMarkerType.INT64;
+import static org.ubjson.io.IMarkerType.INT16;
 
 import java.io.IOException;
 
@@ -23,19 +23,19 @@ import org.ubjson.io.DataFormatException;
 import org.ubjson.io.UBJOutputStream;
 import org.ubjson.io.parser.UBJInputStreamParser;
 
-public class Int64Value extends AbstractValue<Long> {
-	public Int64Value(Long value) throws IllegalArgumentException {
+public class Int16Value extends AbstractValue<Short> {
+	public Int16Value(Short value) throws IllegalArgumentException {
 		super(value);
 	}
 
-	public Int64Value(UBJInputStreamParser in) throws IllegalArgumentException,
+	public Int16Value(UBJInputStreamParser in) throws IllegalArgumentException,
 			IOException, DataFormatException {
 		super(in);
 	}
 
 	@Override
 	public byte getType() {
-		return INT64;
+		return INT16;
 	}
 
 	@Override
@@ -44,7 +44,7 @@ public class Int64Value extends AbstractValue<Long> {
 		if (out == null)
 			throw new IllegalArgumentException("out cannot be null");
 
-		out.writeInt64(value);
+		out.writeInt16(value);
 	}
 
 	@Override
@@ -53,6 +53,6 @@ public class Int64Value extends AbstractValue<Long> {
 		if (in == null)
 			throw new IllegalArgumentException("in cannot be null");
 
-		value = in.readInt64();
+		value = in.readInt16();
 	}
 }

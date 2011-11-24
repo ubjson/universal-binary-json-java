@@ -1,4 +1,4 @@
-package org.ubjson.spec;
+package org.ubjson.model;
 
 import static org.ubjson.io.IMarkerType.ARRAY;
 import static org.ubjson.io.IMarkerType.ARRAY_COMPACT;
@@ -22,34 +22,20 @@ import static org.ubjson.io.IMarkerType.TRUE;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.ubjson.io.DataFormatException;
 import org.ubjson.io.UBJOutputStream;
 import org.ubjson.io.parser.UBJInputStreamParser;
-import org.ubjson.spec.value.BooleanValue;
-import org.ubjson.spec.value.ByteValue;
-import org.ubjson.spec.value.DoubleValue;
-import org.ubjson.spec.value.EndValue;
-import org.ubjson.spec.value.FloatValue;
-import org.ubjson.spec.value.BigDecimalHugeValue;
-import org.ubjson.spec.value.BigIntegerHugeValue;
-import org.ubjson.spec.value.IValue;
-import org.ubjson.spec.value.Int16Value;
-import org.ubjson.spec.value.Int32Value;
-import org.ubjson.spec.value.Int64Value;
-import org.ubjson.spec.value.NullValue;
-import org.ubjson.spec.value.StringValue;
 
-public class ObjectMapValue extends
-		AbstractCollectionValue<Map<String, IValue<?>>> {
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public ObjectMapValue() {
-		value = new HashMap();
+public class ArrayValue extends AbstractCollectionValue<List<IValue<?>>> {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public ArrayValue() {
+		value = new ArrayList();
 	}
 
-	public ObjectMapValue(UBJInputStreamParser in) throws IOException,
+	public ArrayValue(UBJInputStreamParser in) throws IOException,
 			DataFormatException {
 		deserialize(in);
 	}
@@ -63,7 +49,7 @@ public class ObjectMapValue extends
 
 	@Override
 	public byte getType() {
-		return (value.size() < 256 ? OBJECT_COMPACT : OBJECT);
+		return (value.size() < 256 ? ARRAY_COMPACT : ARRAY);
 	}
 
 	@Override
@@ -74,64 +60,55 @@ public class ObjectMapValue extends
 	@Override
 	public void deserialize(UBJInputStreamParser in) throws IOException,
 			DataFormatException {
-		int size = in.readObjectLength();
-		value = new HashMap<String, IValue<?>>(size * 3);
+		int size = in.readArrayLength();
+		value = new ArrayList<IValue<?>>(size);
 
-		// TODO: add support for streaming.
+		// TODO: Adding support for streaming
 		if (size == -1)
 			throw new IOException(
-					"Deserializing an unbounded OBJECT (length 255) container is not supported by this class.");
+					"Deserializing an unbounded ARRAY (length 255) container is not supported by this class.");
 
 		int read = 0;
 		int type = -1;
 
-		/*
-		 * TODO: The logic below isn't right, the "type" we are getting is the
-		 * type for the name of the name-value pair, we have no idea what the
-		 * value's type is.
-		 */
-
 		// Loop until we read size items or hit EOS.
 		while ((read < size) && (type = in.nextType()) != -1) {
-			String name = in.readString();
-
-			// Switch on the value type.
-			switch ((type = in.nextType())) {
+			switch (type) {
 			case END:
-				value.put(name, new EndValue(in));
+				value.add(new EndValue(in));
 				break;
 
 			case NULL:
-				value.put(name, new NullValue(in));
+				value.add(new NullValue(in));
 				break;
 
 			case TRUE:
 			case FALSE:
-				value.put(name, new BooleanValue(in));
+				value.add(new BooleanValue(in));
 				break;
 
 			case BYTE:
-				value.put(name, new ByteValue(in));
+				value.add(new ByteValue(in));
 				break;
 
 			case INT16:
-				value.put(name, new Int16Value(in));
+				value.add(new Int16Value(in));
 				break;
 
 			case INT32:
-				value.put(name, new Int32Value(in));
+				value.add(new Int32Value(in));
 				break;
 
 			case INT64:
-				value.put(name, new Int64Value(in));
+				value.add(new Int64Value(in));
 				break;
 
 			case FLOAT:
-				value.put(name, new FloatValue(in));
+				value.add(new FloatValue(in));
 				break;
 
 			case DOUBLE:
-				value.put(name, new DoubleValue(in));
+				value.add(new DoubleValue(in));
 				break;
 
 			case HUGE:
@@ -145,26 +122,25 @@ public class ObjectMapValue extends
 				}
 
 				if (isDecimal)
-					value.put(name, new BigDecimalHugeValue(new BigDecimal(
-							chars)));
+					value.add(new BigDecimalHugeValue(new BigDecimal(chars)));
 				else
-					value.put(name, new BigIntegerHugeValue(new BigInteger(
+					value.add(new BigIntegerHugeValue(new BigInteger(
 							new String(chars))));
 				break;
 
 			case STRING:
 			case STRING_COMPACT:
-				value.put(name, new StringValue(in));
+				value.add(new StringValue(in));
 				break;
 
 			case ARRAY:
 			case ARRAY_COMPACT:
-				value.put(name, new ArrayListValue(in));
+				value.add(new ArrayValue(in));
 				break;
 
 			case OBJECT:
 			case OBJECT_COMPACT:
-				value.put(name, new ObjectMapValue(in));
+				value.add(new ObjectValue(in));
 				break;
 
 			default:
@@ -172,7 +148,7 @@ public class ObjectMapValue extends
 						+ type + " (char='" + ((char) type) + "') encountered.");
 			}
 
-			// Keep track of how many name-value pairs we've read.
+			// Keep track of how many values we've read.
 			read++;
 		}
 	}

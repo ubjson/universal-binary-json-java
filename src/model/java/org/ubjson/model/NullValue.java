@@ -13,37 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ubjson.spec.value;
+package org.ubjson.model;
 
-import static org.ubjson.io.IMarkerType.HUGE;
-import static org.ubjson.io.IMarkerType.HUGE_COMPACT;
+import static org.ubjson.io.IMarkerType.NULL;
 
 import java.io.IOException;
-import java.math.BigInteger;
 
 import org.ubjson.io.DataFormatException;
 import org.ubjson.io.UBJOutputStream;
 import org.ubjson.io.parser.UBJInputStreamParser;
 
-public class BigIntegerHugeValue extends AbstractValue<BigInteger> {
-	protected int length = -1;
-
-	public BigIntegerHugeValue(BigInteger value)
-			throws IllegalArgumentException {
-		super(value);
+public class NullValue extends AbstractValue<Void> {
+	public NullValue() {
+		// default
 	}
 
-	public BigIntegerHugeValue(UBJInputStreamParser in)
-			throws IllegalArgumentException, IOException, DataFormatException {
+	public NullValue(UBJInputStreamParser in) throws IllegalArgumentException,
+			IOException, DataFormatException {
 		super(in);
 	}
 
 	@Override
 	public byte getType() {
-		if (length == -1)
-			length = value.toString().length();
-
-		return (length < 255 ? HUGE_COMPACT : HUGE);
+		return NULL;
 	}
 
 	@Override
@@ -52,7 +44,7 @@ public class BigIntegerHugeValue extends AbstractValue<BigInteger> {
 		if (out == null)
 			throw new IllegalArgumentException("out cannot be null");
 
-		out.writeHuge(value);
+		out.writeNull();
 	}
 
 	@Override
@@ -61,6 +53,6 @@ public class BigIntegerHugeValue extends AbstractValue<BigInteger> {
 		if (in == null)
 			throw new IllegalArgumentException("in cannot be null");
 
-		value = in.readHugeAsBigInteger();
+		in.readNull();
 	}
 }

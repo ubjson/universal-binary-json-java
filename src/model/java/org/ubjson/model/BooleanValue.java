@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ubjson.spec.value;
+package org.ubjson.model;
 
-import static org.ubjson.io.IMarkerType.INT32;
+import static org.ubjson.io.IMarkerType.FALSE;
+import static org.ubjson.io.IMarkerType.TRUE;
 
 import java.io.IOException;
 
@@ -23,19 +24,19 @@ import org.ubjson.io.DataFormatException;
 import org.ubjson.io.UBJOutputStream;
 import org.ubjson.io.parser.UBJInputStreamParser;
 
-public class Int32Value extends AbstractValue<Integer> {
-	public Int32Value(Integer value) throws IllegalArgumentException {
+public class BooleanValue extends AbstractValue<Boolean> {
+	public BooleanValue(Boolean value) throws IllegalArgumentException {
 		super(value);
 	}
 
-	public Int32Value(UBJInputStreamParser in) throws IllegalArgumentException,
-			IOException, DataFormatException {
+	public BooleanValue(UBJInputStreamParser in)
+			throws IllegalArgumentException, IOException, DataFormatException {
 		super(in);
 	}
 
 	@Override
 	public byte getType() {
-		return INT32;
+		return (value ? TRUE : FALSE);
 	}
 
 	@Override
@@ -44,7 +45,7 @@ public class Int32Value extends AbstractValue<Integer> {
 		if (out == null)
 			throw new IllegalArgumentException("out cannot be null");
 
-		out.writeInt32(value);
+		out.writeBoolean(value);
 	}
 
 	@Override
@@ -53,6 +54,6 @@ public class Int32Value extends AbstractValue<Integer> {
 		if (in == null)
 			throw new IllegalArgumentException("in cannot be null");
 
-		value = in.readInt32();
+		value = in.readBoolean();
 	}
 }

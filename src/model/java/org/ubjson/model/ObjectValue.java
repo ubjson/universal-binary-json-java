@@ -1,4 +1,4 @@
-package org.ubjson.spec;
+package org.ubjson.model;
 
 import static org.ubjson.io.IMarkerType.ARRAY;
 import static org.ubjson.io.IMarkerType.ARRAY_COMPACT;
@@ -22,33 +22,21 @@ import static org.ubjson.io.IMarkerType.TRUE;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.ubjson.io.DataFormatException;
 import org.ubjson.io.UBJOutputStream;
 import org.ubjson.io.parser.UBJInputStreamParser;
-import org.ubjson.spec.value.BooleanValue;
-import org.ubjson.spec.value.ByteValue;
-import org.ubjson.spec.value.DoubleValue;
-import org.ubjson.spec.value.EndValue;
-import org.ubjson.spec.value.FloatValue;
-import org.ubjson.spec.value.BigDecimalHugeValue;
-import org.ubjson.spec.value.BigIntegerHugeValue;
-import org.ubjson.spec.value.IValue;
-import org.ubjson.spec.value.Int16Value;
-import org.ubjson.spec.value.Int32Value;
-import org.ubjson.spec.value.Int64Value;
-import org.ubjson.spec.value.NullValue;
-import org.ubjson.spec.value.StringValue;
 
-public class ArrayListValue extends AbstractCollectionValue<List<IValue<?>>> {
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public ArrayListValue() {
-		value = new ArrayList();
+public class ObjectValue extends
+		AbstractCollectionValue<Map<String, IValue<?>>> {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public ObjectValue() {
+		value = new HashMap();
 	}
 
-	public ArrayListValue(UBJInputStreamParser in) throws IOException,
+	public ObjectValue(UBJInputStreamParser in) throws IOException,
 			DataFormatException {
 		deserialize(in);
 	}
@@ -62,7 +50,7 @@ public class ArrayListValue extends AbstractCollectionValue<List<IValue<?>>> {
 
 	@Override
 	public byte getType() {
-		return (value.size() < 256 ? ARRAY_COMPACT : ARRAY);
+		return (value.size() < 256 ? OBJECT_COMPACT : OBJECT);
 	}
 
 	@Override
@@ -73,55 +61,58 @@ public class ArrayListValue extends AbstractCollectionValue<List<IValue<?>>> {
 	@Override
 	public void deserialize(UBJInputStreamParser in) throws IOException,
 			DataFormatException {
-		int size = in.readArrayLength();
-		value = new ArrayList<IValue<?>>(size);
+		int size = in.readObjectLength();
+		value = new HashMap<String, IValue<?>>(size * 3);
 
-		// TODO: Adding support for streaming
+		// TODO: add support for streaming.
 		if (size == -1)
 			throw new IOException(
-					"Deserializing an unbounded ARRAY (length 255) container is not supported by this class.");
+					"Deserializing an unbounded OBJECT (length 255) container is not supported by this class.");
 
 		int read = 0;
 		int type = -1;
 
 		// Loop until we read size items or hit EOS.
 		while ((read < size) && (type = in.nextType()) != -1) {
-			switch (type) {
+			String name = in.readString();
+
+			// Switch on the value type.
+			switch ((type = in.nextType())) {
 			case END:
-				value.add(new EndValue(in));
+				value.put(name, new EndValue(in));
 				break;
 
 			case NULL:
-				value.add(new NullValue(in));
+				value.put(name, new NullValue(in));
 				break;
 
 			case TRUE:
 			case FALSE:
-				value.add(new BooleanValue(in));
+				value.put(name, new BooleanValue(in));
 				break;
 
 			case BYTE:
-				value.add(new ByteValue(in));
+				value.put(name, new ByteValue(in));
 				break;
 
 			case INT16:
-				value.add(new Int16Value(in));
+				value.put(name, new Int16Value(in));
 				break;
 
 			case INT32:
-				value.add(new Int32Value(in));
+				value.put(name, new Int32Value(in));
 				break;
 
 			case INT64:
-				value.add(new Int64Value(in));
+				value.put(name, new Int64Value(in));
 				break;
 
 			case FLOAT:
-				value.add(new FloatValue(in));
+				value.put(name, new FloatValue(in));
 				break;
 
 			case DOUBLE:
-				value.add(new DoubleValue(in));
+				value.put(name, new DoubleValue(in));
 				break;
 
 			case HUGE:
@@ -135,25 +126,26 @@ public class ArrayListValue extends AbstractCollectionValue<List<IValue<?>>> {
 				}
 
 				if (isDecimal)
-					value.add(new BigDecimalHugeValue(new BigDecimal(chars)));
+					value.put(name, new BigDecimalHugeValue(new BigDecimal(
+							chars)));
 				else
-					value.add(new BigIntegerHugeValue(new BigInteger(
+					value.put(name, new BigIntegerHugeValue(new BigInteger(
 							new String(chars))));
 				break;
 
 			case STRING:
 			case STRING_COMPACT:
-				value.add(new StringValue(in));
+				value.put(name, new StringValue(in));
 				break;
 
 			case ARRAY:
 			case ARRAY_COMPACT:
-				value.add(new ArrayListValue(in));
+				value.put(name, new ArrayValue(in));
 				break;
 
 			case OBJECT:
 			case OBJECT_COMPACT:
-				value.add(new ObjectMapValue(in));
+				value.put(name, new ObjectValue(in));
 				break;
 
 			default:
@@ -161,7 +153,7 @@ public class ArrayListValue extends AbstractCollectionValue<List<IValue<?>>> {
 						+ type + " (char='" + ((char) type) + "') encountered.");
 			}
 
-			// Keep track of how many values we've read.
+			// Keep track of how many name-value pairs we've read.
 			read++;
 		}
 	}

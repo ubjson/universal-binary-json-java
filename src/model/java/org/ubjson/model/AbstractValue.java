@@ -13,47 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ubjson.spec.value;
-
-import static org.ubjson.io.IMarkerType.FALSE;
-import static org.ubjson.io.IMarkerType.TRUE;
+package org.ubjson.model;
 
 import java.io.IOException;
 
 import org.ubjson.io.DataFormatException;
-import org.ubjson.io.UBJOutputStream;
 import org.ubjson.io.parser.UBJInputStreamParser;
 
-public class BooleanValue extends AbstractValue<Boolean> {
-	public BooleanValue(Boolean value) throws IllegalArgumentException {
-		super(value);
+public abstract class AbstractValue<T> implements IValue<T> {
+	protected T value;
+
+	public AbstractValue() {
+		// default constructor, only stub values should use this.
 	}
 
-	public BooleanValue(UBJInputStreamParser in)
-			throws IllegalArgumentException, IOException, DataFormatException {
-		super(in);
+	public AbstractValue(T value) throws IllegalArgumentException {
+		if (value == null)
+			throw new IllegalArgumentException("value cannot be null");
+
+		this.value = value;
 	}
 
-	@Override
-	public byte getType() {
-		return (value ? TRUE : FALSE);
-	}
-
-	@Override
-	public void serialize(UBJOutputStream out) throws IllegalArgumentException,
-			IOException {
-		if (out == null)
-			throw new IllegalArgumentException("out cannot be null");
-
-		out.writeBoolean(value);
-	}
-
-	@Override
-	public void deserialize(UBJInputStreamParser in)
+	public AbstractValue(UBJInputStreamParser in)
 			throws IllegalArgumentException, IOException, DataFormatException {
 		if (in == null)
 			throw new IllegalArgumentException("in cannot be null");
 
-		value = in.readBoolean();
+		deserialize(in);
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getName() + "@" + hashCode() + " [value="
+				+ (value == null ? "" : value.toString()) + "]";
+	}
+
+	@Override
+	public T getValue() {
+		return value;
 	}
 }

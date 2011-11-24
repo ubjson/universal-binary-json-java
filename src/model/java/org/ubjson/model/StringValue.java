@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ubjson.spec.value;
+package org.ubjson.model;
 
 import static org.ubjson.io.IMarkerType.STRING;
 import static org.ubjson.io.IMarkerType.STRING_COMPACT;
