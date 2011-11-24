@@ -20,8 +20,8 @@ import static org.ubjson.io.IMarkerType.INT32;
 import java.io.IOException;
 
 import org.ubjson.io.DataFormatException;
+import org.ubjson.io.UBJInputStreamParser;
 import org.ubjson.io.UBJOutputStream;
-import org.ubjson.io.parser.UBJInputStreamParser;
 
 public class Int32Value extends AbstractValue<Integer> {
 	public Int32Value(Integer value) throws IllegalArgumentException {

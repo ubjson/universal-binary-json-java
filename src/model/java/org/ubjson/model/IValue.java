@@ -19,8 +19,8 @@ import java.io.IOException;
 
 import org.ubjson.io.DataFormatException;
 import org.ubjson.io.IMarkerType;
+import org.ubjson.io.UBJInputStreamParser;
 import org.ubjson.io.UBJOutputStream;
-import org.ubjson.io.parser.UBJInputStreamParser;
 
 /**
  * Class used to define a Universal Binary JSON value element and the

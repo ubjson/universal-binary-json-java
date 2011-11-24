@@ -26,8 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.ubjson.io.DataFormatException;
+import org.ubjson.io.UBJInputStreamParser;
 import org.ubjson.io.UBJOutputStream;
-import org.ubjson.io.parser.UBJInputStreamParser;
 
 public class ArrayValue extends AbstractCollectionValue<List<IValue<?>>> {
 	@SuppressWarnings({ "rawtypes", "unchecked" })

@@ -26,8 +26,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.ubjson.io.DataFormatException;
+import org.ubjson.io.UBJInputStreamParser;
 import org.ubjson.io.UBJOutputStream;
-import org.ubjson.io.parser.UBJInputStreamParser;
 
 public class ObjectValue extends
 		AbstractCollectionValue<Map<String, IValue<?>>> {

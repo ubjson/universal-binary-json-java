@@ -13,15 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ubjson.io.parser;
+package org.ubjson.io;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import org.ubjson.io.DataFormatException;
-import org.ubjson.io.UBJInputStream;
 
 public class UBJInputStreamParser extends UBJInputStream {
 	private byte peek;

@@ -20,8 +20,8 @@ import static org.ubjson.io.IMarkerType.DOUBLE;
 import java.io.IOException;
 
 import org.ubjson.io.DataFormatException;
+import org.ubjson.io.UBJInputStreamParser;
 import org.ubjson.io.UBJOutputStream;
-import org.ubjson.io.parser.UBJInputStreamParser;
 
 public class DoubleValue extends AbstractValue<Double> {
 	public DoubleValue(Double value) throws IllegalArgumentException {

@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 
 import org.ubjson.io.DataFormatException;
+import org.ubjson.io.UBJInputStreamParser;
 import org.ubjson.io.UBJOutputStream;
-import org.ubjson.io.parser.UBJInputStreamParser;
 
 public class BigDecimalHugeValue extends AbstractValue<BigDecimal> {
 	protected int length = -1;

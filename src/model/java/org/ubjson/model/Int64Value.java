@@ -20,8 +20,8 @@ import static org.ubjson.io.IMarkerType.INT64;
 import java.io.IOException;
 
 import org.ubjson.io.DataFormatException;
+import org.ubjson.io.UBJInputStreamParser;
 import org.ubjson.io.UBJOutputStream;
-import org.ubjson.io.parser.UBJInputStreamParser;
 
 public class Int64Value extends AbstractValue<Long> {
 	public Int64Value(Long value) throws IllegalArgumentException {

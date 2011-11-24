@@ -4,8 +4,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.ubjson.io.UBJOutputStream;
-import org.ubjson.io.reflect.IObjectWriter;
-import org.ubjson.io.reflect.ObjectWriter;
+import org.ubjson.reflect.IObjectWriter;
+import org.ubjson.reflect.ObjectWriter;
 
 import com.ubjson.data.CouchDB4k;
 import com.ubjson.data.MediaContent;

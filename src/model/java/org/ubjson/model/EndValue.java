@@ -20,8 +20,8 @@ import static org.ubjson.io.IMarkerType.END;
 import java.io.IOException;
 
 import org.ubjson.io.DataFormatException;
+import org.ubjson.io.UBJInputStreamParser;
 import org.ubjson.io.UBJOutputStream;
-import org.ubjson.io.parser.UBJInputStreamParser;
 
 public class EndValue extends AbstractValue<Void> {
 	public EndValue() {

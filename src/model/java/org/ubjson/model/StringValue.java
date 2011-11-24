@@ -21,8 +21,8 @@ import static org.ubjson.io.IMarkerType.STRING_COMPACT;
 import java.io.IOException;
 
 import org.ubjson.io.DataFormatException;
+import org.ubjson.io.UBJInputStreamParser;
 import org.ubjson.io.UBJOutputStream;
-import org.ubjson.io.parser.UBJInputStreamParser;
 
 public class StringValue extends AbstractValue<String> {
 	protected int length = -1;
