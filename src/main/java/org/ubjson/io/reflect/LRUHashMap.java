@@ -18,24 +18,48 @@ package org.ubjson.io.reflect;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class LRUHashMap<K, V> extends LinkedHashMap<K, V> {
-	private static final long serialVersionUID = -4615724930741862324L;
+/**
+ * Class used to implement a LRU cache used by the reflection implementation to
+ * cache reflected values from classes for performance reasons.
+ * <p/>
+ * This class is intentionally package-private as (for the time being) it is a
+ * hidden implementation detail of the default reflection-based IO classes.
+ * 
+ * @author Riyad Kalla (software@thebuzzmedia.com)
+ * 
+ * @param <K>
+ *            key type for this map.
+ * @param <V>
+ *            value type for this map.
+ */
+class LRUHashMap<K, V> extends LinkedHashMap<K, V> {
+	private static final long serialVersionUID = 6873519493912239225L;
 
-	public static final int DEFAULT_CAPACITY = 256;
+	public static final String CACHE_SIZE_PROPERTY_NAME = "ubjson.io.reflect.cacheSize";
 
-	private int capacity;
+	public static final int CACHE_SIZE = Integer.getInteger(
+			CACHE_SIZE_PROPERTY_NAME, 256);
 
-	public LRUHashMap() {
-		this(DEFAULT_CAPACITY);
+	static {
+		if (CACHE_SIZE < 1)
+			throw new RuntimeException("Invalid CACHE_SIZE [" + CACHE_SIZE
+					+ "], system property [" + CACHE_SIZE_PROPERTY_NAME
+					+ "] must be set to an integer value >= 1.");
 	}
 
-	public LRUHashMap(int capacity) {
-		super(capacity);
-		this.capacity = capacity;
+	private int cacheSize;
+
+	public LRUHashMap() {
+		this(CACHE_SIZE);
+	}
+
+	public LRUHashMap(int cacheSize) {
+		super(cacheSize);
+		this.cacheSize = cacheSize;
 	}
 
 	@Override
 	protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
-		return (size() > capacity);
+		return (size() > cacheSize);
 	}
 }

@@ -20,23 +20,15 @@ import java.io.IOException;
 import org.ubjson.io.UBJOutputStream;
 
 public interface IObjectWriter {
-	public enum AccessType {
+	public enum Mode {
 		FIELDS, METHODS
 	}
 
-	public void reset();
+	public void clear();
 
 	public void writeObject(UBJOutputStream out, Object obj)
 			throws IllegalArgumentException, IOException;
 
-	public void writeObject(UBJOutputStream out, Object obj,
-			boolean compactNumberStorage) throws IllegalArgumentException,
-			IOException;
-
-	public void writeObject(UBJOutputStream out, Object obj, AccessType type)
+	public void writeObject(UBJOutputStream out, Object obj, Mode mode)
 			throws IllegalArgumentException, IOException;
-
-	public void writeObject(UBJOutputStream out, Object obj, AccessType type,
-			boolean compactNumberStorage) throws IllegalArgumentException,
-			IOException;
 }

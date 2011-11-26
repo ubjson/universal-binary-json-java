@@ -18,6 +18,7 @@ package org.ubjson.io.reflect;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -30,330 +31,459 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.ubjson.io.UBJOutputStream;
 
-/*
- * TODO: Optimization, cache filtered field & method Lists in an LRUCache after
- * they are calculated.
- * 
- * TODO: Optimization, benchmark (and possibly cache) the calls to isAssignableFrom
- * to avoid the reflection calls when the same types of objects come through over
- * and over again.
- * 
- * TODO: Optimization, when doing METHOD access to values on the objects, caching
- * the processed field names (from the getters) so the strings don't have to be
- * created each time would be good.
- */
 public class ObjectWriter implements IObjectWriter {
-	private enum CType {
+	protected enum ScopeType {
 		ARRAY, OBJECT;
 	}
 
-	private AccessType accessType;
-	private boolean compactNumberStorage;
+	protected Mode mode;
+	protected ScopeStack sstack;
 
-	private CStack cstate;
+	private AssignableKey assignableQuery;
+	private LRUHashMap<AssignableKey, Boolean> assignableCache;
+
+	private LRUHashMap<Class<?>, List<Field>> fieldCache;
+	private LRUHashMap<Class<?>, List<MethodAlias>> methodCache;
 
 	public ObjectWriter() {
-		cstate = new CStack();
+		sstack = new ScopeStack();
+
+		assignableQuery = new AssignableKey();
+		assignableCache = new LRUHashMap<AssignableKey, Boolean>();
+
+		fieldCache = new LRUHashMap<Class<?>, List<Field>>();
+		methodCache = new LRUHashMap<Class<?>, List<MethodAlias>>();
 	}
 
 	@Override
-	public void reset() {
-		accessType = null;
-		compactNumberStorage = false;
-		cstate.reset();
+	public void clear() {
+		assignableCache.clear();
+
+		fieldCache.clear();
+		methodCache.clear();
 	}
 
 	@Override
 	public void writeObject(UBJOutputStream out, Object obj)
 			throws IllegalArgumentException, IOException {
-		writeObject(out, obj, AccessType.FIELDS, false);
+		writeObject(out, obj, Mode.FIELDS);
 	}
 
 	@Override
-	public void writeObject(UBJOutputStream out, Object obj,
-			boolean compactNumberStorage) throws IllegalArgumentException,
-			IOException {
-		writeObject(out, obj, AccessType.FIELDS, compactNumberStorage);
-	}
-
-	@Override
-	public void writeObject(UBJOutputStream out, Object obj, AccessType type)
+	public void writeObject(UBJOutputStream out, Object obj, Mode mode)
 			throws IllegalArgumentException, IOException {
-		writeObject(out, obj, type, false);
-	}
-
-	@Override
-	public void writeObject(UBJOutputStream out, Object obj, AccessType type,
-			boolean compactNumberStorage) throws IllegalArgumentException,
-			IOException {
 		if (out == null)
 			throw new IllegalArgumentException("out cannot be null");
 		if (obj == null)
 			throw new IllegalArgumentException("obj cannot be null");
-		if (type == null)
-			throw new IllegalArgumentException("type cannot be null");
+		if (mode == null)
+			throw new IllegalArgumentException("mode cannot be null");
 
-		// Reset the writer's state since we are going to do work now.
-		reset();
+		// Reset scope stack state
+		sstack.reset();
 
-		this.compactNumberStorage = compactNumberStorage;
-		this.accessType = type;
+		// Setup the reflection mode used for this operation.
+		this.mode = mode;
 
-		// Begin recursing on the object and writing it out.
-		switch (accessType) {
+		switch (mode) {
 		case FIELDS:
 			writeObjectByFields(out, null, obj.getClass(), obj);
 			break;
 
 		case METHODS:
-			// TODO: implement
+			writeObjectByMethods(out, null, obj.getClass(), obj);
 			break;
 		}
 	}
 
-	/*
-	 * ========================================================================
-	 * Entry Point - Master dispatch method.
-	 * ========================================================================
+	/**
+	 * Used to check if the given {@link Class} <code>from</code> is assignable
+	 * to the given {@link Class} <code>to</code>.
+	 * <p/>
+	 * Put another way, this method checks if objects of type <code>from</code>
+	 * can be cast to type <code>to</code>.
+	 * <p/>
+	 * This implementation caches the results of these tests so as to avoid
+	 * unnecessary {@link Class#isAssignableFrom(Class)} calls.
+	 * 
+	 * @param from
+	 *            The original {@link Class} to check assignment to
+	 *            <code>to</code>.
+	 * @param to
+	 *            The target assignable {@link Class}.
+	 * 
+	 * @return <code>true</code> if <code>from</code> can be cast to
+	 *         <code>to</code>, otherwise returns <code>false</code>.
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if <code>from</code> or <code>to</code> or <code>null</code>.
 	 */
+	protected boolean isAssignable(Class<?> from, Class<?> to)
+			throws IllegalArgumentException {
+		if (from == null)
+			throw new IllegalArgumentException("from cannot be null");
+		if (to == null)
+			throw new IllegalArgumentException("to cannot be null");
+
+		// Setup temp key to query our cache.
+		assignableQuery.set(from, to);
+
+		// Check if the assignable calculation has been checked/cached before.
+		Boolean assignable = assignableCache.get(assignableQuery);
+
+		if (assignable == null) {
+			System.out.println("Assignable Cache MISS!");
+
+			// Calculate assignability and cache result.
+			assignable = to.isAssignableFrom(from);
+			assignableCache.put(new AssignableKey(from, to), assignable);
+		} else
+			System.out.println("Assignable Cache HIT!");
+
+		return assignable;
+	}
 
 	protected void dispatchWrite(UBJOutputStream out, String name, Object value)
 			throws IOException {
-
 		if (value == null)
 			writeNull(out, name);
 		else {
-			Class<?> type = value.getClass();
+			Class<?> valType = value.getClass();
 
-			if (Boolean.class.isAssignableFrom(type))
+			// Values
+			if (isAssignable(valType, Boolean.class))
 				writeBoolean(out, name, (Boolean) value);
-			else if (Number.class.isAssignableFrom(type))
-				writeNumber(out, name, type, (Number) value);
-			else if (String.class.isAssignableFrom(type))
+			else if (isAssignable(valType, Number.class))
+				writeNumber(out, name, valType, (Number) value);
+			else if (isAssignable(valType, String.class))
 				writeString(out, name, (String) value);
-			else if (type.isArray()) {
-				String typeName = type.getComponentType().getName();
-
-				if ("char".equals(typeName))
+			// Arrays
+			else if (valType.isArray()) {
+				if ("char".equals(valType.getComponentType().getName()))
 					writeString(out, name, (char[]) value);
 				else
 					writeArray(out, name, value);
-			} else if (Collection.class.isAssignableFrom(type))
+			} else if (isAssignable(valType, Collection.class))
 				writeArray(out, name, (Collection<?>) value);
+			// Objects
 			else {
-				switch (accessType) {
+				switch (mode) {
 				case FIELDS:
-					writeObjectByFields(out, type.getSimpleName(), type, value);
+					writeObjectByFields(out, valType.getSimpleName(), valType,
+							value);
 					break;
 
 				case METHODS:
-					// TODO: implement byMethods
+					writeObjectByMethods(out, valType.getSimpleName(), valType,
+							value);
 					break;
 				}
 			}
 		}
 	}
 
-	/*
-	 * ========================================================================
-	 * Value-specific Writer Methods
-	 * ========================================================================
-	 */
-
 	protected void writeNull(UBJOutputStream out, String name)
-			throws IllegalArgumentException, IOException {
-		writeName(out, name);
+			throws IOException {
+		if (sstack.peek() != ScopeType.ARRAY)
+			out.writeString(name);
+
 		out.writeNull();
 	}
 
 	protected void writeBoolean(UBJOutputStream out, String name, boolean value)
-			throws IllegalArgumentException, IOException {
-		writeName(out, name);
+			throws IOException {
+		if (sstack.peek() != ScopeType.ARRAY)
+			out.writeString(name);
+
 		out.writeBoolean(value);
 	}
 
 	protected void writeNumber(UBJOutputStream out, String name, Class<?> type,
-			Number value) throws IllegalArgumentException, IOException {
-		writeName(out, name);
+			Number value) throws IOException {
+		if (sstack.peek() != ScopeType.ARRAY)
+			out.writeString(name);
 
-		if (compactNumberStorage) {
-			long iv = value.longValue(); // integer value
-			double dv = value.doubleValue(); // decimal value
-			boolean hasDecimal = (dv > iv);
-
-			if (hasDecimal) {
-				if (dv > Float.MAX_VALUE)
-					value = dv;
-				else
-					value = (float) dv;
-			} else {
-				if (iv <= Byte.MAX_VALUE)
-					value = (byte) iv;
-				else if (iv <= Short.MAX_VALUE)
-					value = (short) iv;
-				else if (iv <= Integer.MAX_VALUE)
-					value = (int) iv;
-				else
-					value = (long) iv;
-			}
-
-			type = value.getClass();
-		}
-
-		if (Byte.class.isAssignableFrom(type))
+		if (isAssignable(type, Byte.class))
 			out.writeByte((Byte) value);
-		else if (Short.class.isAssignableFrom(type))
+		else if (isAssignable(type, Short.class))
 			out.writeInt16((Short) value);
-		else if (Integer.class.isAssignableFrom(type))
+		else if (isAssignable(type, Integer.class))
 			out.writeInt32((Integer) value);
-		else if (Long.class.isAssignableFrom(type))
+		else if (isAssignable(type, Long.class))
 			out.writeInt64((Long) value);
-		else if (Float.class.isAssignableFrom(type))
+		else if (isAssignable(type, Float.class))
 			out.writeFloat((Float) value);
-		else if (Double.class.isAssignableFrom(type))
+		else if (isAssignable(type, Double.class))
 			out.writeDouble((Double) value);
-		else if (BigInteger.class.isAssignableFrom(type))
+		else if (isAssignable(type, BigInteger.class))
 			out.writeHuge((BigInteger) value);
-		else if (BigDecimal.class.isAssignableFrom(type))
+		else if (isAssignable(type, BigDecimal.class))
 			out.writeHuge((BigDecimal) value);
-		else if (AtomicInteger.class.isAssignableFrom(type))
+		else if (isAssignable(type, AtomicInteger.class))
 			out.writeInt32(((AtomicInteger) value).get());
-		else if (AtomicLong.class.isAssignableFrom(type))
+		else if (isAssignable(type, AtomicLong.class))
 			out.writeInt64(((AtomicLong) value).get());
 		else
-			throw new IllegalArgumentException("Writing a numeric value ["
-					+ value + "] of type [" + type
-					+ "] is not supported by this class.");
+			throw new IllegalArgumentException("Unsupported numeric type ["
+					+ type + "]");
 	}
 
 	protected void writeString(UBJOutputStream out, String name, char[] value)
-			throws IllegalArgumentException, IOException {
-		writeName(out, name);
+			throws IOException {
+		if (sstack.peek() != ScopeType.ARRAY)
+			out.writeString(name);
+
 		out.writeString(value);
 	}
 
 	protected void writeString(UBJOutputStream out, String name, String value)
-			throws IllegalArgumentException, IOException {
-		writeName(out, name);
+			throws IOException {
+		if (sstack.peek() != ScopeType.ARRAY)
+			out.writeString(name);
+
 		out.writeString(value);
 	}
 
-	/*
-	 * ========================================================================
-	 * Container Writer Methods
-	 * ========================================================================
-	 */
-
 	protected void writeArray(UBJOutputStream out, String name, Object array)
-			throws IllegalArgumentException, IOException {
-		writeName(out, name);
+			throws IOException {
+		if (sstack.peek() != ScopeType.ARRAY)
+			out.writeString(name);
 
 		int length = Array.getLength(array);
 		out.writeArrayHeader(length);
 
-		cstate.push(CType.ARRAY);
+		// Enter array scope
+		sstack.push(ScopeType.ARRAY);
+
+		// Write array elements
 		for (int i = 0; i < length; i++)
 			dispatchWrite(out, null, Array.get(array, i));
-		cstate.pop();
+
+		// Exit array scope
+		sstack.pop();
 	}
 
 	protected void writeArray(UBJOutputStream out, String name,
-			Collection<?> collection) throws IllegalArgumentException,
-			IOException {
-		writeName(out, name);
+			Collection<?> collection) throws IOException {
+		if (sstack.peek() != ScopeType.ARRAY)
+			out.writeString(name);
 
 		int length = collection.size();
 		out.writeArrayHeader(length);
 
 		Class<?> cType = collection.getClass();
 
-		cstate.push(CType.ARRAY);
+		// Enter array scope
+		sstack.push(ScopeType.ARRAY);
+
+		/*
+		 * We can iterate over a List more efficiently otherwise fall back to
+		 * using the collection's iterator.
+		 */
 		if (List.class.isAssignableFrom(cType)) {
 			List<?> list = (List<?>) collection;
 
+			// Write array elements
 			for (int i = 0; i < length; i++)
-				dispatchWrite(out, name, list.get(i));
+				dispatchWrite(out, null, list.get(i));
 		} else {
-			Iterator<?> i = collection.iterator();
+			Iterator<?> iter = collection.iterator();
 
-			while (i.hasNext())
-				dispatchWrite(out, name, i.next());
+			// Write array elements
+			while (iter.hasNext())
+				dispatchWrite(out, null, iter.next());
 		}
-		cstate.pop();
+
+		// Exit array scope
+		sstack.pop();
 	}
 
 	protected void writeObjectByFields(UBJOutputStream out, String name,
-			Class<?> type, Object obj) throws IllegalArgumentException,
-			IOException {
-		writeName(out, name);
+			Class<?> type, Object obj) throws IOException {
+		if (sstack.peek() != ScopeType.ARRAY)
+			out.writeString(name);
 
-		// TODO: Optimization, Cache these processed lists.
-		Field[] fields = type.getDeclaredFields();
-		List<Field> fieldList = new ArrayList<Field>(fields.length);
+		// Check cache for existing filtered field list.
+		List<Field> fieldList = fieldCache.get(type);
 
-		for (int i = 0; i < fields.length; i++) {
-			Field f = fields[i];
-			int mods = f.getModifiers();
+		// Filter and cache field list if we didn't already.
+		if (fieldList == null) {
+			// Get all public, inherited fields.
+			Field[] fields = type.getFields();
+			fieldList = new ArrayList<Field>(fields.length);
 
-			// Skip non-public, static, transient or synthetic fields.
-			if (!Modifier.isPublic(mods) || Modifier.isStatic(mods)
-					|| Modifier.isTransient(mods) || f.isSynthetic())
-				continue;
+			for (int i = 0; i < fields.length; i++) {
+				Field f = fields[i];
+				int mods = f.getModifiers();
 
-			fieldList.add(f);
+				// Skip static, transient or synthetic fields.
+				if (Modifier.isStatic(mods) || Modifier.isTransient(mods)
+						|| f.isSynthetic())
+					continue;
+
+				fieldList.add(f);
+			}
 		}
 
 		out.writeObjectHeader(fieldList.size());
 
-		cstate.push(CType.OBJECT);
-		for (int i = 0, length = fieldList.size(); i < length; i++) {
+		// Enter object scope
+		sstack.push(ScopeType.OBJECT);
+
+		for (int i = 0, s = fieldList.size(); i < s; i++) {
 			Field f = fieldList.get(i);
 			Object fValue = null;
 
 			try {
 				fValue = f.get(obj);
 			} catch (Exception e) {
-				// no-op, the value will be written as null.
+				e.printStackTrace();
 			}
 
 			dispatchWrite(out, f.getName(), fValue);
 		}
-		cstate.pop();
+
+		// Exit object scope
+		sstack.pop();
 	}
 
-	/*
-	 * ========================================================================
-	 * General - Helper methods.
-	 * ========================================================================
-	 */
-
-	private void writeName(UBJOutputStream out, String name) throws IOException {
-		if (cstate.peek() != CType.ARRAY && name != null && !name.isEmpty())
+	protected void writeObjectByMethods(UBJOutputStream out, String name,
+			Class<?> type, Object obj) throws IOException {
+		if (sstack.peek() != ScopeType.ARRAY)
 			out.writeString(name);
+
+		// Check cache for existing filtered method list.
+		List<MethodAlias> methodList = methodCache.get(type);
+
+		// Filter and cache field list if we didn't already.
+		if (methodList == null) {
+			// Get all public, inherited methods.
+			Method[] methods = type.getMethods();
+			methodList = new ArrayList<MethodAlias>(methods.length);
+
+			for (int i = 0; i < methods.length; i++) {
+				Method m = methods[i];
+				int mods = m.getModifiers();
+
+				// Skip static, transient, synthetic or methods that take args.
+				if (Modifier.isStatic(mods) || Modifier.isTransient(mods)
+						|| m.isSynthetic() || m.getParameterTypes().length != 0)
+					continue;
+
+				int j = 0;
+				String mName = m.getName();
+
+				// Normalize the method name used as the value label.
+				if (mName.startsWith("is"))
+					j = 2;
+				else if (mName.startsWith("can") || mName.startsWith("has")
+						|| mName.startsWith("get"))
+					j = 3;
+
+				// Lowercase first char, append the remainder of the name.
+				mName = Character.toLowerCase(mName.charAt(j))
+						+ mName.substring(j + 1);
+
+				methodList.add(new MethodAlias(m, mName));
+			}
+		}
+
+		out.writeObjectHeader(methodList.size());
+
+		// Enter object scope
+		sstack.push(ScopeType.OBJECT);
+
+		for (int i = 0, s = methodList.size(); i < s; i++) {
+			MethodAlias ma = methodList.get(i);
+			Object mValue = null;
+
+			try {
+				mValue = ma.method.invoke(obj);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			dispatchWrite(out, ma.name, mValue);
+		}
+
+		// Exit object scope
+		sstack.pop();
 	}
 
-	private class CStack {
+	/**
+	 * Class used to represent a (FIFO) stack of scopes that the reflection code
+	 * uses to keep track of where it is while writing out an object; this is
+	 * important so the code knows when to include labels for values (in
+	 * objects) and when not to (in arrays).
+	 * 
+	 * @author Riyad Kalla (software@thebuzzmedia.com)
+	 */
+	protected class ScopeStack {
 		private int pos;
-		private CType[] levels;
+		private ScopeType[] levels;
 
-		public CStack() {
-			levels = new CType[128];
+		public ScopeStack() {
+			// Support a scope depth up to 128-levels.
+			levels = new ScopeType[128];
 		}
 
 		public void reset() {
 			pos = -1;
 		}
 
-		public void push(CType type) {
+		public void push(ScopeType type) {
 			levels[++pos] = type;
 		}
 
-		public CType peek() {
+		public ScopeType peek() {
 			return (pos < 0 ? null : levels[pos]);
 		}
 
-		public CType pop() {
+		public ScopeType pop() {
 			return levels[pos--];
+		}
+	}
+
+	private class AssignableKey {
+		Class<?> from;
+		Class<?> to;
+
+		public AssignableKey() {
+			set(null, null);
+		}
+
+		public AssignableKey(Class<?> from, Class<?> to) {
+			set(from, to);
+		}
+
+		@Override
+		public int hashCode() {
+			return (from.hashCode() + to.hashCode());
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			boolean equal = false;
+
+			if (obj != null)
+				equal = (hashCode() == obj.hashCode());
+
+			return equal;
+		}
+
+		public void set(Class<?> from, Class<?> to) {
+			this.from = from;
+			this.to = to;
+		}
+	}
+
+	private class MethodAlias {
+		Method method;
+		String name;
+
+		public MethodAlias(Method method, String name) {
+			this.method = method;
+			this.name = name;
 		}
 	}
 }
