@@ -2,8 +2,8 @@ package com.ubjson.data;
 
 import java.io.IOException;
 
-import org.ubjson.io.UBJInputStream;
-import org.ubjson.io.UBJOutputStream;
+import org.ubjson.UBJInputStream;
+import org.ubjson.UBJOutputStream;
 
 public class CouchDB4kMarshaller {
 	public static void serialize(CouchDB4k db, UBJOutputStream out)

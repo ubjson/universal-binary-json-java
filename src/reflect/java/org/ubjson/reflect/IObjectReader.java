@@ -17,8 +17,8 @@ package org.ubjson.reflect;
 
 import java.io.IOException;
 
-import org.ubjson.io.DataFormatException;
-import org.ubjson.io.UBJInputStream;
+import org.ubjson.DataFormatException;
+import org.ubjson.UBJInputStream;
 
 public interface IObjectReader {
 	public <T> T readObject(UBJInputStream in, T type)

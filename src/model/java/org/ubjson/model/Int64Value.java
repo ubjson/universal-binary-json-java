@@ -15,13 +15,13 @@
  */
 package org.ubjson.model;
 
-import static org.ubjson.io.IMarkerType.INT64;
+import static org.ubjson.IMarkerType.INT64;
 
 import java.io.IOException;
 
-import org.ubjson.io.DataFormatException;
-import org.ubjson.io.UBJInputStreamParser;
-import org.ubjson.io.UBJOutputStream;
+import org.ubjson.DataFormatException;
+import org.ubjson.UBJInputStreamParser;
+import org.ubjson.UBJOutputStream;
 
 public class Int64Value extends AbstractValue<Long> {
 	public Int64Value(Long value) throws IllegalArgumentException {

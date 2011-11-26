@@ -17,7 +17,7 @@ package org.ubjson.reflect;
 
 import java.io.IOException;
 
-import org.ubjson.io.UBJOutputStream;
+import org.ubjson.UBJOutputStream;
 
 public interface IObjectWriter {
 	public enum AccessType {

@@ -17,8 +17,8 @@ package org.ubjson.model;
 
 import java.io.IOException;
 
-import org.ubjson.io.DataFormatException;
-import org.ubjson.io.UBJInputStreamParser;
+import org.ubjson.DataFormatException;
+import org.ubjson.UBJInputStreamParser;
 
 public abstract class AbstractValue<T> implements IValue<T> {
 	protected T value;

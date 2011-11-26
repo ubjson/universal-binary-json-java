@@ -15,13 +15,13 @@
  */
 package org.ubjson.model;
 
-import static org.ubjson.io.IMarkerType.INT32;
+import static org.ubjson.IMarkerType.INT32;
 
 import java.io.IOException;
 
-import org.ubjson.io.DataFormatException;
-import org.ubjson.io.UBJInputStreamParser;
-import org.ubjson.io.UBJOutputStream;
+import org.ubjson.DataFormatException;
+import org.ubjson.UBJInputStreamParser;
+import org.ubjson.UBJOutputStream;
 
 public class Int32Value extends AbstractValue<Integer> {
 	public Int32Value(Integer value) throws IllegalArgumentException {

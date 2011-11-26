@@ -15,14 +15,14 @@
  */
 package org.ubjson.model;
 
-import static org.ubjson.io.IMarkerType.FALSE;
-import static org.ubjson.io.IMarkerType.TRUE;
+import static org.ubjson.IMarkerType.FALSE;
+import static org.ubjson.IMarkerType.TRUE;
 
 import java.io.IOException;
 
-import org.ubjson.io.DataFormatException;
-import org.ubjson.io.UBJInputStreamParser;
-import org.ubjson.io.UBJOutputStream;
+import org.ubjson.DataFormatException;
+import org.ubjson.UBJInputStreamParser;
+import org.ubjson.UBJOutputStream;
 
 public class BooleanValue extends AbstractValue<Boolean> {
 	public BooleanValue(Boolean value) throws IllegalArgumentException {

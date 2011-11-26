@@ -1,23 +1,23 @@
 package org.ubjson.model;
 
-import static org.ubjson.io.IMarkerType.ARRAY;
-import static org.ubjson.io.IMarkerType.ARRAY_COMPACT;
-import static org.ubjson.io.IMarkerType.BYTE;
-import static org.ubjson.io.IMarkerType.DOUBLE;
-import static org.ubjson.io.IMarkerType.END;
-import static org.ubjson.io.IMarkerType.FALSE;
-import static org.ubjson.io.IMarkerType.FLOAT;
-import static org.ubjson.io.IMarkerType.HUGE;
-import static org.ubjson.io.IMarkerType.HUGE_COMPACT;
-import static org.ubjson.io.IMarkerType.INT16;
-import static org.ubjson.io.IMarkerType.INT32;
-import static org.ubjson.io.IMarkerType.INT64;
-import static org.ubjson.io.IMarkerType.NULL;
-import static org.ubjson.io.IMarkerType.OBJECT;
-import static org.ubjson.io.IMarkerType.OBJECT_COMPACT;
-import static org.ubjson.io.IMarkerType.STRING;
-import static org.ubjson.io.IMarkerType.STRING_COMPACT;
-import static org.ubjson.io.IMarkerType.TRUE;
+import static org.ubjson.IMarkerType.ARRAY;
+import static org.ubjson.IMarkerType.ARRAY_COMPACT;
+import static org.ubjson.IMarkerType.BYTE;
+import static org.ubjson.IMarkerType.DOUBLE;
+import static org.ubjson.IMarkerType.END;
+import static org.ubjson.IMarkerType.FALSE;
+import static org.ubjson.IMarkerType.FLOAT;
+import static org.ubjson.IMarkerType.HUGE;
+import static org.ubjson.IMarkerType.HUGE_COMPACT;
+import static org.ubjson.IMarkerType.INT16;
+import static org.ubjson.IMarkerType.INT32;
+import static org.ubjson.IMarkerType.INT64;
+import static org.ubjson.IMarkerType.NULL;
+import static org.ubjson.IMarkerType.OBJECT;
+import static org.ubjson.IMarkerType.OBJECT_COMPACT;
+import static org.ubjson.IMarkerType.STRING;
+import static org.ubjson.IMarkerType.STRING_COMPACT;
+import static org.ubjson.IMarkerType.TRUE;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.ubjson.io.UBJOutputStream;
+import org.ubjson.UBJOutputStream;
 
 public abstract class AbstractCollectionValue<T> extends AbstractValue<T> {
 	protected void writeValue(UBJOutputStream out, IValue<?> value)

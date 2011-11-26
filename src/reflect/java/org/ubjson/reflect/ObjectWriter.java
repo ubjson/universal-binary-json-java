@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.ubjson.io.UBJOutputStream;
+import org.ubjson.UBJOutputStream;
 
 /*
  * TODO: Optimization, cache filtered field & method Lists in an LRUCache after
