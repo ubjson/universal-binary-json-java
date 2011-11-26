@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ubjson.reflect;
+package org.ubjson.io.reflect;
 
 import java.io.IOException;
 
-import org.ubjson.DataFormatException;
-import org.ubjson.UBJInputStream;
+import org.ubjson.io.DataFormatException;
+import org.ubjson.io.UBJInputStream;
 
 public interface IObjectReader {
 	public <T> T readObject(UBJInputStream in, T type)

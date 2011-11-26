@@ -15,14 +15,14 @@
  */
 package org.ubjson.model;
 
-import static org.ubjson.IMarkerType.STRING;
-import static org.ubjson.IMarkerType.STRING_COMPACT;
+import static org.ubjson.io.IMarkerType.STRING;
+import static org.ubjson.io.IMarkerType.STRING_COMPACT;
 
 import java.io.IOException;
 
-import org.ubjson.DataFormatException;
-import org.ubjson.UBJInputStreamParser;
-import org.ubjson.UBJOutputStream;
+import org.ubjson.io.DataFormatException;
+import org.ubjson.io.UBJInputStreamParser;
+import org.ubjson.io.UBJOutputStream;
 
 public class StringValue extends AbstractValue<String> {
 	protected int length = -1;

@@ -5,8 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.ubjson.UBJInputStream;
-import org.ubjson.UBJOutputStream;
+import org.ubjson.io.UBJInputStream;
+import org.ubjson.io.UBJOutputStream;
 
 import com.ubjson.data.TwitterTimeline;
 import com.ubjson.data.TwitterTimelineMarshaller;

@@ -2,8 +2,8 @@ package com.ubjson.data;
 
 import java.io.IOException;
 
-import org.ubjson.UBJInputStream;
-import org.ubjson.UBJOutputStream;
+import org.ubjson.io.UBJInputStream;
+import org.ubjson.io.UBJOutputStream;
 
 public class TwitterTimelineMarshaller {
 	public static void serialize(TwitterTimeline tt, UBJOutputStream out)

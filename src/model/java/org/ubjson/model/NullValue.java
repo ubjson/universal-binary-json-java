@@ -15,13 +15,13 @@
  */
 package org.ubjson.model;
 
-import static org.ubjson.IMarkerType.NULL;
+import static org.ubjson.io.IMarkerType.NULL;
 
 import java.io.IOException;
 
-import org.ubjson.DataFormatException;
-import org.ubjson.UBJInputStreamParser;
-import org.ubjson.UBJOutputStream;
+import org.ubjson.io.DataFormatException;
+import org.ubjson.io.UBJInputStreamParser;
+import org.ubjson.io.UBJOutputStream;
 
 public class NullValue extends AbstractValue<Void> {
 	public NullValue() {

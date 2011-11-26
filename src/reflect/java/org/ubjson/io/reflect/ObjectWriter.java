@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ubjson.reflect;
+package org.ubjson.io.reflect;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.ubjson.UBJOutputStream;
+import org.ubjson.io.UBJOutputStream;
 
 /*
  * TODO: Optimization, cache filtered field & method Lists in an LRUCache after

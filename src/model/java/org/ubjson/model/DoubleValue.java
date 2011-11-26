@@ -15,13 +15,13 @@
  */
 package org.ubjson.model;
 
-import static org.ubjson.IMarkerType.DOUBLE;
+import static org.ubjson.io.IMarkerType.DOUBLE;
 
 import java.io.IOException;
 
-import org.ubjson.DataFormatException;
-import org.ubjson.UBJInputStreamParser;
-import org.ubjson.UBJOutputStream;
+import org.ubjson.io.DataFormatException;
+import org.ubjson.io.UBJInputStreamParser;
+import org.ubjson.io.UBJOutputStream;
 
 public class DoubleValue extends AbstractValue<Double> {
 	public DoubleValue(Double value) throws IllegalArgumentException {
