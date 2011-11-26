@@ -17,9 +17,6 @@ package org.ubjson.io;
 
 public interface IMarkerType {
 	// General Types
-	public static final byte NOOP = 'N';
-	
-	public static final byte END = 'E';
 	public static final byte NULL = 'Z';
 
 	// Boolean Types
@@ -45,4 +42,8 @@ public interface IMarkerType {
 	public static final byte ARRAY_COMPACT = 'a';
 	public static final byte OBJECT = 'O';
 	public static final byte OBJECT_COMPACT = 'o';
+
+	// Streaming Types
+	public static final byte NOOP = 'N';
+	public static final byte END = 'E';
 }
