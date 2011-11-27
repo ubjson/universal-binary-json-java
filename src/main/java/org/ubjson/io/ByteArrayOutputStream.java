@@ -2,7 +2,6 @@ package org.ubjson.io;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 
 /**
  * Class used to implement a re-usable (see {@link #reset()})
@@ -10,20 +9,28 @@ import java.nio.ByteBuffer;
  * <code>byte[]</code> that the caller can get direct access to via
  * {@link #getArray()}.
  * <p/>
- * This class is meant to be used as middle ground between the stream-based
- * {@link UBJOutputStream} class and any non-stream based output mechanism in
- * Java (e.g. writing to a {@link ByteBuffer}).
- * <p/>
- * The intended usage is to have callers write wrap an instance of this class
- * with a {@link UBJOutputStream}, write output as normal, and then using
- * {@link #getArray()} and {@link #getLength()}, write the <code>byte[]</code>
- * directly to the alternative output mechanism (e.g.
- * {@link ByteBuffer#put(byte[], int, int)}).
+ * This class is meant as the bridge between the existing, stream-based
+ * Universal Binary JSON I/O classes and any other I/O mechanism in Java that is
+ * byte-based. Using this class allows you to easily write UBJ-formatted data to
+ * an underlying <code>byte[]</code> which can then be directly used elsewhere
+ * (e.g. Java's NIO classes) without incurring the performance overhead of
+ * copying out the data manually into a new <code>byte[]</code> which
+ * {@link java.io.ByteArrayOutputStream} requires.
  * <p/>
  * After any number of operations {@link #reset()} can be called to reset the
  * internal index used to track insertion and length of the underlying
- * <code>byte[]</code>; effectively resetting this output stream for more output
- * operations.
+ * <code>byte[]</code>; effectively resetting this output stream and preparing
+ * it for a new set of write operations (without needing to close and re-create
+ * a new stream).
+ * <p/>
+ * This reusable design was chosen so callers can maintain a single
+ * <code>byte[]</code> and wrapping {@link ByteArrayOutputStream} instance to be
+ * used as a translation layer between Universal Binary JSON and its default
+ * stream-based I/O, and any other form of processing the caller intends to use;
+ * as opposed to designing this stream as not reusable and requiring the caller
+ * to re-create new <code>byte[]</code> and {@link ByteArrayOutputStream}
+ * instances on <strong>every write</strong>. The overhead would have been
+ * significant in high performance applications.
  * <p/>
  * This class is meant as a more performant replacement to the JDK's
  * {@link java.io.ByteArrayOutputStream} class that provides no direct access to
@@ -33,23 +40,11 @@ import java.nio.ByteBuffer;
  * @author Riyad Kalla (software@thebuzzmedia.com)
  */
 public class ByteArrayOutputStream extends OutputStream {
-	public static final String BUFFER_SIZE_PROPERTY_NAME = "ubjson.io.baos.bufferSize";
-
-	public static final int BUFFER_SIZE = Integer.getInteger(
-			BUFFER_SIZE_PROPERTY_NAME, 8192);
-
-	static {
-		if (BUFFER_SIZE < 1)
-			throw new RuntimeException("Invalid BUFFER_SIZE [" + BUFFER_SIZE
-					+ "], system property [" + BUFFER_SIZE_PROPERTY_NAME
-					+ "] must be set to an integer value >= 1.");
-	}
-
 	protected int i;
 	protected byte[] data;
 
 	public ByteArrayOutputStream() {
-		this(BUFFER_SIZE);
+		this(8192);
 	}
 
 	public ByteArrayOutputStream(int initialSize)
