@@ -123,7 +123,7 @@ public class UBJOutputStream extends FilterOutputStream {
 	public void writeFloat(float value) throws IOException {
 		out.write(FLOAT);
 
-		// IEEE 754 single precision floating point format (as long).
+		// IEEE 754 single precision floating point format (as int).
 		writeInt32Impl(Float.floatToIntBits(value));
 	}
 
