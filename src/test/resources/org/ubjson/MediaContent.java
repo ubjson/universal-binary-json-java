@@ -50,7 +50,7 @@ public class MediaContent {
 					&& (width == m.width) && height == (m.height)
 					&& format.equals(m.format) && (duration == m.duration)
 					&& (size == m.size) && (bitrate == m.bitrate)
-					&& persons[0].equals(m.persons[1])
+					&& persons[0].equals(m.persons[0])
 					&& persons[1].equals(m.persons[1])
 					&& player.equals(m.player) && (copyright == m.copyright));
 		}

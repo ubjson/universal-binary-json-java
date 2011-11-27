@@ -1,5 +1,7 @@
 package org.ubjson;
 
+import java.util.Arrays;
+
 public class CouchDB4k {
 	public String data3 = "ColreUHAtuYoUOx1N4ZloouQt2o6ugnUT6eYtS10gu7niM8i0vEiNufpk1RlMQXaHXlIwQBDsMFDFUQcFeg2vW5eD259Xm";
 	public String data4 = "zCxriJhL726WNNTdJJzurgSA8vKT6rHA0cFCb9koZcLUMXg4rmoXVPqIHWYaCV0ovl2t6xm7I1Hm36jXpLlXEb8fRfbwBeTW2V0OAsVqYH8eAT";
@@ -29,6 +31,17 @@ public class CouchDB4k {
 
 	public MoreNested moreNested = new MoreNested();
 
+	@Override
+	public boolean equals(Object obj) {
+		CouchDB4k c = (CouchDB4k) obj;
+		return (data3.equals(c.data3) && data4.equals(c.data4)
+				&& data0.equals(c.data0) && data7.equals(c.data7)
+				&& data5.equals(c.data5) && Arrays.equals(strings, c.strings)
+				&& data1.equals(c.data1)
+				&& Arrays.equals(integers2, c.integers2) && moreNested
+					.equals(c.moreNested));
+	}
+
 	public class Data5 {
 		public int[] integers = { 756509, 116117, 776378, 275045, 703447,
 				50156, 685803, 147958, 941747, 905651, 57367, 530248, 312888,
@@ -39,6 +52,14 @@ public class CouchDB4k {
 
 		public Nested1 nested1 = new Nested1();
 		public Nested2 nested2 = new Nested2();
+
+		@Override
+		public boolean equals(Object obj) {
+			Data5 d = (Data5) obj;
+			return (Arrays.equals(integers, d.integers) && (float1 == d.float1)
+					&& (float2 == d.float2) && nested1.equals(d.nested1) && nested2
+						.equals(d.nested2));
+		}
 
 		public class Nested1 {
 			public int[] integers = { 756509, 116117, 776378, 275045, 703447,
@@ -77,6 +98,13 @@ public class CouchDB4k {
 					73009014.5521f, 7397302.331f, 34345128.9589f,
 					98343269.4418f, 95039116.9058f, 44833102.5752f,
 					51052997.8873f, 22719195.6783f, 64883244.8699f };
+
+			@Override
+			public boolean equals(Object obj) {
+				Nested1 n = (Nested1) obj;
+				return (Arrays.equals(integers, n.integers) && Arrays.equals(
+						floats, n.floats));
+			}
 		}
 
 		public class Nested2 {
@@ -86,6 +114,13 @@ public class CouchDB4k {
 
 			public float float1 = 76.572f;
 			public float float2 = 83.5299f;
+
+			@Override
+			public boolean equals(Object obj) {
+				Nested2 n = (Nested2) obj;
+				return (Arrays.equals(integers, n.integers)
+						&& float1 == n.float1 && float2 == n.float2);
+			}
 		}
 	}
 
@@ -100,10 +135,24 @@ public class CouchDB4k {
 		public Nested1 nested1 = new Nested1();
 		public Nested2 nested2 = new Nested2();
 
+		@Override
+		public boolean equals(Object obj) {
+			MoreNested n = (MoreNested) obj;
+			return (Arrays.equals(integers, n.integers) && (float1 == n.float1)
+					&& (float2 == n.float2) && nested1.equals(n.nested1) && nested2
+						.equals(n.nested2));
+		}
+
 		public class Nested1 {
 			public int[] integers = { 756509, 116117, 776378, 275045, 703447,
 					50156, 685803, 147958, 941747, 905651, 57367, 530248,
 					312888, 740951, 988947, 450154 };
+
+			@Override
+			public boolean equals(Object obj) {
+				Nested1 n = (Nested1) obj;
+				return Arrays.equals(integers, n.integers);
+			}
 		}
 
 		public class Nested2 {
@@ -120,6 +169,13 @@ public class CouchDB4k {
 					"zGuLsPXoJqMbO4PcePteZfDMYFXdWtvNF8WvaplXypsd6" };
 			public int[] integers = { 756509, 116117, 776378, 57367, 530248,
 					312888, 740951, 988947, 450154 };
+
+			@Override
+			public boolean equals(Object obj) {
+				Nested2 n = (Nested2) obj;
+				return (Arrays.equals(strings, n.strings) && Arrays.equals(
+						integers, n.integers));
+			}
 		}
 	}
 }
