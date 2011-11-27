@@ -42,19 +42,13 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 public class UBJInputStream extends FilterInputStream {
+	protected byte[] buffer;
 	protected StreamDecoder decoder;
-
-	private byte[] int16Buffer;
-	private byte[] int32Buffer;
-	private byte[] int64Buffer;
 
 	public UBJInputStream(InputStream in) {
 		super(in);
 
-		int16Buffer = new byte[2];
-		int32Buffer = new byte[4];
-		int64Buffer = new byte[8];
-
+		buffer = new byte[8];
 		decoder = new StreamDecoder();
 	}
 
@@ -333,49 +327,87 @@ public class UBJInputStream extends FilterInputStream {
 	}
 
 	protected short readInt16Impl() throws IOException {
-		int read = in.read(int16Buffer);
+		int read = in.read(buffer, 0, 2);
 
-		if (read < int16Buffer.length)
+		if (read < 2)
 			throw new DataFormatException(
-					"Attempted to read "
-							+ int16Buffer.length
-							+ " bytes to reconstruct the INT16 value, instead was only able to read "
-							+ read + " bytes.");
+					"Attempted to read 2 bytes to reconstruct the INT16 value, instead was only able to read "
+							+ read + " bytes from the underlying stream.");
 
-		return (short) (((int) int16Buffer[0] << 8) + ((int) int16Buffer[1] << 0));
+		/*
+		 * We read in the original number in 1-byte (8-bit) segments,
+		 * bit-shifting the significant bits back into their place in the final
+		 * numeric type that will be returned.
+		 * 
+		 * NOTE: Bit shifts cannot be done on shorts, so instead of casting to
+		 * shorts here, bit-shifting, then returning below, we have to keep the
+		 * segments as ints while we bit-shift, then cast it in the return.
+		 */
+		int s1 = (int) (buffer[0] & 0xFF) << 8;
+		int s2 = (int) (buffer[1] & 0xFF) << 0;
+
+		/*
+		 * Now that the significant bits of each segment of the number are where
+		 * they should be, we re-create the original number by merging all the
+		 * segments together (bit operation) and return the resulting number.
+		 */
+		return (short) (s1 | s2);
 	}
 
 	protected int readInt32Impl() throws IOException {
-		int read = in.read(int32Buffer);
+		int read = in.read(buffer, 0, 4);
 
-		if (read < int32Buffer.length)
+		if (read < 4)
 			throw new DataFormatException(
-					"Attempted to read "
-							+ int32Buffer.length
-							+ " bytes to reconstruct the INT32 value, instead was only able to read "
-							+ read + " bytes.");
+					"Attempted to read 4 bytes to reconstruct the INT32 value, instead was only able to read "
+							+ read + " bytes from the underlying stream.");
 
-		return (((int) int32Buffer[0] << 24) + ((int) int32Buffer[1] << 16)
-				+ ((int) int32Buffer[2] << 8) + ((int) int32Buffer[3] << 0));
+		/*
+		 * We read in the original number in 1-byte (8-bit) segments,
+		 * bit-shifting the significant bits back into their place in the final
+		 * numeric type that will be returned.
+		 */
+		int i1 = (int) (buffer[0] & 0xFF) << 24;
+		int i2 = (int) (buffer[1] & 0xFF) << 16;
+		int i3 = (int) (buffer[2] & 0xFF) << 8;
+		int i4 = (int) (buffer[3] & 0xFF) << 0;
+
+		/*
+		 * Now that the significant bits of each segment of the number are where
+		 * they should be, we re-create the original number by merging all the
+		 * segments together (bit operation) and return the resulting number.
+		 */
+		return (i1 | i2 | i3 | i4);
 	}
 
 	protected long readInt64Impl() throws IOException {
-		int read = in.read(int64Buffer);
+		int read = in.read(buffer);
 
-		if (read < int64Buffer.length)
+		if (read < 8)
 			throw new DataFormatException(
-					"Attempted to read "
-							+ int64Buffer.length
-							+ " bytes to reconstruct the INT64 value, instead was only able to read "
-							+ read + " bytes.");
+					"Attempted to read 8 bytes to reconstruct the INT64 value, instead was only able to read "
+							+ read + " bytes from the underlying stream.");
 
-		return (((long) int64Buffer[0] << 56)
-				+ (((long) int64Buffer[1] & 255) << 48)
-				+ (((long) int64Buffer[2] & 255) << 40)
-				+ (((long) int64Buffer[3] & 255) << 32)
-				+ (((long) int64Buffer[4] & 255) << 24)
-				+ (((long) int64Buffer[5] & 255) << 16)
-				+ (((long) int64Buffer[6] & 255) << 8) + (((long) int64Buffer[7] & 255) << 0));
+		/*
+		 * We read in the original number in 1-byte (8-bit) segments,
+		 * bit-shifting the significant bits back into their place in the final
+		 * numeric type that will be returned.
+		 */
+		long l1 = (long) (buffer[0] & 0xFF) << 56;
+		long l2 = (long) (buffer[1] & 0xFF) << 48;
+		long l3 = (long) (buffer[2] & 0xFF) << 40;
+		long l4 = (long) (buffer[3] & 0xFF) << 32;
+		long l5 = (long) (buffer[4] & 0xFF) << 24;
+		long l6 = (long) (buffer[5] & 0xFF) << 16;
+		long l7 = (long) (buffer[6] & 0xFF) << 8;
+		long l8 = (long) (buffer[7] & 0xFF) << 0;
+
+		/*
+		 * Now that the significant bits of each segment of the number are where
+		 * they should be, we re-create the original number by merging all the
+		 * segments together (bit operation) and return the resulting number.
+		 */
+		return (l1 | l2 | l3 | l4 | l5 | l6 | l7 | l8);
 	}
 
 	protected byte checkType(String typeLabel, byte expectedType)
