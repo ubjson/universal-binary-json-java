@@ -162,16 +162,16 @@ public class TwitterTimelineMarshaller {
 		out.writeBoolean(tt.user.follow_request_sent);
 
 		out.writeString("friends_count");
-		out.writeInt16((short) tt.user.friends_count);
+		out.writeInt32(tt.user.friends_count);
 
 		out.writeString("followers_count");
-		out.writeInt16((short) tt.user.followers_count);
+		out.writeInt32(tt.user.followers_count);
 
 		out.writeString("time_zone");
 		out.writeString(tt.user.time_zone);
 
 		out.writeString("favourites_count");
-		out.writeByte((byte) tt.user.favourites_count);
+		out.writeInt32(tt.user.favourites_count);
 
 		out.writeString("profile_sidebar_border_color");
 		out.writeString(tt.user.profile_sidebar_border_color);
@@ -332,7 +332,7 @@ public class TwitterTimelineMarshaller {
 		tt.user.screen_name = in.readString();
 
 		in.readStringAsChars();
-		tt.user.statuses_count = in.readInt16();
+		tt.user.statuses_count = in.readInt32();
 
 		in.readStringAsChars();
 		tt.user.profile_image_url = in.readString();
@@ -383,10 +383,10 @@ public class TwitterTimelineMarshaller {
 		tt.user.follow_request_sent = in.readBoolean();
 
 		in.readStringAsChars();
-		tt.user.friends_count = in.readInt16();
+		tt.user.friends_count = in.readInt32();
 
 		in.readStringAsChars();
-		tt.user.followers_count = in.readInt16();
+		tt.user.followers_count = in.readInt32();
 
 		in.readStringAsChars();
 		tt.user.time_zone = in.readString();
