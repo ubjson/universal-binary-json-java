@@ -1,4 +1,4 @@
-package com.ubjson.data;
+package org.ubjson;
 
 /**
  * Well-known test data from the JVM Serializers Benchmark project in Object
@@ -14,6 +14,14 @@ package com.ubjson.data;
  *      Serializers Test Data</a>
  */
 public class MediaContent {
+	@Override
+	public boolean equals(Object obj) {
+		MediaContent mc = (MediaContent) obj;
+
+		return (media.equals(mc.media) && images[0].equals(mc.images[0]) && images[1]
+				.equals(mc.images[1]));
+	}
+
 	public Media media = new Media();
 	public Image[] images = {
 			new Image("http://javaone.com/keynote_large.jpg",
@@ -33,6 +41,19 @@ public class MediaContent {
 		public String[] persons = { "Bill Gates", "Steve Jobs" };
 		public String player = "JAVA";
 		public String copyright = null;
+
+		@Override
+		public boolean equals(Object obj) {
+			Media m = (Media) obj;
+
+			return (uri.equals(m.uri) && title.equals(m.title)
+					&& (width == m.width) && height == (m.height)
+					&& format.equals(m.format) && (duration == m.duration)
+					&& (size == m.size) && (bitrate == m.bitrate)
+					&& persons[0].equals(m.persons[1])
+					&& persons[1].equals(m.persons[1])
+					&& player.equals(m.player) && (copyright == m.copyright));
+		}
 	}
 
 	public static class Image {
@@ -49,6 +70,15 @@ public class MediaContent {
 			this.width = width;
 			this.height = height;
 			this.size = size;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			Image i = (Image) obj;
+
+			return (uri.equals(i.uri) && title.equals(i.title)
+					&& (width == i.width) && (height == i.height) && size
+						.equals(i.size));
 		}
 	}
 }

@@ -1,4 +1,4 @@
-package com.ubjson.data;
+package org.ubjson;
 
 public class CouchDB4k {
 	public String data3 = "ColreUHAtuYoUOx1N4ZloouQt2o6ugnUT6eYtS10gu7niM8i0vEiNufpk1RlMQXaHXlIwQBDsMFDFUQcFeg2vW5eD259Xm";

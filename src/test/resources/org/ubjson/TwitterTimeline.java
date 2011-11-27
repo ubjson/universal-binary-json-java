@@ -1,4 +1,4 @@
-package com.ubjson.data;
+package org.ubjson;
 
 public class TwitterTimeline {
 	public String id_str = "121769183821312000";

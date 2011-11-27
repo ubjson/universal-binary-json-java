@@ -1,11 +1,22 @@
-package com.ubjson.data;
+package org.ubjson;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.ubjson.io.UBJInputStream;
 import org.ubjson.io.UBJOutputStream;
 
 public class MediaContentMarshaller {
+	/*
+	 * Used to write out the test UBJ file handled by this class. Typically only
+	 * needed by author to write a new test UBJ file if the file format changes
+	 * due to an update to the POJO or marshaling logic.
+	 */
+	public static void main(String[] args) throws IOException {
+		serialize(new MediaContent(), new UBJOutputStream(new FileOutputStream(
+				"MediaContent.ubj")));
+	}
+
 	public static void serialize(MediaContent mc, UBJOutputStream out)
 			throws IOException {
 		// root obj
@@ -23,10 +34,10 @@ public class MediaContentMarshaller {
 		out.writeString(mc.media.title);
 
 		out.writeString("width");
-		out.writeInt16((short) mc.media.width);
+		out.writeInt32(mc.media.width);
 
 		out.writeString("height");
-		out.writeInt16((short) mc.media.height);
+		out.writeInt32(mc.media.height);
 
 		out.writeString("format");
 		out.writeString(mc.media.format);
@@ -62,9 +73,9 @@ public class MediaContentMarshaller {
 		out.writeString("title");
 		out.writeString(mc.images[0].title);
 		out.writeString("width");
-		out.writeInt16((short) mc.images[0].width);
+		out.writeInt32(mc.images[0].width);
 		out.writeString("height");
-		out.writeInt16((short) mc.images[0].height);
+		out.writeInt32(mc.images[0].height);
 		out.writeString("size");
 		out.writeString(mc.images[0].size);
 
@@ -75,9 +86,9 @@ public class MediaContentMarshaller {
 		out.writeString("title");
 		out.writeString(mc.images[1].title);
 		out.writeString("width");
-		out.writeInt16((short) mc.images[1].width);
+		out.writeInt32(mc.images[1].width);
 		out.writeString("height");
-		out.writeInt16((short) mc.images[1].height);
+		out.writeInt32(mc.images[1].height);
 		out.writeString("size");
 		out.writeString(mc.images[1].size);
 	}
@@ -101,10 +112,10 @@ public class MediaContentMarshaller {
 		mc.media.title = in.readString();
 
 		in.readStringAsChars();
-		mc.media.width = in.readInt16();
+		mc.media.width = in.readInt32();
 
 		in.readStringAsChars();
-		mc.media.height = in.readInt16();
+		mc.media.height = in.readInt32();
 
 		in.readStringAsChars();
 		mc.media.format = in.readString();
@@ -148,9 +159,9 @@ public class MediaContentMarshaller {
 		in.readStringAsChars();
 		mc.images[0].title = in.readString();
 		in.readStringAsChars();
-		mc.images[0].width = in.readInt16();
+		mc.images[0].width = in.readInt32();
 		in.readStringAsChars();
-		mc.images[0].height = in.readInt16();
+		mc.images[0].height = in.readInt32();
 		in.readStringAsChars();
 		mc.images[0].size = in.readString();
 
@@ -161,9 +172,9 @@ public class MediaContentMarshaller {
 		in.readStringAsChars();
 		mc.images[1].title = in.readString();
 		in.readStringAsChars();
-		mc.images[1].width = in.readInt16();
+		mc.images[1].width = in.readInt32();
 		in.readStringAsChars();
-		mc.images[1].height = in.readInt16();
+		mc.images[1].height = in.readInt32();
 		in.readStringAsChars();
 		mc.images[1].size = in.readString();
 

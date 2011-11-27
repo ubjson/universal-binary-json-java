@@ -1,10 +1,15 @@
-package com.ubjson.data;
+package org.ubjson;
 
 import java.io.IOException;
 
 import org.ubjson.io.UBJInputStream;
 import org.ubjson.io.UBJOutputStream;
 
+/*
+ * TODO: need to de-optimize the numeric type writing and match it to the type
+ * of the field so testing of Reflection package can be done with these example
+ * files.
+ */
 public class CouchDB4kMarshaller {
 	public static void serialize(CouchDB4k db, UBJOutputStream out)
 			throws IOException {
