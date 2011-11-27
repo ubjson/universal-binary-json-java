@@ -25,12 +25,12 @@ public class ObjectWriterTest {
 	private IObjectWriter writer;
 
 	@Before
-	public void setup() {
+	public void before() {
 		writer = new ObjectWriter();
 	}
 
 	@After
-	public void teardown() {
+	public void after() {
 		writer = null;
 	}
 
