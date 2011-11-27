@@ -43,19 +43,14 @@ import java.math.BigInteger;
 import java.nio.CharBuffer;
 
 public class UBJOutputStream extends FilterOutputStream {
-	private byte[] int16Buffer;
-	private byte[] int32Buffer;
-	private byte[] int64Buffer;
-
-	private StreamEncoder encoder;
+	protected byte[] buffer;
+	protected StreamEncoder encoder;
 
 	public UBJOutputStream(OutputStream out) {
 		super(out);
-		encoder = new StreamEncoder();
 
-		int16Buffer = new byte[2];
-		int32Buffer = new byte[4];
-		int64Buffer = new byte[8];
+		buffer = new byte[8];
+		encoder = new StreamEncoder();
 	}
 
 	@Override
@@ -298,36 +293,36 @@ public class UBJOutputStream extends FilterOutputStream {
 
 	protected void writeInt16Impl(short value) throws IOException {
 		// Fill write buffer
-		int16Buffer[0] = (byte) ((value >>> 8) & 0xFF);
-		int16Buffer[1] = (byte) ((value >>> 0) & 0xFF);
+		buffer[0] = (byte) ((value >>> 8) & 0xFF);
+		buffer[1] = (byte) ((value >>> 0) & 0xFF);
 
 		// Write it in one chunk.
-		out.write(int16Buffer);
+		out.write(buffer, 0, 2);
 	}
 
 	protected void writeInt32Impl(int value) throws IOException {
 		// Fill write buffer
-		int32Buffer[0] = (byte) ((value >>> 24) & 0xFF);
-		int32Buffer[1] = (byte) ((value >>> 16) & 0xFF);
-		int32Buffer[2] = (byte) ((value >>> 8) & 0xFF);
-		int32Buffer[3] = (byte) ((value >>> 0) & 0xFF);
+		buffer[0] = (byte) ((value >>> 24) & 0xFF);
+		buffer[1] = (byte) ((value >>> 16) & 0xFF);
+		buffer[2] = (byte) ((value >>> 8) & 0xFF);
+		buffer[3] = (byte) ((value >>> 0) & 0xFF);
 
 		// Write it in one chunk.
-		out.write(int32Buffer);
+		out.write(buffer, 0, 4);
 	}
 
 	protected void writeInt64Impl(long value) throws IOException {
 		// Fill write buffer
-		int64Buffer[0] = (byte) (value >>> 56);
-		int64Buffer[1] = (byte) (value >>> 48);
-		int64Buffer[2] = (byte) (value >>> 40);
-		int64Buffer[3] = (byte) (value >>> 32);
-		int64Buffer[4] = (byte) (value >>> 24);
-		int64Buffer[5] = (byte) (value >>> 16);
-		int64Buffer[6] = (byte) (value >>> 8);
-		int64Buffer[7] = (byte) (value >>> 0);
+		buffer[0] = (byte) (value >>> 56);
+		buffer[1] = (byte) (value >>> 48);
+		buffer[2] = (byte) (value >>> 40);
+		buffer[3] = (byte) (value >>> 32);
+		buffer[4] = (byte) (value >>> 24);
+		buffer[5] = (byte) (value >>> 16);
+		buffer[6] = (byte) (value >>> 8);
+		buffer[7] = (byte) (value >>> 0);
 
 		// Write it in one chunk
-		out.write(int64Buffer);
+		out.write(buffer, 0, 8);
 	}
 }
