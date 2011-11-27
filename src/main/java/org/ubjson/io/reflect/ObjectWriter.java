@@ -39,20 +39,20 @@ public class ObjectWriter implements IObjectWriter {
 	protected Mode mode;
 	protected ScopeStack sstack;
 
-	private AssignableKey assignableQuery;
-	private LRUHashMap<AssignableKey, Boolean> assignableCache;
+	private AssignableCacheKey assignableQuery;
+	private LRUHashMap<AssignableCacheKey, Boolean> assignableCache;
 
 	private LRUHashMap<Class<?>, List<Field>> fieldCache;
-	private LRUHashMap<Class<?>, List<MethodAlias>> methodCache;
+	private LRUHashMap<Class<?>, List<MethodCacheElement>> methodCache;
 
 	public ObjectWriter() {
 		sstack = new ScopeStack();
 
-		assignableQuery = new AssignableKey();
-		assignableCache = new LRUHashMap<AssignableKey, Boolean>();
+		assignableQuery = new AssignableCacheKey();
+		assignableCache = new LRUHashMap<AssignableCacheKey, Boolean>();
 
 		fieldCache = new LRUHashMap<Class<?>, List<Field>>();
-		methodCache = new LRUHashMap<Class<?>, List<MethodAlias>>();
+		methodCache = new LRUHashMap<Class<?>, List<MethodCacheElement>>();
 	}
 
 	@Override
@@ -125,24 +125,49 @@ public class ObjectWriter implements IObjectWriter {
 		if (to == null)
 			throw new IllegalArgumentException("to cannot be null");
 
-		// Setup temp key to query our cache.
+		// Re-use temp key to query our cache.
 		assignableQuery.set(from, to);
 
 		// Check if the assignable calculation has been checked/cached before.
 		Boolean assignable = assignableCache.get(assignableQuery);
 
 		if (assignable == null) {
+			// TODO: debug
 			System.out.println("Assignable Cache MISS!");
 
 			// Calculate assignability and cache result.
 			assignable = to.isAssignableFrom(from);
-			assignableCache.put(new AssignableKey(from, to), assignable);
-		} else
+			assignableCache.put(new AssignableCacheKey(from, to), assignable);
+		} else {
+			// TODO: debug
 			System.out.println("Assignable Cache HIT!");
+		}
 
 		return assignable;
 	}
 
+	/**
+	 * Central method to reflection-based mapping that is used to "dispatch" the
+	 * writing of the given <code>value</code> to the specific
+	 * <code>writeXXX</code> method appropriate to write the value given its
+	 * type.
+	 * <p/>
+	 * The entry <code>writeObject(...)</code> methods as well as the container
+	 * (<code>writeArray(...)</code> and <code>writeObjectByXXX(...)</code>)
+	 * methods all call this method to dispatch the writing of their specific
+	 * contained values.
+	 * 
+	 * @param out
+	 *            The UBJ stream to write to.
+	 * @param name
+	 *            A optional name (label) of the given value.
+	 * @param value
+	 *            The value to be written.
+	 * 
+	 * @throws IOException
+	 *             if any error occurs while writing out to the
+	 *             {@link UBJOutputStream}.
+	 */
 	protected void dispatchWrite(UBJOutputStream out, String name, Object value)
 			throws IOException {
 		if (value == null)
@@ -312,6 +337,7 @@ public class ObjectWriter implements IObjectWriter {
 			Field[] fields = type.getFields();
 			fieldList = new ArrayList<Field>(fields.length);
 
+			// Filter the fields down to just the ones we want to map.
 			for (int i = 0; i < fields.length; i++) {
 				Field f = fields[i];
 				int mods = f.getModifiers();
@@ -330,11 +356,13 @@ public class ObjectWriter implements IObjectWriter {
 		// Enter object scope
 		sstack.push(ScopeType.OBJECT);
 
+		// Write out the values for each field we are mapping.
 		for (int i = 0, s = fieldList.size(); i < s; i++) {
 			Field f = fieldList.get(i);
 			Object fValue = null;
 
 			try {
+				// Safely reflect the field's value.
 				fValue = f.get(obj);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -353,14 +381,15 @@ public class ObjectWriter implements IObjectWriter {
 			out.writeString(name);
 
 		// Check cache for existing filtered method list.
-		List<MethodAlias> methodList = methodCache.get(type);
+		List<MethodCacheElement> methodList = methodCache.get(type);
 
 		// Filter and cache field list if we didn't already.
 		if (methodList == null) {
 			// Get all public, inherited methods.
 			Method[] methods = type.getMethods();
-			methodList = new ArrayList<MethodAlias>(methods.length);
+			methodList = new ArrayList<MethodCacheElement>(methods.length);
 
+			// Filter the methods down to just the ones we want to map.
 			for (int i = 0; i < methods.length; i++) {
 				Method m = methods[i];
 				int mods = m.getModifiers();
@@ -373,18 +402,34 @@ public class ObjectWriter implements IObjectWriter {
 				int j = 0;
 				String mName = m.getName();
 
-				// Normalize the method name used as the value label.
+				/*
+				 * We need to normalize the method name into a proper property
+				 * name. First we need to find where the prefix is to chop
+				 * off...
+				 */
 				if (mName.startsWith("is"))
 					j = 2;
-				else if (mName.startsWith("can") || mName.startsWith("has")
-						|| mName.startsWith("get"))
+				else if (mName.startsWith("get") || mName.startsWith("has")
+						|| mName.startsWith("can"))
 					j = 3;
 
-				// Lowercase first char, append the remainder of the name.
+				/*
+				 * Skip mapping this property totally if the method name isn't
+				 * long enough to be used as a property name (e.g. the method
+				 * name is just "get" or "is" and not something like "getAge" or
+				 * "isRegistered".
+				 */
+				if (j >= mName.length())
+					continue;
+
+				/*
+				 * Now we set the property name to the method's name with the
+				 * prefix chopped and the first char lowercased.
+				 */
 				mName = Character.toLowerCase(mName.charAt(j))
 						+ mName.substring(j + 1);
 
-				methodList.add(new MethodAlias(m, mName));
+				methodList.add(new MethodCacheElement(m, mName));
 			}
 		}
 
@@ -393,17 +438,19 @@ public class ObjectWriter implements IObjectWriter {
 		// Enter object scope
 		sstack.push(ScopeType.OBJECT);
 
+		// Write out the values for each method we are mapping.
 		for (int i = 0, s = methodList.size(); i < s; i++) {
-			MethodAlias ma = methodList.get(i);
+			MethodCacheElement cacheElement = methodList.get(i);
 			Object mValue = null;
 
 			try {
-				mValue = ma.method.invoke(obj);
+				// Safely reflect the method value.
+				mValue = cacheElement.method.invoke(obj);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
-			dispatchWrite(out, ma.name, mValue);
+			dispatchWrite(out, cacheElement.name, mValue);
 		}
 
 		// Exit object scope
@@ -444,15 +491,25 @@ public class ObjectWriter implements IObjectWriter {
 		}
 	}
 
-	private class AssignableKey {
+	/**
+	 * Class used to represent a key in the assignableCache Map.
+	 * <p/>
+	 * Key's represent the combination of the [from,to] classes that the
+	 * assignability is being tested for while the map's value is represented by
+	 * a {@link Boolean} value indicating if the assignability from-&gt;to is
+	 * possible.
+	 * 
+	 * @author Riyad Kalla (software@thebuzzmedia.com)
+	 */
+	private class AssignableCacheKey {
 		Class<?> from;
 		Class<?> to;
 
-		public AssignableKey() {
+		public AssignableCacheKey() {
 			set(null, null);
 		}
 
-		public AssignableKey(Class<?> from, Class<?> to) {
+		public AssignableCacheKey(Class<?> from, Class<?> to) {
 			set(from, to);
 		}
 
@@ -477,11 +534,26 @@ public class ObjectWriter implements IObjectWriter {
 		}
 	}
 
-	private class MethodAlias {
+	/**
+	 * Class used to represent a method cache element.
+	 * <p/>
+	 * When methods are used to reflect values out of objects (
+	 * {@link Mode#METHODS}) the names of the methods have to be normalized into
+	 * the field names for the UBJ representation. This is done by trimming any
+	 * of the 'getter' style property prefixes off of the method name (e.g.
+	 * "is", "can", "has" or "get") and then appending the rest of the method
+	 * name with the first char lowercased.
+	 * <p/>
+	 * To avoid doing this string manipulation every time, we cache it along
+	 * with the cached method name from the reflection result.
+	 * 
+	 * @author Riyad Kalla (software@thebuzzmedia.com)
+	 */
+	private class MethodCacheElement {
 		Method method;
 		String name;
 
-		public MethodAlias(Method method, String name) {
+		public MethodCacheElement(Method method, String name) {
 			this.method = method;
 			this.name = name;
 		}
