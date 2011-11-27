@@ -1,17 +1,22 @@
 package org.ubjson;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.ubjson.io.UBJInputStream;
 import org.ubjson.io.UBJOutputStream;
 
-/*
- * TODO: need to de-optimize the numeric type writing and match it to the type
- * of the field so testing of Reflection package can be done with these example
- * files.
- */
-
 public class TwitterTimelineMarshaller {
+	/*
+	 * Used to write out the test UBJ file handled by this class. Typically only
+	 * needed by author to write a new test UBJ file if the file format changes
+	 * due to an update to the POJO or marshaling logic.
+	 */
+	public static void main(String[] args) throws IOException {
+		serialize(new TwitterTimeline(), new UBJOutputStream(
+				new FileOutputStream("TwitterTimeline.ubj")));
+	}
+
 	public static void serialize(TwitterTimeline tt, UBJOutputStream out)
 			throws IOException {
 		// root obj
@@ -21,7 +26,7 @@ public class TwitterTimelineMarshaller {
 		out.writeString(tt.id_str);
 
 		out.writeString("retweet_count");
-		out.writeByte((byte) tt.retweet_count);
+		out.writeInt32(tt.retweet_count);
 
 		out.writeString("in_reply_to_screen_name");
 		out.writeNull();
@@ -57,8 +62,8 @@ public class TwitterTimelineMarshaller {
 
 		out.writeString("indices");
 		out.writeArrayHeader(2);
-		out.writeByte((byte) tt.entities.urls.indices[0]);
-		out.writeByte((byte) tt.entities.urls.indices[1]);
+		out.writeInt32(tt.entities.urls.indices[0]);
+		out.writeInt32(tt.entities.urls.indices[1]);
 
 		out.writeString("expanded_url");
 		out.writeString(tt.entities.urls.expanded_url);
@@ -106,7 +111,7 @@ public class TwitterTimelineMarshaller {
 		out.writeString(tt.user.screen_name);
 
 		out.writeString("statuses_count");
-		out.writeInt16((short) tt.user.statuses_count);
+		out.writeInt32(tt.user.statuses_count);
 
 		out.writeString("profile_image_url");
 		out.writeString(tt.user.profile_image_url);
@@ -187,7 +192,7 @@ public class TwitterTimelineMarshaller {
 		out.writeBoolean(tt.user.profile_use_background_image);
 
 		out.writeString("listed_count");
-		out.writeByte((byte) tt.user.listed_count);
+		out.writeInt32(tt.user.listed_count);
 
 		out.writeString("verified");
 		out.writeBoolean(tt.user.verified);
@@ -235,7 +240,7 @@ public class TwitterTimelineMarshaller {
 		tt.id_str = in.readString();
 
 		in.readStringAsChars();
-		tt.retweet_count = in.readByte();
+		tt.retweet_count = in.readInt32();
 
 		in.readStringAsChars();
 		// tt.in_reply_to_screen_name =
@@ -274,8 +279,8 @@ public class TwitterTimelineMarshaller {
 
 		in.readStringAsChars();
 		in.readArrayLength();
-		tt.entities.urls.indices[0] = in.readByte();
-		tt.entities.urls.indices[1] = in.readByte();
+		tt.entities.urls.indices[0] = in.readInt32();
+		tt.entities.urls.indices[1] = in.readInt32();
 
 		in.readStringAsChars();
 		tt.entities.urls.expanded_url = in.readString();
@@ -387,7 +392,7 @@ public class TwitterTimelineMarshaller {
 		tt.user.time_zone = in.readString();
 
 		in.readStringAsChars();
-		tt.user.favourites_count = in.readByte();
+		tt.user.favourites_count = in.readInt32();
 
 		in.readStringAsChars();
 		tt.user.profile_sidebar_border_color = in.readString();
@@ -408,7 +413,7 @@ public class TwitterTimelineMarshaller {
 		tt.user.profile_use_background_image = in.readBoolean();
 
 		in.readStringAsChars();
-		tt.user.listed_count = in.readByte();
+		tt.user.listed_count = in.readInt32();
 
 		in.readStringAsChars();
 		tt.user.verified = in.readBoolean();
