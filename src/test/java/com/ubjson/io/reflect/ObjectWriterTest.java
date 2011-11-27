@@ -22,7 +22,7 @@ import org.ubjson.io.reflect.IObjectWriter;
 import org.ubjson.io.reflect.ObjectWriter;
 
 public class ObjectWriterTest {
-	private static IObjectWriter writer;
+	private IObjectWriter writer;
 
 	@Before
 	public void setup() {
