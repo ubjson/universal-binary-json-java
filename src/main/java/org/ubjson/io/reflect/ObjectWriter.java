@@ -132,15 +132,9 @@ public class ObjectWriter implements IObjectWriter {
 		Boolean assignable = assignableCache.get(assignableQuery);
 
 		if (assignable == null) {
-			// TODO: debug
-			System.out.println("Assignable Cache MISS!");
-
 			// Calculate assignability and cache result.
 			assignable = to.isAssignableFrom(from);
 			assignableCache.put(new AssignableCacheKey(from, to), assignable);
-		} else {
-			// TODO: debug
-			System.out.println("Assignable Cache HIT!");
 		}
 
 		return assignable;
@@ -325,7 +319,12 @@ public class ObjectWriter implements IObjectWriter {
 
 	protected void writeObjectByFields(UBJOutputStream out, String name,
 			Class<?> type, Object obj) throws IOException {
-		if (sstack.peek() != ScopeType.ARRAY)
+		/*
+		 * Extra checks for the state of the 'name' arg (not-null) because this
+		 * method is called directly from the public writeObject(...) method
+		 * which specifically passes a null name for the root element.
+		 */
+		if (name != null && sstack.peek() != ScopeType.ARRAY && !name.isEmpty())
 			out.writeString(name);
 
 		// Check cache for existing filtered field list.
@@ -377,7 +376,12 @@ public class ObjectWriter implements IObjectWriter {
 
 	protected void writeObjectByMethods(UBJOutputStream out, String name,
 			Class<?> type, Object obj) throws IOException {
-		if (sstack.peek() != ScopeType.ARRAY)
+		/*
+		 * Extra checks for the state of the 'name' arg (not-null) because this
+		 * method is called directly from the public writeObject(...) method
+		 * which specifically passes a null name for the root element.
+		 */
+		if (name != null && sstack.peek() != ScopeType.ARRAY && !name.isEmpty())
 			out.writeString(name);
 
 		// Check cache for existing filtered method list.
