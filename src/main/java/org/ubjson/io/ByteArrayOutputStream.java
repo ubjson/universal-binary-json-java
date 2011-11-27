@@ -31,11 +31,23 @@ import java.io.OutputStream;
  * to re-create new <code>byte[]</code> and {@link ByteArrayOutputStream}
  * instances on <strong>every write</strong>. The overhead would have been
  * significant in high performance applications.
- * <p/>
+ * <h3>Efficient JDK Replacement</h3>
  * This class is meant as a more performant replacement to the JDK's
  * {@link java.io.ByteArrayOutputStream} class that provides no direct access to
  * the underly <code>byte[]</code>; requiring a copy of the underlying
  * <code>byte[]</code> be created every time direct access is needed.
+ * <h3>Safety</h3>
+ * This class intentionally has no constructor accepting a <code>byte[]</code>
+ * argument because this class adjusts the size of the underlying data
+ * <code>byte[]</code> on the fly as new data is written to it; meaning that if
+ * a caller could provide a reference to their own <code>byte[]</code> at
+ * instantiation time, it is possible that this class would create a new
+ * (bigger) <code>byte[]</code> internally and the reference the caller provided
+ * would no longer be valid (the caller and this stream would point at two
+ * different <code>byte[]</code>).
+ * <p/>
+ * To avoid the potential for foot-shooting, this class doesn't allow that
+ * scenario to occur.
  * 
  * @author Riyad Kalla (software@thebuzzmedia.com)
  */
@@ -59,7 +71,7 @@ public class ByteArrayOutputStream extends OutputStream {
 
 	@Override
 	public void write(int b) throws IOException {
-		ensureIndex(i);
+		ensureCapacity(i + 1);
 		data[i++] = (byte) b;
 	}
 
@@ -70,7 +82,7 @@ public class ByteArrayOutputStream extends OutputStream {
 
 	@Override
 	public void write(byte[] b, int offset, int length) throws IOException {
-		ensureIndex(i + length);
+		ensureCapacity(i + length);
 		System.arraycopy(b, offset, data, i, length);
 		i += length;
 	}
@@ -106,23 +118,12 @@ public class ByteArrayOutputStream extends OutputStream {
 		return data;
 	}
 
-	/**
-	 * Used to ensure that the underlying <code>byte[]</code> is large enough to
-	 * allow valid access to the given <code>index</code>. If it is not, then
-	 * the underlying <code>byte[]</code> is expanded to the new size of
-	 * <code>index + 1</code>.
-	 * 
-	 * @param index
-	 *            The position in the underlying <code>byte[]</code> that will
-	 *            be ensured.
-	 */
-	protected void ensureIndex(int index) {
-		int size = index + 1;
+	protected void ensureCapacity(int capacity) {
+		if (capacity <= data.length)
+			return;
 
-		if (size > data.length) {
-			byte[] tmp = new byte[size];
-			System.arraycopy(data, 0, tmp, 0, data.length);
-			data = tmp;
-		}
+		byte[] tmp = new byte[capacity];
+		System.arraycopy(data, 0, tmp, 0, data.length);
+		data = tmp;
 	}
 }
