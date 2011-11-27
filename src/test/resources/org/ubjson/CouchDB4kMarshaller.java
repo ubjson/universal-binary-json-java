@@ -1,16 +1,22 @@
 package org.ubjson;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.ubjson.io.UBJInputStream;
 import org.ubjson.io.UBJOutputStream;
 
-/*
- * TODO: need to de-optimize the numeric type writing and match it to the type
- * of the field so testing of Reflection package can be done with these example
- * files.
- */
 public class CouchDB4kMarshaller {
+	/*
+	 * Used to write out the test UBJ file handled by this class. Typically only
+	 * needed by author to write a new test UBJ file if the file format changes
+	 * due to an update to the POJO or marshaling logic.
+	 */
+	public static void main(String[] args) throws IOException {
+		serialize(new CouchDB4k(), new UBJOutputStream(new FileOutputStream(
+				"CouchDB4k.ubj")));
+	}
+
 	public static void serialize(CouchDB4k db, UBJOutputStream out)
 			throws IOException {
 		// root obj
