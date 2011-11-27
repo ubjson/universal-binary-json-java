@@ -1,15 +1,15 @@
-package com.ubjson.io;
+package org.ubjson.io;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.ubjson.TwitterTimeline;
+import org.ubjson.TwitterTimelineMarshaller;
 import org.ubjson.io.UBJInputStream;
 import org.ubjson.io.UBJOutputStream;
 
-import com.ubjson.data.TwitterTimeline;
-import com.ubjson.data.TwitterTimelineMarshaller;
 
 public class TwitterTimelineBenchmark {
 	private static int len;

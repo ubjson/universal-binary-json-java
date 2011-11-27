@@ -1,17 +1,17 @@
-package com.ubjson.io;
+package org.ubjson.io;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.ubjson.CouchDB4k;
+import org.ubjson.CouchDB4kMarshaller;
 import org.ubjson.io.UBJInputStream;
 import org.ubjson.io.UBJOutputStream;
 
-import com.ubjson.data.MediaContent;
-import com.ubjson.data.MediaContentMarshaller;
 
-public class MediaContentBenchmark {
+public class CouchDB4kBenchmark {
 	private static int len;
 	private static byte[] data;
 
@@ -19,10 +19,10 @@ public class MediaContentBenchmark {
 			new NullOutputStream());
 
 	public static void main(String[] args) throws IOException {
-		// Write a single MediaContent out to byte[]
+		// Write a single CouchDB4k out to byte[]
 		RawByteArrayOutputStream rbaos = new RawByteArrayOutputStream(1024);
 		UBJOutputStream stream = new UBJOutputStream(rbaos);
-		MediaContentMarshaller.serialize(new MediaContent(), stream);
+		CouchDB4kMarshaller.serialize(new CouchDB4k(), stream);
 
 		stream.flush();
 		stream.close();
@@ -45,11 +45,11 @@ public class MediaContentBenchmark {
 
 		long t = 0;
 		long tt = 0;
-		MediaContent mc = new MediaContent();
+		CouchDB4k db = new CouchDB4k();
 
 		for (int i = 0; i < iters; i++) {
 			tt = System.currentTimeMillis();
-			MediaContentMarshaller.serialize(mc, out);
+			CouchDB4kMarshaller.serialize(db, out);
 			t += (System.currentTimeMillis() - tt);
 		}
 
@@ -62,7 +62,7 @@ public class MediaContentBenchmark {
 					data, 0, len));
 
 			tt = System.currentTimeMillis();
-			MediaContentMarshaller.deserialize(in);
+			CouchDB4kMarshaller.deserialize(in);
 			t += (System.currentTimeMillis() - tt);
 		}
 
@@ -75,11 +75,11 @@ public class MediaContentBenchmark {
 
 		long t = 0;
 		long tt = 0;
-		MediaContent mc = new MediaContent();
+		CouchDB4k db = new CouchDB4k();
 
 		for (int i = 0; i < iters; i++) {
 			tt = System.nanoTime();
-			MediaContentMarshaller.serialize(mc, out);
+			CouchDB4kMarshaller.serialize(db, out);
 			t += (System.nanoTime() - tt);
 		}
 
@@ -92,7 +92,7 @@ public class MediaContentBenchmark {
 					data, 0, len));
 
 			tt = System.nanoTime();
-			MediaContentMarshaller.deserialize(in);
+			CouchDB4kMarshaller.deserialize(in);
 			t += (System.nanoTime() - tt);
 		}
 
