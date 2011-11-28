@@ -41,6 +41,8 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import org.ubjson.io.charset.StreamDecoder;
+
 public class UBJInputStream extends FilterInputStream {
 	private static final byte INVALID = -1;
 
