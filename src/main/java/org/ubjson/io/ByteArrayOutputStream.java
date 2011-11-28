@@ -9,33 +9,65 @@ import java.io.OutputStream;
  * <code>byte[]</code> that the caller can get direct access to via
  * {@link #getArray()}.
  * <p/>
- * This class is meant as the bridge between the existing, stream-based
- * Universal Binary JSON I/O classes and any other I/O mechanism in Java that is
- * byte-based. Using this class allows you to easily write UBJ-formatted data to
- * an underlying <code>byte[]</code> which can then be directly used elsewhere
- * (e.g. Java's NIO classes) without incurring the performance overhead of
- * copying out the data manually into a new <code>byte[]</code> which
- * {@link java.io.ByteArrayOutputStream} requires.
+ * This class is meant to be a performant bridge between the stream-based
+ * Universal Binary JSON I/O classes and a simple <code>byte[]</code> which can
+ * be helpful when working with non-stream-based I/O, like Java NIO.
  * <p/>
- * After any number of operations {@link #reset()} can be called to reset the
- * internal index used to track insertion and length of the underlying
- * <code>byte[]</code>; effectively resetting this output stream and preparing
- * it for a new set of write operations (without needing to close and re-create
- * a new stream).
+ * In addition to providing direct access to the underlying <code>byte[]</code>
+ * managed by this stream, the output stream itself is meant to be re-used by
+ * calling {@link #reset()} (a single <code>int</code> reset; very fast) between
+ * any <code>write(...)</code> operations the caller wishes to treat as
+ * separate.
+ * <h3>Usage</h3>
+ * This class is designed such that you create an instance of this class, then
+ * wrap it with a {@link UBJOutputStream} and write any amount of Universal
+ * Binary JSON to the underlying <code>byte[]</code> stream; when ready, you can
+ * call {@link #getArray()} to retrieve the underlying array (the underlying
+ * <code>byte[]</code> is not copied; the raw reference is returned)and process
+ * the UBJ byte data accordingly.
  * <p/>
- * This reusable design was chosen so callers can maintain a single
- * <code>byte[]</code> and wrapping {@link ByteArrayOutputStream} instance to be
- * used as a translation layer between Universal Binary JSON and its default
- * stream-based I/O, and any other form of processing the caller intends to use;
- * as opposed to designing this stream as not reusable and requiring the caller
- * to re-create new <code>byte[]</code> and {@link ByteArrayOutputStream}
- * instances on <strong>every write</strong>. The overhead would have been
- * significant in high performance applications.
- * <h3>Efficient JDK Replacement</h3>
- * This class is meant as a more performant replacement to the JDK's
- * {@link java.io.ByteArrayOutputStream} class that provides no direct access to
- * the underly <code>byte[]</code>; requiring a copy of the underlying
- * <code>byte[]</code> be created every time direct access is needed.
+ * When you are done processing the <code>byte[]</code> contents, simply call
+ * {@link #reset()} on the stream, and begin your next write operation to the
+ * wrapping {@link UBJOutputStream}; it would look something like this:
+ * 
+ * <pre>
+ * <code>
+ * // Create streams individually so we have access to boas.
+ * {@link ByteArrayOutputStream} baos = new {@link ByteArrayOutputStream}();
+ * {@link UBJOutputStream} out = new {@link UBJOutputStream}(baos);
+ * 
+ * // Write some Universal Binary JSON
+ * out.writeObjectHeader(2);
+ * 
+ * // "userID": 22345
+ * out.writeString("userID");
+ * out.writeInt32(22345);
+ * 
+ * // "username": "billg64" 
+ * out.writeString("username");
+ * out.writeString("billg64");
+ * 
+ * // Hypothetical write method that accepts byte[] args 
+ * writeUsingNIO(baos.getArray());
+ * 
+ * // Reset the underlying stream so we make it like new.
+ * baos.reset();
+ * 
+ * // Begin writing some new constructs...
+ * out.writeArrayHead(3);
+ * 
+ * ... more code ...
+ * </code>
+ * </pre>
+ * <p/>
+ * Since {@link UBJOutputStream} maintains no internal state and simply acts as
+ * a translation layer between Java data types and byte-based UBJ
+ * representation, resetting the underlying stream that it wraps is a safe
+ * operation.
+ * <p/>
+ * This provides a very efficient mechanism for working with Universal Binary
+ * JSON via the core I/O classes without wasting CPU or memory resources
+ * creating/destroying byte arrays or output stream.
  * <h3>Safety</h3>
  * This class intentionally has no constructor accepting a <code>byte[]</code>
  * argument because this class adjusts the size of the underlying data
@@ -91,6 +123,9 @@ public class ByteArrayOutputStream extends OutputStream {
 	 * Used to reset the internal index used to track the size and insertion
 	 * position in the underlying <code>byte[]</code>; effectively resetting
 	 * this {@link OutputStream} and preparing it for re-use.
+	 * <p/>
+	 * This is a very fast operation that adjusts a single <code>int</code> and
+	 * returns.
 	 */
 	public void reset() {
 		i = 0;
