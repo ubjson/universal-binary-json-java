@@ -15,25 +15,25 @@
  */
 package org.ubjson.io;
 
-import static org.ubjson.io.IMarkerType.ARRAY;
-import static org.ubjson.io.IMarkerType.ARRAY_COMPACT;
-import static org.ubjson.io.IMarkerType.BYTE;
-import static org.ubjson.io.IMarkerType.DOUBLE;
-import static org.ubjson.io.IMarkerType.END;
-import static org.ubjson.io.IMarkerType.FALSE;
-import static org.ubjson.io.IMarkerType.FLOAT;
-import static org.ubjson.io.IMarkerType.HUGE;
-import static org.ubjson.io.IMarkerType.HUGE_COMPACT;
-import static org.ubjson.io.IMarkerType.INT16;
-import static org.ubjson.io.IMarkerType.INT32;
-import static org.ubjson.io.IMarkerType.INT64;
-import static org.ubjson.io.IMarkerType.NOOP;
-import static org.ubjson.io.IMarkerType.NULL;
-import static org.ubjson.io.IMarkerType.OBJECT;
-import static org.ubjson.io.IMarkerType.OBJECT_COMPACT;
-import static org.ubjson.io.IMarkerType.STRING;
-import static org.ubjson.io.IMarkerType.STRING_COMPACT;
-import static org.ubjson.io.IMarkerType.TRUE;
+import static org.ubjson.io.ITypeMarker.ARRAY;
+import static org.ubjson.io.ITypeMarker.ARRAY_COMPACT;
+import static org.ubjson.io.ITypeMarker.BYTE;
+import static org.ubjson.io.ITypeMarker.DOUBLE;
+import static org.ubjson.io.ITypeMarker.END;
+import static org.ubjson.io.ITypeMarker.FALSE;
+import static org.ubjson.io.ITypeMarker.FLOAT;
+import static org.ubjson.io.ITypeMarker.HUGE;
+import static org.ubjson.io.ITypeMarker.HUGE_COMPACT;
+import static org.ubjson.io.ITypeMarker.INT16;
+import static org.ubjson.io.ITypeMarker.INT32;
+import static org.ubjson.io.ITypeMarker.INT64;
+import static org.ubjson.io.ITypeMarker.NOOP;
+import static org.ubjson.io.ITypeMarker.NULL;
+import static org.ubjson.io.ITypeMarker.OBJECT;
+import static org.ubjson.io.ITypeMarker.OBJECT_COMPACT;
+import static org.ubjson.io.ITypeMarker.STRING;
+import static org.ubjson.io.ITypeMarker.STRING_COMPACT;
+import static org.ubjson.io.ITypeMarker.TRUE;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;
