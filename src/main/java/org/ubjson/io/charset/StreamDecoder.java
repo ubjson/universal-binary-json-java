@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ubjson.io;
+package org.ubjson.io.charset;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,9 +23,9 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 
 public class StreamDecoder {
-	public static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
-
 	public static final char[] EMPTY = new char[0];
+
+	public static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
 	private byte[] readBuffer;
 	private char[] decodeBuffer;
@@ -42,19 +42,20 @@ public class StreamDecoder {
 
 		readBuffer = new byte[8192];
 		decodeBuffer = new char[8192];
+		
 		decoder = charset.newDecoder();
 	}
 
-	public char[] decode(InputStream stream, int byteLength)
+	public char[] decode(InputStream stream, int length)
 			throws IllegalArgumentException, IOException {
 		if (stream == null)
 			throw new IllegalArgumentException("stream cannot be null");
-		if (byteLength < 0)
-			throw new IllegalArgumentException("byteLength [" + byteLength
+		if (length < 0)
+			throw new IllegalArgumentException("length [" + length
 					+ "] must be >= 0.");
 
 		// short-circuit
-		if (byteLength == 0)
+		if (length == 0)
 			return EMPTY;
 
 		int charCount = 0;
@@ -67,9 +68,10 @@ public class StreamDecoder {
 		 * 
 		 * This is better than trying to guess via the Decoder's
 		 * averageBytesPerChar value and happen to get it wrong in the middle of
-		 * decoding then needing to re-adjust the array on the fly then.
+		 * decoding and needing to re-size the target array on the fly them as
+		 * opposed to just chopping it before returning it if necessary.
 		 */
-		char[] chars = new char[byteLength];
+		char[] chars = new char[length];
 
 		// Reuse the backing decode buffer.
 		CharBuffer dest = CharBuffer.wrap(decodeBuffer);
@@ -77,14 +79,13 @@ public class StreamDecoder {
 		int bytesRead = 0;
 		decoder.reset();
 
-		while (byteLength > 0
-				&& (bytesRead = stream.read(readBuffer, 0, byteLength)) != -1) {
-			byteLength -= bytesRead;
-			boolean done = (byteLength == 0);
+		while (length > 0
+				&& (bytesRead = stream.read(readBuffer, 0, length)) != -1) {
+			length -= bytesRead;
 
 			ByteBuffer src = ByteBuffer.wrap(readBuffer, 0, bytesRead);
 			dest.clear();
-			decoder.decode(src, dest, done);
+			decoder.decode(src, dest, (length == 0));
 			dest.flip();
 
 			int remaining = dest.remaining();
@@ -92,12 +93,12 @@ public class StreamDecoder {
 			charCount += remaining;
 		}
 
-		if (byteLength > 0)
+		if (length > 0)
 			throw new IOException(
 					"End of Stream encountered before all requested bytes ["
-							+ (byteLength + bytesRead)
+							+ (length + bytesRead)
 							+ "] could be read. Unable to read the last "
-							+ byteLength + " remaining bytes.");
+							+ length + " remaining bytes.");
 
 		dest.clear();
 		decoder.flush(dest);
