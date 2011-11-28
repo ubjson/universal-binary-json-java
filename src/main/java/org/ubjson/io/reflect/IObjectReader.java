@@ -21,6 +21,6 @@ import org.ubjson.io.DataFormatException;
 import org.ubjson.io.UBJInputStream;
 
 public interface IObjectReader {
-	public <T> T readObject(UBJInputStream in, T type)
+	public <T> T readObject(UBJInputStream in, Class<T> type)
 			throws IllegalArgumentException, IOException, DataFormatException;
 }
