@@ -15,7 +15,7 @@
  */
 package org.ubjson.model;
 
-import static org.ubjson.io.IMarkerType.BYTE;
+import static org.ubjson.io.ITypeMarker.BYTE;
 
 import java.io.IOException;
 

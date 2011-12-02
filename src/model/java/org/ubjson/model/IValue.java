@@ -18,7 +18,7 @@ package org.ubjson.model;
 import java.io.IOException;
 
 import org.ubjson.io.DataFormatException;
-import org.ubjson.io.IMarkerType;
+import org.ubjson.io.ITypeMarker;
 import org.ubjson.io.UBJInputStreamParser;
 import org.ubjson.io.UBJOutputStream;
 
@@ -45,7 +45,7 @@ public interface IValue<T> {
 	 * 
 	 * @return the byte marker value used to represent this value type.
 	 * 
-	 * @see IMarkerType
+	 * @see ITypeMarker
 	 */
 	public byte getType();
 

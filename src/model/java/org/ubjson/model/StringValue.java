@@ -15,8 +15,8 @@
  */
 package org.ubjson.model;
 
-import static org.ubjson.io.IMarkerType.STRING;
-import static org.ubjson.io.IMarkerType.STRING_COMPACT;
+import static org.ubjson.io.ITypeMarker.STRING;
+import static org.ubjson.io.ITypeMarker.STRING_COMPACT;
 
 import java.io.IOException;
 

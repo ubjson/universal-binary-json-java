@@ -15,8 +15,8 @@
  */
 package org.ubjson.model;
 
-import static org.ubjson.io.IMarkerType.HUGE;
-import static org.ubjson.io.IMarkerType.HUGE_COMPACT;
+import static org.ubjson.io.ITypeMarker.HUGE;
+import static org.ubjson.io.ITypeMarker.HUGE_COMPACT;
 
 import java.io.IOException;
 import java.math.BigDecimal;

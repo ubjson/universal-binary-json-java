@@ -15,7 +15,7 @@
  */
 package org.ubjson.model;
 
-import static org.ubjson.io.IMarkerType.FLOAT;
+import static org.ubjson.io.ITypeMarker.FLOAT;
 
 import java.io.IOException;
 

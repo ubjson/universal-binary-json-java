@@ -15,8 +15,8 @@
  */
 package org.ubjson.model;
 
-import static org.ubjson.io.IMarkerType.FALSE;
-import static org.ubjson.io.IMarkerType.TRUE;
+import static org.ubjson.io.ITypeMarker.FALSE;
+import static org.ubjson.io.ITypeMarker.TRUE;
 
 import java.io.IOException;
 
