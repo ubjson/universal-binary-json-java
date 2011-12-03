@@ -2,11 +2,60 @@ Universal Binary JSON Java Library
 http://ubjson.org
 
 
-	<Under Active Development, notes below...>
+About this project...
+---------------------
+This code base is actively under development and implements the latest 
+specification of Universal Binary JSON (Draft 8).
+	
+Core spec-compliant I/O is performed through the UBJOutputStream and 
+UBJInputStream classes; this code has been stable for a while and implements
+the lowest level of interaction between the spec and Java constructs.
+
+Higher-level I/O classes like the org.ubjson.io.reflect package are under
+development but provide easier-to-use tools.
+
+This project intends to eventually contain a multitude of layers of abstraction
+as well as Java-based tools for the Universal Binary JSON spec like UBJ to JSON
+converters, viewers, diff tools, etc.
 
 
 Changelog
 ---------
+11-28-11
+	* Fixed UBJInputStreamParser implementation; nextType correctly implements
+	logic to skip existing element (if called back to back) as well as validate
+	the marker type it encounters before returning it to the caller.
+	
+	* Modified IObjectReader contract; a Parser implementation is required to 
+	make traversing the UBJ stream possible without knowing what type of element
+	is next.
+	
+11-27-11
+	* Streamlined ByteArrayOutputStream implementation to ensure the capacity
+	of the underlying byte[] is never grown unless absolutely necessary.
+	
+	* Rewrote class Javadoc for ByteArrayOutputStream to include a code snippet
+	on how to use it.
+
+11-26-11
+	* Fixed major bug in how 16, 32 and 64-bit integers are re-assembled when
+	read back from binary representations.
+	
+	* Added a numeric test to specifically catch this error if it ever pops up
+	again.
+	
+	* Optimized reading and writing of numeric values in Input and Output
+	stream implementations.
+	
+	* Optimized ObjectWriter implementation by streamlining the numeric read/write
+	logic and removing the sub-optimal force-compression of on-disk storage.
+	
+	* Fixed ObjectWriter to match exactly with the output written by 
+	UBJOutputStream.
+	
+	* Normalized all testing between I/O classes so they use the same classes
+	to ensure parity.
+
 11-10-11
 	* DRAFT 8 Spec Support Added.
 
