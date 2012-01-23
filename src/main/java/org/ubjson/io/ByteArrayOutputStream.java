@@ -8,7 +8,8 @@ import java.nio.ByteBuffer;
  * Class used to implement a very efficient and re-usable (see {@link #reset()})
  * {@link OutputStream} that writes to an underlying (and dynamically-grown)
  * <code>byte[]</code> that the caller can get direct access to via
- * {@link #getArray()}.
+ * {@link #getArray()}. This class is a compliment to
+ * {@link ByteArrayInputStream}.
  * <p/>
  * This class is meant to be a fast bridge between the stream-based Universal
  * Binary JSON I/O classes and a simple <code>byte[]</code> which can be helpful
@@ -115,6 +116,7 @@ import java.nio.ByteBuffer;
  * scenario to occur.
  * 
  * @author Riyad Kalla (software@thebuzzmedia.com)
+ * @see ByteArrayInputStream
  */
 public class ByteArrayOutputStream extends OutputStream {
 	protected int i;
@@ -149,20 +151,15 @@ public class ByteArrayOutputStream extends OutputStream {
 	}
 
 	@Override
-	public void write(int b) throws IOException {
+	public void write(int value) throws IOException {
 		ensureCapacity(i + 1);
-		data[i++] = (byte) b;
+		data[i++] = (byte) value;
 	}
 
 	@Override
-	public void write(byte[] b) throws IOException {
-		write(b, 0, b.length);
-	}
-
-	@Override
-	public void write(byte[] b, int offset, int length) throws IOException {
+	public void write(byte[] buffer, int offset, int length) throws IOException {
 		ensureCapacity(i + length);
-		System.arraycopy(b, offset, data, i, length);
+		System.arraycopy(buffer, offset, data, i, length);
 		i += length;
 	}
 
