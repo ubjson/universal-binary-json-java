@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
-// TODO: note that any stream wrapping this type is implicitly re-usable as well.
-
 /**
  * Class used to implement a very efficient and re-usable (see {@link #reset()})
  * {@link OutputStream} that writes to an underlying (and dynamically-grown)
