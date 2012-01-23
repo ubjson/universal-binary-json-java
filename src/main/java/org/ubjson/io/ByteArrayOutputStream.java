@@ -176,17 +176,6 @@ public class ByteArrayOutputStream extends OutputStream {
 	}
 
 	/**
-	 * Used to get the current length of data written to the underlying
-	 * <code>byte[]</code>.
-	 * 
-	 * @return the current length of data written to the underlying
-	 *         <code>byte[]</code>.
-	 */
-	public int getLength() {
-		return i;
-	}
-
-	/**
 	 * Used to get direct access to the <code>byte[]</code> that backs this
 	 * {@link OutputStream} implementation.
 	 * 
@@ -195,6 +184,17 @@ public class ByteArrayOutputStream extends OutputStream {
 	 */
 	public byte[] getArray() {
 		return data;
+	}
+
+	/**
+	 * Used to get the current length of data written to the underlying
+	 * <code>byte[]</code>.
+	 * 
+	 * @return the current length of data written to the underlying
+	 *         <code>byte[]</code>.
+	 */
+	public int getLength() {
+		return i;
 	}
 
 	protected void ensureCapacity(int capacity) {
