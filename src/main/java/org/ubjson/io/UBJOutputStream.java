@@ -51,6 +51,7 @@ import org.ubjson.io.charset.StreamEncoder;
  * call the underlying stream directly.
  */
 public class UBJOutputStream extends FilterOutputStream {
+	protected long count;
 	protected byte[] buffer;
 	protected StreamEncoder encoder;
 
@@ -63,17 +64,35 @@ public class UBJOutputStream extends FilterOutputStream {
 
 	@Override
 	public void write(int b) throws IOException {
+		count++;
 		out.write(b);
 	}
 
 	@Override
-	public void write(byte[] b) throws IOException {
-		out.write(b);
+	public void write(byte[] buffer) throws IllegalArgumentException,
+			IOException {
+		if (buffer == null)
+			throw new IllegalArgumentException("buffer cannot be null");
+
+		write(buffer, 0, buffer.length);
 	}
 
 	@Override
-	public void write(byte[] b, int off, int len) throws IOException {
-		out.write(b, off, len);
+	public void write(byte[] buffer, int offset, int length)
+			throws IllegalArgumentException, IOException {
+		if (buffer == null)
+			throw new IllegalArgumentException("buffer cannot be null");
+		if (offset < 0 || length < 0 || (offset + length) > buffer.length)
+			throw new IllegalArgumentException(
+					"offset ["
+							+ offset
+							+ "] and length ["
+							+ length
+							+ "] must be >= 0 and (offset + length) must be <= buffer.lengt ["
+							+ buffer.length + "]");
+
+		out.write(buffer, offset, length);
+		count += length;
 	}
 
 	@Override
@@ -87,9 +106,9 @@ public class UBJOutputStream extends FilterOutputStream {
 			out.flush();
 		} catch (Exception e) {
 			// no-op
+		} finally {
+			out.close();
 		}
-
-		out.close();
 	}
 
 	public void writeEnd() throws IOException {
