@@ -1,17 +1,15 @@
 package org.ubjson.io;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
 import org.ubjson.CouchDB4k;
 import org.ubjson.CouchDB4kMarshaller;
-import org.ubjson.io.UBJInputStream;
-import org.ubjson.io.UBJOutputStream;
-
 
 public class CouchDB4kBenchmark {
+	private static boolean profiling;
+
 	private static int len;
 	private static byte[] data;
 
@@ -19,20 +17,28 @@ public class CouchDB4kBenchmark {
 			new NullOutputStream());
 
 	public static void main(String[] args) throws IOException {
+		// Detect if we are running in profile mode.
+		profiling = (args.length > 0 && "-profile".equals(args[0]) ? true
+				: false);
+
 		// Write a single CouchDB4k out to byte[]
-		RawByteArrayOutputStream rbaos = new RawByteArrayOutputStream(1024);
-		UBJOutputStream stream = new UBJOutputStream(rbaos);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+		UBJOutputStream stream = new UBJOutputStream(baos);
 		CouchDB4kMarshaller.serialize(new CouchDB4k(), stream);
 
 		stream.flush();
 		stream.close();
 
 		// Remember the example output
-		len = rbaos.getBytesWritten();
-		data = rbaos.getArray();
+		len = baos.getLength();
+		data = baos.getArray();
 
-		benchmarkMS(1000000); // 1mil
-		benchmarkMS(100000); // 100k
+		// Skip these if in profiling mode; they take too long.
+		if (!profiling) {
+			benchmarkMS(1000000); // 1mil
+			benchmarkMS(100000); // 100k
+		}
+
 		benchmarkMS(10000); // 10k
 		benchmarkNS(1000); // 1k
 		benchmarkNS(100); // 100
@@ -106,20 +112,6 @@ public class CouchDB4kBenchmark {
 
 		System.out.printf("\t%s, Elapsed Time: %d %s [%d ns/op, %f ops/sec]\n",
 				label, et, (ns ? "ns" : "ms"), nsPerOp, opsPerSec);
-	}
-
-	private static class RawByteArrayOutputStream extends ByteArrayOutputStream {
-		public RawByteArrayOutputStream(int size) {
-			super(size);
-		}
-
-		public int getBytesWritten() {
-			return count;
-		}
-
-		public byte[] getArray() {
-			return buf;
-		}
 	}
 
 	private static class NullOutputStream extends OutputStream {
