@@ -101,9 +101,10 @@ public class UBJInputStreamParser extends UBJInputStream {
 				break;
 
 			default:
-				throw new UBJFormatException(
+				throw new UBJFormatException(pos,
 						"Encountered an unknown type marker of byte value "
-								+ peek + " (char='" + ((char) peek) + "').");
+								+ peek + " (char='" + ((char) peek)
+								+ "') at stream position " + pos + ".");
 			}
 		}
 
@@ -237,10 +238,11 @@ public class UBJInputStreamParser extends UBJInputStream {
 
 		if (peek != expected && (expectedOpt != -1 && peek != expectedOpt)) {
 			String message = "Unable to read " + name
-					+ " value. The type marker read was byte " + peek
+					+ " value at stream position " + pos
+					+ ". The type marker byte value read was " + peek
 					+ " (char='" + ((char) peek)
-					+ "') but the expected type marker byte was " + expected
-					+ " (char='" + ((char) expected) + "')";
+					+ "') but the expected type marker byte value was "
+					+ expected + " (char='" + ((char) expected) + "')";
 
 			if (expectedOpt != -1)
 				message += " or " + expectedOpt + " (char='"
@@ -248,7 +250,7 @@ public class UBJInputStreamParser extends UBJInputStream {
 			else
 				message += '.';
 
-			throw new UBJFormatException(message);
+			throw new UBJFormatException(pos, message);
 		}
 
 		return peek;
