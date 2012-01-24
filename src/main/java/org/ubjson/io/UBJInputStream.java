@@ -375,7 +375,10 @@ public class UBJInputStream extends FilterInputStream {
 		/*
 		 * Now that the significant bits of each segment of the number are where
 		 * they should be, we re-create the original number by merging all the
-		 * segments together (bit operation) and return the resulting number.
+		 * segments together (bit operation) then truncating the result to a
+		 * 16-bit short. The truncation is not an issue as the 16-bits we care
+		 * about are in their proper place (done in the step above); if there is
+		 * anything else getting truncated it is data we didn't care about.
 		 */
 		return (short) (s1 | s2);
 	}
