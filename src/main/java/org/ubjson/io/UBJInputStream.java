@@ -46,6 +46,7 @@ import org.ubjson.io.charset.StreamDecoder;
 public class UBJInputStream extends FilterInputStream {
 	private static final byte INVALID = -1;
 
+	protected int pos;
 	protected byte[] buffer;
 	protected StreamDecoder decoder;
 
@@ -57,48 +58,70 @@ public class UBJInputStream extends FilterInputStream {
 	}
 
 	@Override
-	public int read() throws IOException {
-		return in.read();
-	}
-
-	@Override
-	public int read(byte[] b) throws IOException {
-		return in.read(b);
-	}
-
-	@Override
-	public int read(byte[] b, int off, int len) throws IOException {
-		return in.read(b, off, len);
-	}
-
-	@Override
-	public long skip(long n) throws IOException {
-		return in.skip(n);
-	}
-
-	@Override
 	public int available() throws IOException {
 		return in.available();
 	}
 
 	@Override
-	public void close() throws IOException {
-		in.close();
+	public int read() throws IOException {
+		pos++;
+		return in.read();
 	}
 
 	@Override
-	public synchronized void mark(int readlimit) {
-		in.mark(readlimit);
+	public int read(byte[] buffer) throws IllegalArgumentException, IOException {
+		if (buffer == null)
+			throw new IllegalArgumentException("buffer cannot be null");
+
+		return read(buffer, 0, buffer.length);
 	}
 
 	@Override
-	public synchronized void reset() throws IOException {
-		in.reset();
+	public int read(byte[] buffer, int offset, int length)
+			throws IllegalArgumentException, IOException {
+		if (buffer == null)
+			throw new IllegalArgumentException("buffer cannot be null");
+		if (offset < 0 || length < 0 || (offset + length) > buffer.length)
+			throw new IllegalArgumentException(
+					"offset ["
+							+ offset
+							+ "] and length ["
+							+ length
+							+ "] must be >= 0 and (offset + length) must be <= buffer.lengt ["
+							+ buffer.length + "]");
+
+		int read = in.read(buffer, offset, length);
+		pos += read;
+		return read;
+	}
+
+	@Override
+	public long skip(long amount) throws IllegalArgumentException, IOException {
+		if (amount < 0)
+			throw new IllegalArgumentException("amount [" + amount
+					+ "] must be >= 0");
+
+		return in.skip(amount);
 	}
 
 	@Override
 	public boolean markSupported() {
 		return in.markSupported();
+	}
+	
+	@Override
+	public void mark(int readlimit) {
+		in.mark(readlimit);
+	}
+
+	@Override
+	public void reset() throws IOException {
+		in.reset();
+	}
+
+	@Override
+	public void close() throws IOException {
+		in.close();
 	}
 
 	public void readEnd() throws IOException, UBJFormatException {
