@@ -136,6 +136,10 @@ public class UBJInputStream extends FilterInputStream {
 	public void close() throws IOException {
 		in.close();
 	}
+	
+	public long getPosition() {
+		return pos;
+	}
 
 	public void readEnd() throws IOException, UBJFormatException {
 		checkType("END", END, INVALID);

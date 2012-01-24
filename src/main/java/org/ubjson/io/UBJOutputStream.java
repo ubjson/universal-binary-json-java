@@ -110,6 +110,10 @@ public class UBJOutputStream extends FilterOutputStream {
 			out.close();
 		}
 	}
+	
+	public long getWriteCount() {
+		return count;
+	}
 
 	public void writeEnd() throws IOException {
 		write(END);
