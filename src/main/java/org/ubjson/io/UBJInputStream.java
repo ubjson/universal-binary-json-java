@@ -46,7 +46,7 @@ import org.ubjson.io.charset.StreamDecoder;
 public class UBJInputStream extends FilterInputStream {
 	private static final byte INVALID = -1;
 
-	protected int pos;
+	protected long pos;
 	protected byte[] buffer;
 	protected StreamDecoder decoder;
 
@@ -108,7 +108,7 @@ public class UBJInputStream extends FilterInputStream {
 	public boolean markSupported() {
 		return in.markSupported();
 	}
-	
+
 	@Override
 	public void mark(int readlimit) {
 		in.mark(readlimit);
@@ -183,9 +183,11 @@ public class UBJInputStream extends FilterInputStream {
 
 		if (length < 0)
 			throw new UBJFormatException(
+					pos,
 					"Encountered a negative (invalid) length of ["
 							+ length
-							+ "] specified for the HUGE value. Length must be >= 0.");
+							+ "] specified for the HUGE value at stream position "
+							+ pos + ". Length must be >= 0.");
 
 		int read = 0;
 		int total = 0;
@@ -201,10 +203,10 @@ public class UBJInputStream extends FilterInputStream {
 		// Make sure we got all the bytes we were promised.
 		if (total < length)
 			throw new IOException(
-					"End of Stream was encountered while trying to read all of the bytes representing this HUGE value ("
-							+ length
-							+ " bytes). Only "
-							+ total
+					"End of Stream was encountered at stream position "
+							+ pos
+							+ " while trying to read all of the bytes representing this HUGE value ("
+							+ length + " bytes). Only " + total
 							+ " bytes could be read.");
 
 		return buffer;
@@ -226,9 +228,11 @@ public class UBJInputStream extends FilterInputStream {
 
 		if (length < 0)
 			throw new UBJFormatException(
+					pos,
 					"Encountered a negative (invalid) length of ["
 							+ length
-							+ "] specified for the (numeric) HUGE value. Length must be >= 0.");
+							+ "] specified for the HUGE value at stream position "
+							+ pos + ". Length must be >= 0.");
 
 		return decoder.decode(in, length);
 	}
@@ -263,9 +267,11 @@ public class UBJInputStream extends FilterInputStream {
 
 		if (length < 0)
 			throw new UBJFormatException(
+					pos,
 					"Encountered a negative (invalid) length of ["
 							+ length
-							+ "] specified for the STRING value. Length must be >= 0.");
+							+ "] specified for the STRING value at stream position "
+							+ pos + ". Length must be >= 0.");
 
 		return decoder.decode(in, length);
 	}
@@ -296,9 +302,11 @@ public class UBJInputStream extends FilterInputStream {
 
 		if (count < 0)
 			throw new UBJFormatException(
+					pos,
 					"Encountered a negative (invalid) length of ["
 							+ count
-							+ "] specified for the ARRAY value. Length must be >= 0.");
+							+ "] specified for the ARRAY value at stream position "
+							+ pos + ". Length must be >= 0.");
 
 		return count;
 	}
@@ -329,9 +337,11 @@ public class UBJInputStream extends FilterInputStream {
 
 		if (count < 0)
 			throw new UBJFormatException(
+					pos,
 					"Encountered a negative (invalid) length of ["
 							+ count
-							+ "] specified for the OBJECT value. Length must be >= 0.");
+							+ "] specified for the OBJECT value at stream position "
+							+ pos + ". Length must be >= 0.");
 
 		return count;
 	}
@@ -358,10 +368,11 @@ public class UBJInputStream extends FilterInputStream {
 
 		if (type != expected && (expectedOpt != -1 && type != expectedOpt)) {
 			String message = "Unable to read " + name
-					+ " value. The type marker read was byte " + type
+					+ " value at stream position " + pos
+					+ ". The type marker byte value read was " + type
 					+ " (char='" + ((char) type)
-					+ "') but the expected type marker byte was " + expected
-					+ " (char='" + ((char) expected) + "')";
+					+ "') but the expected type marker byte value was "
+					+ expected + " (char='" + ((char) expected) + "')";
 
 			if (expectedOpt != -1)
 				message += " or " + expectedOpt + " (char='"
@@ -369,7 +380,7 @@ public class UBJInputStream extends FilterInputStream {
 			else
 				message += '.';
 
-			throw new UBJFormatException(message);
+			throw new UBJFormatException(pos, message);
 		}
 
 		return type;
@@ -379,9 +390,10 @@ public class UBJInputStream extends FilterInputStream {
 		int read = read(buffer, 0, 2);
 
 		if (read < 2)
-			throw new UBJFormatException(
-					"Attempted to read 2 bytes to reconstruct the INT16 value, instead was only able to read "
-							+ read + " bytes from the underlying stream.");
+			throw new UBJFormatException(pos,
+					"Attempted to read 2 bytes to reconstruct the INT16 value at stream position "
+							+ pos + ", but was only able to read " + read
+							+ " bytes from the underlying stream.");
 
 		/*
 		 * We read in the original number in 1-byte (8-bit) segments,
@@ -410,9 +422,10 @@ public class UBJInputStream extends FilterInputStream {
 		int read = read(buffer, 0, 4);
 
 		if (read < 4)
-			throw new UBJFormatException(
-					"Attempted to read 4 bytes to reconstruct the INT32 value, instead was only able to read "
-							+ read + " bytes from the underlying stream.");
+			throw new UBJFormatException(pos,
+					"Attempted to read 4 bytes to reconstruct the INT32 value at stream position "
+							+ pos + ", but was only able to read " + read
+							+ " bytes from the underlying stream.");
 
 		/*
 		 * We read in the original number in 1-byte (8-bit) segments,
@@ -436,9 +449,10 @@ public class UBJInputStream extends FilterInputStream {
 		int read = read(buffer);
 
 		if (read < 8)
-			throw new UBJFormatException(
-					"Attempted to read 8 bytes to reconstruct the INT64 value, instead was only able to read "
-							+ read + " bytes from the underlying stream.");
+			throw new UBJFormatException(pos,
+					"Attempted to read 8 bytes to reconstruct the INT64 value at stream position "
+							+ pos + ", but was only able to read " + read
+							+ " bytes from the underlying stream.");
 
 		/*
 		 * We read in the original number in 1-byte (8-bit) segments,

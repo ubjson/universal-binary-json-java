@@ -18,7 +18,14 @@ package org.ubjson.io;
 public class UBJFormatException extends RuntimeException {
 	private static final long serialVersionUID = 4874357982561267152L;
 
-	public UBJFormatException(String reason) {
+	protected long pos;
+
+	public UBJFormatException(long pos, String reason) {
 		super(reason);
+		this.pos = pos;
+	}
+
+	public long getPosition() {
+		return pos;
 	}
 }
