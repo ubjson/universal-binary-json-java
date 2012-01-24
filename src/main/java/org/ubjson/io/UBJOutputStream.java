@@ -112,50 +112,50 @@ public class UBJOutputStream extends FilterOutputStream {
 	}
 
 	public void writeEnd() throws IOException {
-		out.write(END);
+		write(END);
 	}
 
 	public void writeNoop() throws IOException {
-		out.write(NOOP);
+		write(NOOP);
 	}
 
 	public void writeNull() throws IOException {
-		out.write(NULL);
+		write(NULL);
 	}
 
 	public void writeBoolean(boolean value) throws IOException {
-		out.write(value ? TRUE : FALSE);
+		write(value ? TRUE : FALSE);
 	}
 
 	public void writeByte(byte value) throws IOException {
-		out.write(BYTE);
-		out.write(value);
+		write(BYTE);
+		write(value);
 	}
 
 	public void writeInt16(short value) throws IOException {
-		out.write(INT16);
+		write(INT16);
 		writeInt16Impl(value);
 	}
 
 	public void writeInt32(int value) throws IOException {
-		out.write(INT32);
+		write(INT32);
 		writeInt32Impl(value);
 	}
 
 	public void writeInt64(long value) throws IOException {
-		out.write(INT64);
+		write(INT64);
 		writeInt64Impl(value);
 	}
 
 	public void writeFloat(float value) throws IOException {
-		out.write(FLOAT);
+		write(FLOAT);
 
 		// IEEE 754 single precision floating point format (as int).
 		writeInt32Impl(Float.floatToIntBits(value));
 	}
 
 	public void writeDouble(double value) throws IOException {
-		out.write(DOUBLE);
+		write(DOUBLE);
 
 		// IEEE 754 double precision floating point format (as long).
 		writeInt64Impl(Double.doubleToLongBits(value));
@@ -168,10 +168,10 @@ public class UBJOutputStream extends FilterOutputStream {
 
 		// Write header
 		if (huge.length < 255) {
-			out.write(HUGE_COMPACT);
-			out.write(huge.length);
+			write(HUGE_COMPACT);
+			write(huge.length);
 		} else {
-			out.write(HUGE);
+			write(HUGE);
 			writeInt32Impl(huge.length);
 		}
 
@@ -189,10 +189,10 @@ public class UBJOutputStream extends FilterOutputStream {
 
 		// Write header
 		if (length < 255) {
-			out.write(HUGE_COMPACT);
-			out.write(length);
+			write(HUGE_COMPACT);
+			write(length);
 		} else {
-			out.write(HUGE);
+			write(HUGE);
 			writeInt32Impl(length);
 		}
 
@@ -210,10 +210,10 @@ public class UBJOutputStream extends FilterOutputStream {
 
 		// Write header
 		if (length < 255) {
-			out.write(HUGE_COMPACT);
-			out.write(length);
+			write(HUGE_COMPACT);
+			write(length);
 		} else {
-			out.write(HUGE);
+			write(HUGE);
 			writeInt32Impl(length);
 		}
 
@@ -228,10 +228,10 @@ public class UBJOutputStream extends FilterOutputStream {
 
 		// Write header
 		if (text.length < 255) {
-			out.write(STRING_COMPACT);
-			out.write(text.length);
+			write(STRING_COMPACT);
+			write(text.length);
 		} else {
-			out.write(STRING);
+			write(STRING);
 			writeInt32Impl(text.length);
 		}
 
@@ -246,10 +246,10 @@ public class UBJOutputStream extends FilterOutputStream {
 
 		// Write header
 		if (length < 255) {
-			out.write(STRING_COMPACT);
-			out.write(length);
+			write(STRING_COMPACT);
+			write(length);
 		} else {
-			out.write(STRING);
+			write(STRING);
 			writeInt32Impl(length);
 		}
 
@@ -266,10 +266,10 @@ public class UBJOutputStream extends FilterOutputStream {
 
 		// Write header
 		if (length < 255) {
-			out.write(STRING_COMPACT);
-			out.write(length);
+			write(STRING_COMPACT);
+			write(length);
 		} else {
-			out.write(STRING);
+			write(STRING);
 			writeInt32Impl(length);
 		}
 
@@ -290,10 +290,10 @@ public class UBJOutputStream extends FilterOutputStream {
 		 * trailing 'E' at some point.
 		 */
 		if (elementCount < 256) {
-			out.write(ARRAY_COMPACT);
-			out.write(elementCount);
+			write(ARRAY_COMPACT);
+			write(elementCount);
 		} else {
-			out.write(ARRAY);
+			write(ARRAY);
 			writeInt32Impl(elementCount);
 		}
 	}
@@ -310,10 +310,10 @@ public class UBJOutputStream extends FilterOutputStream {
 		 * trailing 'E' at some point.
 		 */
 		if (elementCount < 256) {
-			out.write(OBJECT_COMPACT);
-			out.write(elementCount);
+			write(OBJECT_COMPACT);
+			write(elementCount);
 		} else {
-			out.write(OBJECT);
+			write(OBJECT);
 			writeInt32Impl(elementCount);
 		}
 	}
@@ -324,7 +324,7 @@ public class UBJOutputStream extends FilterOutputStream {
 		buffer[1] = (byte) ((value >>> 0) & 0xFF);
 
 		// Write it in one chunk.
-		out.write(buffer, 0, 2);
+		write(buffer, 0, 2);
 	}
 
 	protected void writeInt32Impl(int value) throws IOException {
@@ -335,7 +335,7 @@ public class UBJOutputStream extends FilterOutputStream {
 		buffer[3] = (byte) ((value >>> 0) & 0xFF);
 
 		// Write it in one chunk.
-		out.write(buffer, 0, 4);
+		write(buffer, 0, 4);
 	}
 
 	protected void writeInt64Impl(long value) throws IOException {
@@ -350,6 +350,6 @@ public class UBJOutputStream extends FilterOutputStream {
 		buffer[7] = (byte) (value >>> 0);
 
 		// Write it in one chunk
-		out.write(buffer, 0, 8);
+		write(buffer, 0, 8);
 	}
 }
