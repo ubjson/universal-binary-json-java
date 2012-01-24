@@ -25,7 +25,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ubjson.io.DataFormatException;
+import org.ubjson.io.UBJFormatException;
 import org.ubjson.io.UBJInputStreamParser;
 import org.ubjson.io.UBJOutputStream;
 
@@ -36,7 +36,7 @@ public class ArrayValue extends AbstractCollectionValue<List<IValue<?>>> {
 	}
 
 	public ArrayValue(UBJInputStreamParser in) throws IOException,
-			DataFormatException {
+			UBJFormatException {
 		deserialize(in);
 	}
 
@@ -59,7 +59,7 @@ public class ArrayValue extends AbstractCollectionValue<List<IValue<?>>> {
 
 	@Override
 	public void deserialize(UBJInputStreamParser in) throws IOException,
-			DataFormatException {
+			UBJFormatException {
 		int size = in.readArrayLength();
 		value = new ArrayList<IValue<?>>(size);
 
@@ -144,7 +144,7 @@ public class ArrayValue extends AbstractCollectionValue<List<IValue<?>>> {
 				break;
 
 			default:
-				throw new DataFormatException("Unknown type marker value "
+				throw new UBJFormatException("Unknown type marker value "
 						+ type + " (char='" + ((char) type) + "') encountered.");
 			}
 

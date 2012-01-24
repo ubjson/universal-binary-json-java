@@ -101,50 +101,50 @@ public class UBJInputStream extends FilterInputStream {
 		return in.markSupported();
 	}
 
-	public void readEnd() throws IOException, DataFormatException {
+	public void readEnd() throws IOException, UBJFormatException {
 		checkType("END", END, INVALID);
 	}
 
-	public void readNull() throws IOException, DataFormatException {
+	public void readNull() throws IOException, UBJFormatException {
 		checkType("NULL", NULL, INVALID);
 	}
 
-	public boolean readBoolean() throws IOException, DataFormatException {
+	public boolean readBoolean() throws IOException, UBJFormatException {
 		byte type = checkType("BOOLEAN", TRUE, FALSE);
 		return (type == TRUE ? true : false);
 	}
 
-	public byte readByte() throws IOException, DataFormatException {
+	public byte readByte() throws IOException, UBJFormatException {
 		checkType("BYTE", BYTE, INVALID);
 		return (byte) in.read();
 	}
 
-	public short readInt16() throws IOException, DataFormatException {
+	public short readInt16() throws IOException, UBJFormatException {
 		checkType("INT16", INT16, INVALID);
 		return readInt16Impl();
 	}
 
-	public int readInt32() throws IOException, DataFormatException {
+	public int readInt32() throws IOException, UBJFormatException {
 		checkType("INT32", INT32, INVALID);
 		return readInt32Impl();
 	}
 
-	public long readInt64() throws IOException, DataFormatException {
+	public long readInt64() throws IOException, UBJFormatException {
 		checkType("INT64", INT64, INVALID);
 		return readInt64Impl();
 	}
 
-	public float readFloat() throws IOException, DataFormatException {
+	public float readFloat() throws IOException, UBJFormatException {
 		checkType("FLOAT", FLOAT, INVALID);
 		return Float.intBitsToFloat(readInt32Impl());
 	}
 
-	public double readDouble() throws IOException, DataFormatException {
+	public double readDouble() throws IOException, UBJFormatException {
 		checkType("DOUBLE", DOUBLE, INVALID);
 		return Double.longBitsToDouble(readInt64Impl());
 	}
 
-	public byte[] readHugeAsBytes() throws IOException, DataFormatException {
+	public byte[] readHugeAsBytes() throws IOException, UBJFormatException {
 		byte type = checkType("HUGE", HUGE_COMPACT, HUGE);
 		int length = 0;
 
@@ -159,7 +159,7 @@ public class UBJInputStream extends FilterInputStream {
 		}
 
 		if (length < 0)
-			throw new DataFormatException(
+			throw new UBJFormatException(
 					"Encountered a negative (invalid) length of ["
 							+ length
 							+ "] specified for the HUGE value. Length must be >= 0.");
@@ -187,7 +187,7 @@ public class UBJInputStream extends FilterInputStream {
 		return buffer;
 	}
 
-	public char[] readHugeAsChars() throws IOException, DataFormatException {
+	public char[] readHugeAsChars() throws IOException, UBJFormatException {
 		byte type = checkType("HUGE", HUGE_COMPACT, HUGE);
 		int length = 0;
 
@@ -202,7 +202,7 @@ public class UBJInputStream extends FilterInputStream {
 		}
 
 		if (length < 0)
-			throw new DataFormatException(
+			throw new UBJFormatException(
 					"Encountered a negative (invalid) length of ["
 							+ length
 							+ "] specified for the (numeric) HUGE value. Length must be >= 0.");
@@ -211,20 +211,20 @@ public class UBJInputStream extends FilterInputStream {
 	}
 
 	public BigInteger readHugeAsBigInteger() throws IOException,
-			DataFormatException {
+			UBJFormatException {
 		return new BigInteger(readHugeAsBytes());
 	}
 
 	public BigDecimal readHugeAsBigDecimal() throws IOException,
-			DataFormatException {
+			UBJFormatException {
 		return new BigDecimal(readHugeAsChars());
 	}
 
-	public String readString() throws IOException, DataFormatException {
+	public String readString() throws IOException, UBJFormatException {
 		return new String(readStringAsChars());
 	}
 
-	public char[] readStringAsChars() throws IOException, DataFormatException {
+	public char[] readStringAsChars() throws IOException, UBJFormatException {
 		byte type = checkType("STRING", STRING_COMPACT, STRING);
 		int length = 0;
 
@@ -239,7 +239,7 @@ public class UBJInputStream extends FilterInputStream {
 		}
 
 		if (length < 0)
-			throw new DataFormatException(
+			throw new UBJFormatException(
 					"Encountered a negative (invalid) length of ["
 							+ length
 							+ "] specified for the STRING value. Length must be >= 0.");
@@ -247,7 +247,7 @@ public class UBJInputStream extends FilterInputStream {
 		return decoder.decode(in, length);
 	}
 
-	public int readArrayLength() throws IOException, DataFormatException {
+	public int readArrayLength() throws IOException, UBJFormatException {
 		byte type = checkType("ARRAY", ARRAY_COMPACT, ARRAY);
 		int count = 0;
 
@@ -272,7 +272,7 @@ public class UBJInputStream extends FilterInputStream {
 		}
 
 		if (count < 0)
-			throw new DataFormatException(
+			throw new UBJFormatException(
 					"Encountered a negative (invalid) length of ["
 							+ count
 							+ "] specified for the ARRAY value. Length must be >= 0.");
@@ -280,7 +280,7 @@ public class UBJInputStream extends FilterInputStream {
 		return count;
 	}
 
-	public int readObjectLength() throws IOException, DataFormatException {
+	public int readObjectLength() throws IOException, UBJFormatException {
 		byte type = checkType("OBJECT", OBJECT_COMPACT, OBJECT);
 		int count = 0;
 
@@ -305,7 +305,7 @@ public class UBJInputStream extends FilterInputStream {
 		}
 
 		if (count < 0)
-			throw new DataFormatException(
+			throw new UBJFormatException(
 					"Encountered a negative (invalid) length of ["
 							+ count
 							+ "] specified for the OBJECT value. Length must be >= 0.");
@@ -330,7 +330,7 @@ public class UBJInputStream extends FilterInputStream {
 	}
 
 	protected byte checkType(String name, byte expected, byte expectedOpt)
-			throws DataFormatException, IOException {
+			throws UBJFormatException, IOException {
 		byte type = nextType();
 
 		if (type != expected && (expectedOpt != -1 && type != expectedOpt)) {
@@ -346,7 +346,7 @@ public class UBJInputStream extends FilterInputStream {
 			else
 				message += '.';
 
-			throw new DataFormatException(message);
+			throw new UBJFormatException(message);
 		}
 
 		return type;
@@ -356,7 +356,7 @@ public class UBJInputStream extends FilterInputStream {
 		int read = in.read(buffer, 0, 2);
 
 		if (read < 2)
-			throw new DataFormatException(
+			throw new UBJFormatException(
 					"Attempted to read 2 bytes to reconstruct the INT16 value, instead was only able to read "
 							+ read + " bytes from the underlying stream.");
 
@@ -384,7 +384,7 @@ public class UBJInputStream extends FilterInputStream {
 		int read = in.read(buffer, 0, 4);
 
 		if (read < 4)
-			throw new DataFormatException(
+			throw new UBJFormatException(
 					"Attempted to read 4 bytes to reconstruct the INT32 value, instead was only able to read "
 							+ read + " bytes from the underlying stream.");
 
@@ -410,7 +410,7 @@ public class UBJInputStream extends FilterInputStream {
 		int read = in.read(buffer);
 
 		if (read < 8)
-			throw new DataFormatException(
+			throw new UBJFormatException(
 					"Attempted to read 8 bytes to reconstruct the INT64 value, instead was only able to read "
 							+ read + " bytes from the underlying stream.");
 

@@ -31,7 +31,7 @@ public class UBJInputStreamParser extends UBJInputStream {
 	}
 
 	@Override
-	public byte nextType() throws IOException, DataFormatException {
+	public byte nextType() throws IOException, UBJFormatException {
 		// Skip the current marked value if the body wasn't read.
 		if (peek != -1) {
 			switch (peek) {
@@ -81,7 +81,7 @@ public class UBJInputStreamParser extends UBJInputStream {
 				break;
 
 			default:
-				throw new DataFormatException(
+				throw new UBJFormatException(
 						"Encountered an unknown type marker of byte value "
 								+ peek + " (char='" + ((char) peek) + "').");
 			}
@@ -91,75 +91,75 @@ public class UBJInputStreamParser extends UBJInputStream {
 	}
 
 	@Override
-	public void readEnd() throws IOException, DataFormatException {
+	public void readEnd() throws IOException, UBJFormatException {
 		super.readEnd();
 		peek = -1;
 	}
 
 	@Override
-	public void readNull() throws IOException, DataFormatException {
+	public void readNull() throws IOException, UBJFormatException {
 		super.readNull();
 		peek = -1;
 	}
 
 	@Override
-	public boolean readBoolean() throws IOException, DataFormatException {
+	public boolean readBoolean() throws IOException, UBJFormatException {
 		boolean b = super.readBoolean();
 		peek = -1;
 		return b;
 	}
 
 	@Override
-	public byte readByte() throws IOException, DataFormatException {
+	public byte readByte() throws IOException, UBJFormatException {
 		byte b = super.readByte();
 		peek = -1;
 		return b;
 	}
 
 	@Override
-	public short readInt16() throws IOException, DataFormatException {
+	public short readInt16() throws IOException, UBJFormatException {
 		short s = super.readInt16();
 		peek = -1;
 		return s;
 	}
 
 	@Override
-	public int readInt32() throws IOException, DataFormatException {
+	public int readInt32() throws IOException, UBJFormatException {
 		int i = super.readInt32();
 		peek = -1;
 		return i;
 	}
 
 	@Override
-	public long readInt64() throws IOException, DataFormatException {
+	public long readInt64() throws IOException, UBJFormatException {
 		long l = super.readInt64();
 		peek = -1;
 		return l;
 	}
 
 	@Override
-	public float readFloat() throws IOException, DataFormatException {
+	public float readFloat() throws IOException, UBJFormatException {
 		float f = super.readFloat();
 		peek = -1;
 		return f;
 	}
 
 	@Override
-	public double readDouble() throws IOException, DataFormatException {
+	public double readDouble() throws IOException, UBJFormatException {
 		double d = super.readDouble();
 		peek = -1;
 		return d;
 	}
 
 	@Override
-	public byte[] readHugeAsBytes() throws IOException, DataFormatException {
+	public byte[] readHugeAsBytes() throws IOException, UBJFormatException {
 		byte[] h = super.readHugeAsBytes();
 		peek = -1;
 		return h;
 	}
 
 	@Override
-	public char[] readHugeAsChars() throws IOException, DataFormatException {
+	public char[] readHugeAsChars() throws IOException, UBJFormatException {
 		char[] h = super.readHugeAsChars();
 		peek = -1;
 		return h;
@@ -167,7 +167,7 @@ public class UBJInputStreamParser extends UBJInputStream {
 
 	@Override
 	public BigInteger readHugeAsBigInteger() throws IOException,
-			DataFormatException {
+			UBJFormatException {
 		BigInteger h = super.readHugeAsBigInteger();
 		peek = -1;
 		return h;
@@ -175,28 +175,28 @@ public class UBJInputStreamParser extends UBJInputStream {
 
 	@Override
 	public BigDecimal readHugeAsBigDecimal() throws IOException,
-			DataFormatException {
+			UBJFormatException {
 		BigDecimal h = super.readHugeAsBigDecimal();
 		peek = -1;
 		return h;
 	}
 
 	@Override
-	public char[] readStringAsChars() throws IOException, DataFormatException {
+	public char[] readStringAsChars() throws IOException, UBJFormatException {
 		char[] chars = super.readStringAsChars();
 		peek = -1;
 		return chars;
 	}
 
 	@Override
-	public int readArrayLength() throws IOException, DataFormatException {
+	public int readArrayLength() throws IOException, UBJFormatException {
 		int count = super.readArrayLength();
 		peek = -1;
 		return count;
 	}
 
 	@Override
-	public int readObjectLength() throws IOException, DataFormatException {
+	public int readObjectLength() throws IOException, UBJFormatException {
 		int count = super.readObjectLength();
 		peek = -1;
 		return count;
@@ -204,7 +204,7 @@ public class UBJInputStreamParser extends UBJInputStream {
 
 	@Override
 	protected byte checkType(String name, byte expected, byte expectedOpt)
-			throws DataFormatException, IOException {
+			throws UBJFormatException, IOException {
 		/*
 		 * Auto-peek at the next byte if necessary. This allows people to use
 		 * the UBJ streams in a manual serial/deserialization pattern of calling
@@ -228,7 +228,7 @@ public class UBJInputStreamParser extends UBJInputStream {
 			else
 				message += '.';
 
-			throw new DataFormatException(message);
+			throw new UBJFormatException(message);
 		}
 
 		return peek;

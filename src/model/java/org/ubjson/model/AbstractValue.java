@@ -17,7 +17,7 @@ package org.ubjson.model;
 
 import java.io.IOException;
 
-import org.ubjson.io.DataFormatException;
+import org.ubjson.io.UBJFormatException;
 import org.ubjson.io.UBJInputStreamParser;
 
 public abstract class AbstractValue<T> implements IValue<T> {
@@ -35,7 +35,7 @@ public abstract class AbstractValue<T> implements IValue<T> {
 	}
 
 	public AbstractValue(UBJInputStreamParser in)
-			throws IllegalArgumentException, IOException, DataFormatException {
+			throws IllegalArgumentException, IOException, UBJFormatException {
 		if (in == null)
 			throw new IllegalArgumentException("in cannot be null");
 

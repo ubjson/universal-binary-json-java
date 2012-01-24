@@ -19,7 +19,7 @@ import static org.ubjson.io.ITypeMarker.NOOP;
 
 import java.io.IOException;
 
-import org.ubjson.io.DataFormatException;
+import org.ubjson.io.UBJFormatException;
 import org.ubjson.io.UBJInputStreamParser;
 import org.ubjson.io.UBJOutputStream;
 
@@ -29,7 +29,7 @@ public class NoopValue extends AbstractValue<Void> {
 	}
 
 	public NoopValue(UBJInputStreamParser in) throws IllegalArgumentException,
-			IOException, DataFormatException {
+			IOException, UBJFormatException {
 		super(in);
 	}
 
@@ -49,7 +49,7 @@ public class NoopValue extends AbstractValue<Void> {
 
 	@Override
 	public void deserialize(UBJInputStreamParser in)
-			throws IllegalArgumentException, IOException, DataFormatException {
+			throws IllegalArgumentException, IOException, UBJFormatException {
 		throw new UnsupportedOperationException(
 				"UBJInputStream(Parser) does not support reading NOOP bytes directly as every read operation implicitly skips NOOP markers when it finds them inside the stream.");
 	}

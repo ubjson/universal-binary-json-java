@@ -17,7 +17,7 @@ package org.ubjson.model;
 
 import java.io.IOException;
 
-import org.ubjson.io.DataFormatException;
+import org.ubjson.io.UBJFormatException;
 import org.ubjson.io.ITypeMarker;
 import org.ubjson.io.UBJInputStreamParser;
 import org.ubjson.io.UBJOutputStream;
@@ -90,10 +90,10 @@ public interface IValue<T> {
 	 * @throws IOException
 	 *             if any exception bubbles up from the given input stream while
 	 *             in use.
-	 * @throws DataFormatException
+	 * @throws UBJFormatException
 	 *             if this class is unable to read its expected value type from
 	 *             the given input stream.
 	 */
 	public void deserialize(UBJInputStreamParser in)
-			throws IllegalArgumentException, IOException, DataFormatException;
+			throws IllegalArgumentException, IOException, UBJFormatException;
 }

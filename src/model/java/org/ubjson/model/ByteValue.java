@@ -19,7 +19,7 @@ import static org.ubjson.io.ITypeMarker.BYTE;
 
 import java.io.IOException;
 
-import org.ubjson.io.DataFormatException;
+import org.ubjson.io.UBJFormatException;
 import org.ubjson.io.UBJInputStreamParser;
 import org.ubjson.io.UBJOutputStream;
 
@@ -29,7 +29,7 @@ public class ByteValue extends AbstractValue<Byte> {
 	}
 
 	public ByteValue(UBJInputStreamParser in) throws IllegalArgumentException,
-			IOException, DataFormatException {
+			IOException, UBJFormatException {
 		super(in);
 	}
 
@@ -49,7 +49,7 @@ public class ByteValue extends AbstractValue<Byte> {
 
 	@Override
 	public void deserialize(UBJInputStreamParser in)
-			throws IllegalArgumentException, IOException, DataFormatException {
+			throws IllegalArgumentException, IOException, UBJFormatException {
 		if (in == null)
 			throw new IllegalArgumentException("in cannot be null");
 

@@ -17,10 +17,10 @@ package org.ubjson.io.reflect;
 
 import java.io.IOException;
 
-import org.ubjson.io.DataFormatException;
+import org.ubjson.io.UBJFormatException;
 import org.ubjson.io.UBJInputStreamParser;
 
 public interface IObjectReader {
 	public <T> T readObject(UBJInputStreamParser in, Class<T> type)
-			throws IllegalArgumentException, IOException, DataFormatException;
+			throws IllegalArgumentException, IOException, UBJFormatException;
 }

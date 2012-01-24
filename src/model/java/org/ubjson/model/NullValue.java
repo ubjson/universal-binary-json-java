@@ -19,7 +19,7 @@ import static org.ubjson.io.ITypeMarker.NULL;
 
 import java.io.IOException;
 
-import org.ubjson.io.DataFormatException;
+import org.ubjson.io.UBJFormatException;
 import org.ubjson.io.UBJInputStreamParser;
 import org.ubjson.io.UBJOutputStream;
 
@@ -29,7 +29,7 @@ public class NullValue extends AbstractValue<Void> {
 	}
 
 	public NullValue(UBJInputStreamParser in) throws IllegalArgumentException,
-			IOException, DataFormatException {
+			IOException, UBJFormatException {
 		super(in);
 	}
 
@@ -49,7 +49,7 @@ public class NullValue extends AbstractValue<Void> {
 
 	@Override
 	public void deserialize(UBJInputStreamParser in)
-			throws IllegalArgumentException, IOException, DataFormatException {
+			throws IllegalArgumentException, IOException, UBJFormatException {
 		if (in == null)
 			throw new IllegalArgumentException("in cannot be null");
 

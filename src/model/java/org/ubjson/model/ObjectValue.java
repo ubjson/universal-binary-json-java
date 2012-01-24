@@ -25,7 +25,7 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.ubjson.io.DataFormatException;
+import org.ubjson.io.UBJFormatException;
 import org.ubjson.io.UBJInputStreamParser;
 import org.ubjson.io.UBJOutputStream;
 
@@ -37,7 +37,7 @@ public class ObjectValue extends
 	}
 
 	public ObjectValue(UBJInputStreamParser in) throws IOException,
-			DataFormatException {
+			UBJFormatException {
 		deserialize(in);
 	}
 
@@ -60,7 +60,7 @@ public class ObjectValue extends
 
 	@Override
 	public void deserialize(UBJInputStreamParser in) throws IOException,
-			DataFormatException {
+			UBJFormatException {
 		int size = in.readObjectLength();
 		value = new HashMap<String, IValue<?>>(size * 3);
 
@@ -149,7 +149,7 @@ public class ObjectValue extends
 				break;
 
 			default:
-				throw new DataFormatException("Unknown type marker value "
+				throw new UBJFormatException("Unknown type marker value "
 						+ type + " (char='" + ((char) type) + "') encountered.");
 			}
 
