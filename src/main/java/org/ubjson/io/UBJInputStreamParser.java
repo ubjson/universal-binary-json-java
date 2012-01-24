@@ -32,40 +32,56 @@ public class UBJInputStreamParser extends UBJInputStream {
 
 	@Override
 	public byte nextType() throws IOException, UBJFormatException {
-		// Skip the current marked value if the body wasn't read.
+		/*
+		 * peek == -1 on the first call or after reading a value's "body" using
+		 * one of the readXXX methods below.
+		 * 
+		 * peek != -1 when we have found a value marker and NOT read the body
+		 * using one of the values below, which means in order to read the
+		 * "nextType" we first need to skip over the body of the currently
+		 * marked value.
+		 */
 		if (peek != -1) {
 			switch (peek) {
+			/*
+			 * All 1-byte values are technically already "skipped" as they have
+			 * been read from the stream and their value is sitting in the
+			 * "peek" variable at the moment. By no-op'ing here then calling
+			 * nextType at the end of this method, we are effectively skipping
+			 * the value and moving onto the next one from the stream.
+			 */
 			case END:
 			case NULL:
 			case TRUE:
 			case FALSE:
+				break;
+
+			// 2-byte value, skip the 1-byte body.
+			case BYTE:
 				in.skip(1);
 				break;
 
-			case BYTE:
+			// 3-byte value, skip the 2-byte body.
+			case INT16:
 				in.skip(2);
 				break;
 
-			case INT16:
-				in.skip(3);
-				break;
-
+			// 5-byte values, skip the 4-byte body.
 			case INT32:
-				in.skip(5);
-				break;
-
-			case INT64:
-				in.skip(9);
-				break;
-
 			case FLOAT:
-				in.skip(5);
+				in.skip(4);
 				break;
 
+			// 9-byte value, skip the 8-byte body.
+			case INT64:
 			case DOUBLE:
-				in.skip(9);
+				in.skip(8);
 				break;
 
+			/*
+			 * Variable-Length: Each of these types have a variable-length body
+			 * size which is described in the following 4-byte integer value.
+			 */
 			case HUGE:
 			case STRING:
 			case ARRAY:
@@ -73,6 +89,10 @@ public class UBJInputStreamParser extends UBJInputStream {
 				in.skip(readInt32Impl());
 				break;
 
+			/*
+			 * Variable-Length: Each of these types have a variable-length body
+			 * size which is described in the following 1-byte integer value.
+			 */
 			case HUGE_COMPACT:
 			case STRING_COMPACT:
 			case ARRAY_COMPACT:
@@ -209,8 +229,8 @@ public class UBJInputStreamParser extends UBJInputStream {
 		 * Auto-peek at the next byte if necessary. This allows people to use
 		 * the UBJ streams in a manual serial/deserialization pattern of calling
 		 * the read/write methods back to back with no intervening nextType()
-		 * calls required; we do it automatically for them here if they haven't
-		 * done it yet.
+		 * calls required (just how a direct UBJInputStream would be used); we
+		 * do it automatically for them here if they haven't done it yet.
 		 */
 		if (peek == -1)
 			nextType();
