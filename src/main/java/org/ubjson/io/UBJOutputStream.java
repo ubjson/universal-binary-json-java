@@ -44,6 +44,12 @@ import java.nio.CharBuffer;
 
 import org.ubjson.io.charset.StreamEncoder;
 
+/*
+ * TODO: Add amount-written tracking (to mirror input stream position tracking).
+ * TODO: Make write methods safer for vetting arguments like IS impl did (throws IllegalArgument).
+ * TODO: Normalize ALL custom write methods to call into the core 3 write methods and not
+ * call the underlying stream directly.
+ */
 public class UBJOutputStream extends FilterOutputStream {
 	protected byte[] buffer;
 	protected StreamEncoder encoder;
