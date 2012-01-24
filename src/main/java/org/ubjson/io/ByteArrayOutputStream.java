@@ -29,6 +29,17 @@ import java.nio.ByteBuffer;
  * object creation and GC cleanup (especially in high-performance systems) as
  * well as the memory and CPU overhead caused by complete array duplication just
  * to get results. These performance wins can be significant.
+ * <p/>
+ * <strong>TIP</strong>: In a very high-performance system where data is being
+ * written out as <code>byte[]</code>, you can keep a pool around of streams
+ * wrapping this stream type (e.g. {@link UBJOutputStream} wrapping
+ * {@link ByteArrayOutputStream}) and re-use them over and over again without
+ * ever needing to create new instances or GC old ones. The performance benefits
+ * in a high-frequency system can be significant; especially for long-running
+ * applications.
+ * <p/>
+ * It is because of the re-usability nature of this stream type that allows any
+ * wrapping streams to be implicitly (and safely) re-usable as well.
  * <h3>Reuse</h3>
  * The most powerful aspect of this {@link ByteArrayOutputStream} implementation
  * is that it is meant to be re-used over and over again by way of the
@@ -46,6 +57,11 @@ import java.nio.ByteBuffer;
  * <p/>
  * This allows more efficient, long-lived usage of other stream classes; namely
  * the Universal Binary JSON I/O streams.
+ * <p/>
+ * <strong>REMINDER</strong>: {@link #flush()} and {@link #close()} are no-op
+ * operations. You don't need to worry about not being able to re-use instances
+ * of this class because a wrapping stream type issued a flush or a close; the
+ * state of streams of this type are not effected by those operations.
  * <h3>Usage</h3>
  * This class is designed such that you create an instance of this class, then
  * wrap it with a {@link UBJOutputStream} and write any amount of Universal
@@ -66,7 +82,7 @@ import java.nio.ByteBuffer;
  * 
  * <pre>
  * <code>
- * // Create streams individually so we have access to boas.
+ * // Create streams individually so we have access to baos.
  * {@link ByteArrayOutputStream} baos = new {@link ByteArrayOutputStream}();
  * {@link UBJOutputStream} out = new {@link UBJOutputStream}(baos);
  * 
