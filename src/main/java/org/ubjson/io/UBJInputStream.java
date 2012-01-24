@@ -116,7 +116,7 @@ public class UBJInputStream extends FilterInputStream {
 
 	public byte readByte() throws IOException, UBJFormatException {
 		checkType("BYTE", BYTE, INVALID);
-		return (byte) in.read();
+		return (byte) read();
 	}
 
 	public short readInt16() throws IOException, UBJFormatException {
@@ -150,7 +150,7 @@ public class UBJInputStream extends FilterInputStream {
 
 		switch (type) {
 		case HUGE_COMPACT:
-			length = in.read();
+			length = read();
 			break;
 
 		case HUGE:
@@ -172,7 +172,7 @@ public class UBJInputStream extends FilterInputStream {
 		 * Keep reading from the stream until we have collected all the bytes
 		 * necessary to reconstitute the BigInteger.
 		 */
-		while ((read = in.read(buffer, total, length - read)) > -1)
+		while ((read = read(buffer, total, length - read)) > -1)
 			total += read;
 
 		// Make sure we got all the bytes we were promised.
@@ -193,7 +193,7 @@ public class UBJInputStream extends FilterInputStream {
 
 		switch (type) {
 		case HUGE_COMPACT:
-			length = in.read();
+			length = read();
 			break;
 
 		case HUGE:
@@ -230,7 +230,7 @@ public class UBJInputStream extends FilterInputStream {
 
 		switch (type) {
 		case STRING_COMPACT:
-			length = in.read();
+			length = read();
 			break;
 
 		case STRING:
@@ -253,7 +253,7 @@ public class UBJInputStream extends FilterInputStream {
 
 		switch (type) {
 		case ARRAY_COMPACT:
-			count = in.read();
+			count = read();
 
 			/*
 			 * Streaming Support: When using the 'a' marker, when a length of
@@ -286,7 +286,7 @@ public class UBJInputStream extends FilterInputStream {
 
 		switch (type) {
 		case OBJECT_COMPACT:
-			count = in.read();
+			count = read();
 
 			/*
 			 * Streaming Support: When using the 'o' marker, when a length of
@@ -353,7 +353,7 @@ public class UBJInputStream extends FilterInputStream {
 	}
 
 	protected short readInt16Impl() throws IOException {
-		int read = in.read(buffer, 0, 2);
+		int read = read(buffer, 0, 2);
 
 		if (read < 2)
 			throw new UBJFormatException(
@@ -384,7 +384,7 @@ public class UBJInputStream extends FilterInputStream {
 	}
 
 	protected int readInt32Impl() throws IOException {
-		int read = in.read(buffer, 0, 4);
+		int read = read(buffer, 0, 4);
 
 		if (read < 4)
 			throw new UBJFormatException(
@@ -410,7 +410,7 @@ public class UBJInputStream extends FilterInputStream {
 	}
 
 	protected long readInt64Impl() throws IOException {
-		int read = in.read(buffer);
+		int read = read(buffer);
 
 		if (read < 8)
 			throw new UBJFormatException(
