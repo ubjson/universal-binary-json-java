@@ -110,13 +110,26 @@ public class UBJInputStream extends FilterInputStream {
 	}
 
 	@Override
-	public void mark(int readlimit) {
-		in.mark(readlimit);
+	public void mark(int readLimit) throws IllegalArgumentException {
+		if (readLimit < 0)
+			throw new IllegalArgumentException("readLimit [" + readLimit
+					+ "] must be >= 0");
+
+		in.mark(readLimit);
 	}
 
 	@Override
 	public void reset() throws IOException {
 		in.reset();
+
+		/*
+		 * Technically we should do something to pos here (reset to 0, reset to
+		 * the last marked position, etc.) but because we have no way of knowing
+		 * how the underlying InputStream actually implements mark/reset and
+		 * overflows, we have no way of knowing what "position" we are in it.
+		 * 
+		 * So instead we just never decrement pos and always increment it.
+		 */
 	}
 
 	@Override
