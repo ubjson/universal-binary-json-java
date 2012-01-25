@@ -6,21 +6,49 @@ About this project...
 ---------------------
 This code base is actively under development and implements the latest 
 specification of Universal Binary JSON (Draft 8).
+
+I/O is handled through the following core classes:
+
+	* UBJOutputStream
+	* UBJInputStream
+	* UBJInputStreamParser
 	
-Core spec-compliant I/O is performed through the UBJOutputStream and 
-UBJInputStream classes; this code has been stable for a while and implements
-the lowest level of interaction between the spec and Java constructs.
+Additionally, if you are working with Java's NIO and need byte[]-based
+results, you can wrap any of the above I/O classes around one of the provided
 
-Higher-level I/O classes like the org.ubjson.io.reflect package are under
-development but provide easier-to-use tools.
+	* ByteArrayInputStream	(optimized for reuse, not from JDK)
+	* ByteArrayOutputStream (optimized for reuse, not from JDK)
 
-This project intends to eventually contain a multitude of layers of abstraction
-as well as Java-based tools for the Universal Binary JSON spec like UBJ to JSON
-converters, viewers, diff tools, etc.
+And reuse the streams over and over again in a pool of streams for high 
+performance I/O using Java's NIO classes.
+
+All of the core I/O classes have been stable for a while, with tweaks to make the
+performance tighter and the error messages more informative over the last few
+months.
+
+More Java-convenient reflection-based I/O classes are available in the
+org.ubjson.io.reflect package, but they are under active development.
+
+There are other efforts (like utilities) in other sub portions of the source
+tree. This project intends to eventually contain a multitude of UBJSON abstraction
+layers, I/O methods and utilities.
 
 
 Changelog
 ---------
+01-15-12
+	Huge performance boost for deserialization!
+	
+	StreamDecoder previously used separate read and write buffers for decoding 
+	as well as the resulting char[] that was returned to the caller. This at
+	least 1 full array copy before returning a result in the best case and
+	2x full array copies before returning the result in the worst case.
+	
+	The rewrite removed the need for a write buffer entire as well as ALL array
+	copies; in the best OR worse case they never occur anymore.
+	
+	Raw performance boost of roughly 25% in all UBJ I/O classes as a result. 
+
 12-01-11 through 01-24-12
 	A large amount of work has continued on the core I/O classes (stream impls)
 	to help make them not only faster and more robust, but also more helpful.
