@@ -149,8 +149,11 @@ public class ObjectValue extends
 				break;
 
 			default:
-				throw new UBJFormatException("Unknown type marker value "
-						+ type + " (char='" + ((char) type) + "') encountered.");
+				throw new UBJFormatException(in.getPosition(),
+						"Unknown type marker value " + type + " (char='"
+								+ ((char) type)
+								+ "') encountered at stream position "
+								+ in.getPosition() + ".");
 			}
 
 			// Keep track of how many name-value pairs we've read.

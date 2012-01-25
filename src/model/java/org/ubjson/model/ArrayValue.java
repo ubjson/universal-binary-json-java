@@ -144,8 +144,11 @@ public class ArrayValue extends AbstractCollectionValue<List<IValue<?>>> {
 				break;
 
 			default:
-				throw new UBJFormatException("Unknown type marker value "
-						+ type + " (char='" + ((char) type) + "') encountered.");
+				throw new UBJFormatException(in.getPosition(),
+						"Unknown type marker value " + type + " (char='"
+								+ ((char) type)
+								+ "') encountered at stream position "
+								+ in.getPosition() + ".");
 			}
 
 			// Keep track of how many values we've read.
