@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.CharBuffer;
 
 import org.ubjson.io.charset.StreamDecoder;
 
@@ -136,7 +137,7 @@ public class UBJInputStream extends FilterInputStream {
 	public void close() throws IOException {
 		in.close();
 	}
-	
+
 	public long getPosition() {
 		return pos;
 	}
@@ -229,7 +230,7 @@ public class UBJInputStream extends FilterInputStream {
 		return buffer;
 	}
 
-	public char[] readHugeAsChars() throws IOException, UBJFormatException {
+	public CharBuffer readHugeAsChars() throws IOException, UBJFormatException {
 		byte type = checkType("HUGE", HUGE_COMPACT, HUGE);
 		int length = 0;
 
@@ -261,14 +262,18 @@ public class UBJInputStream extends FilterInputStream {
 
 	public BigDecimal readHugeAsBigDecimal() throws IOException,
 			UBJFormatException {
-		return new BigDecimal(readHugeAsChars());
+		CharBuffer buffer = readHugeAsChars();
+		return new BigDecimal(buffer.array(), buffer.position(),
+				buffer.remaining());
 	}
 
 	public String readString() throws IOException, UBJFormatException {
-		return new String(readStringAsChars());
+		CharBuffer buffer = readStringAsChars();
+		return new String(buffer.array(), buffer.position(), buffer.remaining());
 	}
 
-	public char[] readStringAsChars() throws IOException, UBJFormatException {
+	public CharBuffer readStringAsChars() throws IOException,
+			UBJFormatException {
 		byte type = checkType("STRING", STRING_COMPACT, STRING);
 		int length = 0;
 

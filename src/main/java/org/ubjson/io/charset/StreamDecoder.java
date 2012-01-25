@@ -23,13 +23,14 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 
 public class StreamDecoder {
-	public static final char[] EMPTY = new char[0];
+	public static final String BUFFER_SIZE_PROPERTY_NAME = "org.ubjson.io.charset.dencoderBufferSize";
+
+	public static final int BUFFER_SIZE = Integer.getInteger(
+			BUFFER_SIZE_PROPERTY_NAME, 16384);
 
 	public static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
-	private byte[] readBuffer;
-	private char[] decodeBuffer;
-
+	private byte[] buffer;
 	private CharsetDecoder decoder;
 
 	public StreamDecoder() {
@@ -40,13 +41,11 @@ public class StreamDecoder {
 		if (charset == null)
 			throw new IllegalArgumentException("charset cannot be null");
 
-		readBuffer = new byte[8192];
-		decodeBuffer = new char[8192];
-
+		buffer = new byte[BUFFER_SIZE];
 		decoder = charset.newDecoder();
 	}
 
-	public char[] decode(InputStream stream, int length)
+	public CharBuffer decode(InputStream stream, int length)
 			throws IllegalArgumentException, IOException {
 		if (stream == null)
 			throw new IllegalArgumentException("stream cannot be null");
@@ -56,41 +55,47 @@ public class StreamDecoder {
 
 		// short-circuit
 		if (length == 0)
-			return EMPTY;
-
-		int charCount = 0;
+			return CharBuffer.wrap(new char[0]);
 
 		/*
-		 * Byte to Char conversion can never result in *more* chars than bytes,
-		 * so assume up front that our character count result will be equal to
-		 * the number of bytes we decode (i.e. ASCII). If that guess was wrong,
-		 * it is corrected below before returning.
+		 * Create the read buffer.
 		 * 
-		 * This is better than trying to guess via the Decoder's
-		 * averageBytesPerChar value and happen to get it wrong in the middle of
-		 * decoding and needing to re-size the target array on the fly as
-		 * opposed to just chopping it before returning it if necessary.
+		 * The offset and length we pass doesn't matter because we actually have
+		 * to adjust it on each iteration of the loop below to make sure it is
+		 * "looking" at the bytes just read in from the stream into the
+		 * underlying array (readBuffer).
 		 */
-		char[] chars = new char[length];
+		ByteBuffer src = ByteBuffer.wrap(buffer, 0, 0);
 
-		// Reuse the backing decode buffer.
-		CharBuffer dest = CharBuffer.wrap(decodeBuffer);
+		/*
+		 * Create the buffer that we are going to decode into and return to the
+		 * caller.
+		 * 
+		 * Byte to Char conversion will *never* result in more chars than there
+		 * are bytes, so we know that the biggest possible buffer we will need
+		 * is length bytes long. If it ends up being less after doing the
+		 * decoding, the limit on the buffer will be truncated to indicate that.
+		 */
+		CharBuffer dest = CharBuffer.allocate(length);
 
-		int bytesRead = 0;
+		// Reset the decoder to prepare it for new work.
 		decoder.reset();
 
-		while (length > 0
-				&& (bytesRead = stream.read(readBuffer, 0, length)) != -1) {
+		int bytesRead = 0;
+
+		while (length > 0 && (bytesRead = stream.read(buffer, 0, length)) != -1) {
+			// Keep track of how many bytes remaining we need to read.
 			length -= bytesRead;
 
-			ByteBuffer src = ByteBuffer.wrap(readBuffer, 0, bytesRead);
-			dest.clear();
-			decoder.decode(src, dest, (length == 0));
-			dest.flip();
+			/*
+			 * Re-position the frame (position to limit) of the buffer to point
+			 * at the bytes just read in from the stream to the backing array.
+			 */
+			src.position(0);
+			src.limit(bytesRead);
 
-			int remaining = dest.remaining();
-			dest.get(chars, charCount, remaining);
-			charCount += remaining;
+			// Decode the read bytes to our output buffer.
+			decoder.decode(src, dest, (length == 0));
 		}
 
 		if (length > 0)
@@ -100,26 +105,12 @@ public class StreamDecoder {
 							+ "] could be read. Unable to read the last "
 							+ length + " remaining bytes.");
 
-		dest.clear();
+		// Flush any remaining state from the decoder to our result.
 		decoder.flush(dest);
+
+		// Prepare the result buffer to be read by the caller.
 		dest.flip();
 
-		if (dest.hasRemaining()) {
-			int remaining = dest.remaining();
-			dest.get(chars, charCount, remaining);
-			charCount += remaining;
-		}
-
-		/*
-		 * Chop the resulting array if we over-guestimated at the beginning of
-		 * the method. When processing 1-byte chars (ASCII) this never happens.
-		 */
-		if (charCount < chars.length) {
-			char[] tmp = new char[charCount];
-			System.arraycopy(chars, 0, tmp, 0, charCount);
-			chars = tmp;
-		}
-
-		return chars;
+		return dest;
 	}
 }

@@ -23,9 +23,22 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 
 public class StreamEncoder {
+	public static final String BUFFER_SIZE_PROPERTY_NAME = "org.ubjson.io.charset.encoderBufferSize";
+
+	public static final int BUFFER_SIZE = Integer.getInteger(
+			BUFFER_SIZE_PROPERTY_NAME, 16384);
+
 	public static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
-	private byte[] writeBuffer;
+	static {
+		if (BUFFER_SIZE < 1)
+			throw new RuntimeException("System property ["
+					+ BUFFER_SIZE_PROPERTY_NAME
+					+ "] must be > 0 but is currently set to the value: "
+					+ BUFFER_SIZE);
+	}
+
+	private byte[] buffer;
 	private CharsetEncoder encoder;
 
 	public StreamEncoder() {
@@ -36,7 +49,7 @@ public class StreamEncoder {
 		if (charset == null)
 			throw new IllegalArgumentException("charset cannot be null");
 
-		writeBuffer = new byte[8192];
+		buffer = new byte[BUFFER_SIZE];
 		encoder = charset.newEncoder();
 	}
 
@@ -49,20 +62,27 @@ public class StreamEncoder {
 			return;
 
 		encoder.reset();
-		ByteBuffer dest = ByteBuffer.wrap(writeBuffer);
+		ByteBuffer dest = ByteBuffer.wrap(buffer);
 
+		/*
+		 * Encode all the remaining chars in the given buffer; the buffer's
+		 * state (position, limit) will mark the range of chars we are meant to
+		 * process.
+		 */
 		while (text.hasRemaining()) {
 			dest.clear();
 			encoder.encode(text, dest, false);
 
-			stream.write(writeBuffer, 0, dest.position());
+			stream.write(buffer, 0, dest.position());
 		}
 
+		// Perform the decoding finalization.
 		dest.clear();
 		encoder.encode(text, dest, true);
 		encoder.flush(dest);
 
+		// Write out any additional bytes finalization resulted in.
 		if (dest.position() > 0)
-			stream.write(writeBuffer, 0, dest.position());
+			stream.write(buffer, 0, dest.position());
 	}
 }

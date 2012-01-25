@@ -15,12 +15,30 @@
  */
 package org.ubjson.io;
 
-import static org.ubjson.io.ITypeMarker.*;
+import static org.ubjson.io.ITypeMarker.ARRAY;
+import static org.ubjson.io.ITypeMarker.ARRAY_COMPACT;
+import static org.ubjson.io.ITypeMarker.BYTE;
+import static org.ubjson.io.ITypeMarker.DOUBLE;
+import static org.ubjson.io.ITypeMarker.END;
+import static org.ubjson.io.ITypeMarker.FALSE;
+import static org.ubjson.io.ITypeMarker.FLOAT;
+import static org.ubjson.io.ITypeMarker.HUGE;
+import static org.ubjson.io.ITypeMarker.HUGE_COMPACT;
+import static org.ubjson.io.ITypeMarker.INT16;
+import static org.ubjson.io.ITypeMarker.INT32;
+import static org.ubjson.io.ITypeMarker.INT64;
+import static org.ubjson.io.ITypeMarker.NULL;
+import static org.ubjson.io.ITypeMarker.OBJECT;
+import static org.ubjson.io.ITypeMarker.OBJECT_COMPACT;
+import static org.ubjson.io.ITypeMarker.STRING;
+import static org.ubjson.io.ITypeMarker.STRING_COMPACT;
+import static org.ubjson.io.ITypeMarker.TRUE;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.CharBuffer;
 
 public class UBJInputStreamParser extends UBJInputStream {
 	private byte peek;
@@ -180,10 +198,10 @@ public class UBJInputStreamParser extends UBJInputStream {
 	}
 
 	@Override
-	public char[] readHugeAsChars() throws IOException, UBJFormatException {
-		char[] h = super.readHugeAsChars();
+	public CharBuffer readHugeAsChars() throws IOException, UBJFormatException {
+		CharBuffer buffer = super.readHugeAsChars();
 		peek = -1;
-		return h;
+		return buffer;
 	}
 
 	@Override
@@ -203,10 +221,11 @@ public class UBJInputStreamParser extends UBJInputStream {
 	}
 
 	@Override
-	public char[] readStringAsChars() throws IOException, UBJFormatException {
-		char[] chars = super.readStringAsChars();
+	public CharBuffer readStringAsChars() throws IOException,
+			UBJFormatException {
+		CharBuffer buffer = super.readStringAsChars();
 		peek = -1;
-		return chars;
+		return buffer;
 	}
 
 	@Override
