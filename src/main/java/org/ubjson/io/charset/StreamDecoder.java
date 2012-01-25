@@ -42,7 +42,7 @@ public class StreamDecoder {
 
 		readBuffer = new byte[8192];
 		decodeBuffer = new char[8192];
-		
+
 		decoder = charset.newDecoder();
 	}
 
@@ -68,7 +68,7 @@ public class StreamDecoder {
 		 * 
 		 * This is better than trying to guess via the Decoder's
 		 * averageBytesPerChar value and happen to get it wrong in the middle of
-		 * decoding and needing to re-size the target array on the fly them as
+		 * decoding and needing to re-size the target array on the fly as
 		 * opposed to just chopping it before returning it if necessary.
 		 */
 		char[] chars = new char[length];
@@ -110,6 +110,10 @@ public class StreamDecoder {
 			charCount += remaining;
 		}
 
+		/*
+		 * Chop the resulting array if we over-guestimated at the beginning of
+		 * the method. When processing 1-byte chars (ASCII) this never happens.
+		 */
 		if (charCount < chars.length) {
 			char[] tmp = new char[charCount];
 			System.arraycopy(chars, 0, tmp, 0, charCount);
