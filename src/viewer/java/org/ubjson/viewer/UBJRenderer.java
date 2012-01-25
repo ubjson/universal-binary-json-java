@@ -108,12 +108,12 @@ public class UBJRenderer {
 
 			case HUGE:
 				writer.append(indent(indent)).append("[H]")
-						.append(new String(parser.readHugeAsChars()));
+						.append(parser.readHugeAsString());
 				break;
 
 			case HUGE_COMPACT:
 				writer.append(indent(indent)).append("[h]")
-						.append(new String(parser.readHugeAsChars()));
+						.append(parser.readHugeAsString());
 				break;
 
 			case STRING:
@@ -207,7 +207,7 @@ public class UBJRenderer {
 	private void print(Writer writer, Scope scope, int indent, String... values)
 			throws IOException {
 		writer.append(indent(indent));
-		
+
 		switch (scope.getType()) {
 		case ARRAY:
 			for (int i = 0; i < values.length; i++)
