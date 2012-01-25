@@ -255,6 +255,11 @@ public class UBJInputStream extends FilterInputStream {
 		return decoder.decode(in, length);
 	}
 
+	public String readHugeAsString() throws IOException, UBJFormatException {
+		CharBuffer buffer = readHugeAsChars();
+		return new String(buffer.array(), buffer.position(), buffer.remaining());
+	}
+
 	public BigInteger readHugeAsBigInteger() throws IOException,
 			UBJFormatException {
 		return new BigInteger(readHugeAsBytes());

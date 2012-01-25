@@ -205,6 +205,13 @@ public class UBJInputStreamParser extends UBJInputStream {
 	}
 
 	@Override
+	public String readHugeAsString() throws IOException, UBJFormatException {
+		String huge = super.readHugeAsString();
+		peek = -1;
+		return huge;
+	}
+
+	@Override
 	public BigInteger readHugeAsBigInteger() throws IOException,
 			UBJFormatException {
 		BigInteger h = super.readHugeAsBigInteger();
