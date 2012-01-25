@@ -22,6 +22,7 @@ import static org.ubjson.io.ITypeMarker.TRUE;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.CharBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -118,19 +119,24 @@ public class ObjectValue extends
 			case HUGE:
 			case HUGE_COMPACT:
 				boolean isDecimal = false;
-				char[] chars = in.readHugeAsChars();
+				CharBuffer buffer = in.readHugeAsChars();
+				char[] array = buffer.array();
 
-				for (int i = 0; !isDecimal && i < chars.length; i++) {
-					if (chars[i] == '.')
+				for (int i = buffer.position(), length = buffer.remaining(); !isDecimal
+						&& i < length; i++) {
+					if (array[i] == '.')
 						isDecimal = true;
 				}
 
 				if (isDecimal)
 					value.put(name, new BigDecimalHugeValue(new BigDecimal(
-							chars)));
+							array, buffer.position(), buffer.remaining())));
 				else
-					value.put(name, new BigIntegerHugeValue(new BigInteger(
-							new String(chars))));
+					value.put(
+							name,
+							new BigIntegerHugeValue(new BigInteger(new String(
+									array, buffer.position(), buffer
+											.remaining()))));
 				break;
 
 			case STRING:

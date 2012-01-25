@@ -22,6 +22,7 @@ import static org.ubjson.io.ITypeMarker.TRUE;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -114,18 +115,22 @@ public class ArrayValue extends AbstractCollectionValue<List<IValue<?>>> {
 			case HUGE:
 			case HUGE_COMPACT:
 				boolean isDecimal = false;
-				char[] chars = in.readHugeAsChars();
+				CharBuffer buffer = in.readHugeAsChars();
+				char[] array = buffer.array();
 
-				for (int i = 0; !isDecimal && i < chars.length; i++) {
-					if (chars[i] == '.')
+				for (int i = buffer.position(), length = buffer.remaining(); !isDecimal
+						&& i < length; i++) {
+					if (array[i] == '.')
 						isDecimal = true;
 				}
 
 				if (isDecimal)
-					value.add(new BigDecimalHugeValue(new BigDecimal(chars)));
+					value.add(new BigDecimalHugeValue(new BigDecimal(array,
+							buffer.position(), buffer.remaining())));
 				else
 					value.add(new BigIntegerHugeValue(new BigInteger(
-							new String(chars))));
+							new String(array, buffer.position(), buffer
+									.remaining()))));
 				break;
 
 			case STRING:
