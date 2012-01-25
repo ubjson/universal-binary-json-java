@@ -15,8 +15,6 @@
  */
 package org.ubjson.io.reflect;
 
-import static org.ubjson.io.ITypeMarker.*;
-
 import java.io.IOException;
 
 import org.ubjson.io.UBJFormatException;
@@ -43,15 +41,16 @@ public class ObjectReader implements IObjectReader {
 		}
 
 		/*
-		 * begin looping on parser, ensure the root element is an object, and then
-		 * read NUM number of values from parser, populating the object (maybe a method
-		 * populateObject(stream, T obj, int count), going deeper as needed.
+		 * begin looping on parser, ensure the root element is an object, and
+		 * then read NUM number of values from parser, populating the object
+		 * (maybe a method populateObject(stream, T obj, int count), going
+		 * deeper as needed.
 		 */
 		byte t = -1;
-		
-		while((t = in.nextType()) != -1) {
-			switch(t) {
-			
+
+		while ((t = in.nextType()) != -1) {
+			switch (t) {
+
 			}
 		}
 
