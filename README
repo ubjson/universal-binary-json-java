@@ -74,8 +74,8 @@ Changelog
 	the stream.
 	
 	In the case of direct ByteBuffers, there is no additional overhead added
-	because the calls to get or put are required anyway to pull or push the values
-	from the native memory location.
+	because the calls to get or put are required anyway to pull or push the 
+	values from the native memory location.
 	
 	This approach allows the fastest implementation of Universal Binary JSON
 	I/O possible in the JVM whether you are using the standard IO (stream) 
