@@ -15,25 +15,25 @@
  */
 package org.ubjson.io;
 
-import static org.ubjson.io.ITypeMarker.ARRAY;
-import static org.ubjson.io.ITypeMarker.ARRAY_COMPACT;
-import static org.ubjson.io.ITypeMarker.BYTE;
-import static org.ubjson.io.ITypeMarker.DOUBLE;
-import static org.ubjson.io.ITypeMarker.END;
-import static org.ubjson.io.ITypeMarker.FALSE;
-import static org.ubjson.io.ITypeMarker.FLOAT;
-import static org.ubjson.io.ITypeMarker.HUGE;
-import static org.ubjson.io.ITypeMarker.HUGE_COMPACT;
-import static org.ubjson.io.ITypeMarker.INT16;
-import static org.ubjson.io.ITypeMarker.INT32;
-import static org.ubjson.io.ITypeMarker.INT64;
-import static org.ubjson.io.ITypeMarker.NOOP;
-import static org.ubjson.io.ITypeMarker.NULL;
-import static org.ubjson.io.ITypeMarker.OBJECT;
-import static org.ubjson.io.ITypeMarker.OBJECT_COMPACT;
-import static org.ubjson.io.ITypeMarker.STRING;
-import static org.ubjson.io.ITypeMarker.STRING_COMPACT;
-import static org.ubjson.io.ITypeMarker.TRUE;
+import static org.ubjson.io.IUBJTypeMarker.ARRAY;
+import static org.ubjson.io.IUBJTypeMarker.ARRAY_COMPACT;
+import static org.ubjson.io.IUBJTypeMarker.BYTE;
+import static org.ubjson.io.IUBJTypeMarker.DOUBLE;
+import static org.ubjson.io.IUBJTypeMarker.END;
+import static org.ubjson.io.IUBJTypeMarker.FALSE;
+import static org.ubjson.io.IUBJTypeMarker.FLOAT;
+import static org.ubjson.io.IUBJTypeMarker.HUGE;
+import static org.ubjson.io.IUBJTypeMarker.HUGE_COMPACT;
+import static org.ubjson.io.IUBJTypeMarker.INT16;
+import static org.ubjson.io.IUBJTypeMarker.INT32;
+import static org.ubjson.io.IUBJTypeMarker.INT64;
+import static org.ubjson.io.IUBJTypeMarker.NOOP;
+import static org.ubjson.io.IUBJTypeMarker.NULL;
+import static org.ubjson.io.IUBJTypeMarker.OBJECT;
+import static org.ubjson.io.IUBJTypeMarker.OBJECT_COMPACT;
+import static org.ubjson.io.IUBJTypeMarker.STRING;
+import static org.ubjson.io.IUBJTypeMarker.STRING_COMPACT;
+import static org.ubjson.io.IUBJTypeMarker.TRUE;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;

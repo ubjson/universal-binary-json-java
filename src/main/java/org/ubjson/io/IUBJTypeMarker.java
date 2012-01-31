@@ -15,7 +15,7 @@
  */
 package org.ubjson.io;
 
-public interface ITypeMarker {
+public interface IUBJTypeMarker {
 	// General Types
 	public static final byte NULL = 'Z';
 
