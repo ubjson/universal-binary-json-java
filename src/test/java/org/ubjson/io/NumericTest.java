@@ -1,4 +1,4 @@
-package com.ubjson.io;
+package org.ubjson.io;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

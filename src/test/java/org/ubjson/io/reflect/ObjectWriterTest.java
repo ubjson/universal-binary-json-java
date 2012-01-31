@@ -1,4 +1,4 @@
-package com.ubjson.io.reflect;
+package org.ubjson.io.reflect;
 
 import java.io.File;
 import java.io.FileInputStream;
