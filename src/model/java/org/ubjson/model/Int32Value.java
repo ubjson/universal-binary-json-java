@@ -15,7 +15,7 @@
  */
 package org.ubjson.model;
 
-import static org.ubjson.io.ITypeMarker.INT32;
+import static org.ubjson.io.IUBJTypeMarker.INT32;
 
 import java.io.IOException;
 
