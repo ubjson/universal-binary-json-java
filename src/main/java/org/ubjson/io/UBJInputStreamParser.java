@@ -262,7 +262,7 @@ public class UBJInputStreamParser extends UBJInputStream {
 		if (peek == -1)
 			nextType();
 
-		if (peek != expected && (expectedOpt != -1 && peek != expectedOpt)) {
+		if (peek != expected && (expectedOpt != INVALID && peek != expectedOpt)) {
 			String message = "Unable to read " + name
 					+ " value at stream position " + pos
 					+ ". The type marker byte value read was " + peek
@@ -270,7 +270,7 @@ public class UBJInputStreamParser extends UBJInputStream {
 					+ "') but the expected type marker byte value was "
 					+ expected + " (char='" + ((char) expected) + "')";
 
-			if (expectedOpt != -1)
+			if (expectedOpt != INVALID)
 				message += " or " + expectedOpt + " (char='"
 						+ ((char) expectedOpt) + "'); but neither were found.";
 			else

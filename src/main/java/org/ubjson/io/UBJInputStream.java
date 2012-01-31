@@ -45,7 +45,7 @@ import java.nio.CharBuffer;
 import org.ubjson.io.charset.StreamDecoder;
 
 public class UBJInputStream extends FilterInputStream {
-	private static final byte INVALID = -1;
+	protected static final byte INVALID = -1;
 
 	protected long pos;
 	protected byte[] buffer;
@@ -393,7 +393,7 @@ public class UBJInputStream extends FilterInputStream {
 			throws UBJFormatException, IOException {
 		byte type = nextType();
 
-		if (type != expected && (expectedOpt != -1 && type != expectedOpt)) {
+		if (type != expected && (expectedOpt != INVALID && type != expectedOpt)) {
 			String message = "Unable to read " + name
 					+ " value at stream position " + pos
 					+ ". The type marker byte value read was " + type
@@ -401,7 +401,7 @@ public class UBJInputStream extends FilterInputStream {
 					+ "') but the expected type marker byte value was "
 					+ expected + " (char='" + ((char) expected) + "')";
 
-			if (expectedOpt != -1)
+			if (expectedOpt != INVALID)
 				message += " or " + expectedOpt + " (char='"
 						+ ((char) expectedOpt) + "'); but neither were found.";
 			else
