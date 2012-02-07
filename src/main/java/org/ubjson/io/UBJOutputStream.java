@@ -102,15 +102,9 @@ public class UBJOutputStream extends FilterOutputStream {
 
 	@Override
 	public void close() throws IOException {
-		try {
-			out.flush();
-		} catch (Exception e) {
-			// no-op
-		} finally {
-			out.close();
-		}
+		out.close();
 	}
-	
+
 	public long getWriteCount() {
 		return count;
 	}
