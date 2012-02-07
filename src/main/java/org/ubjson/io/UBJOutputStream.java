@@ -159,27 +159,30 @@ public class UBJOutputStream extends FilterOutputStream {
 		writeInt64Impl(Double.doubleToLongBits(value));
 	}
 
-	/*
-	 * TODO: Add a writeHuge that accepts a CharBuffer that passes right through
-	 * for easy re-use to the caller.
-	 */
-
-	public void writeHuge(char[] huge) throws IllegalArgumentException,
+	public void writeHuge(CharBuffer huge) throws IllegalArgumentException,
 			IOException {
 		if (huge == null)
 			throw new IllegalArgumentException("huge cannot be null");
 
+		int length = huge.remaining();
+
+		if (length < 1)
+			throw new IllegalArgumentException(
+					"huge.remaining() ["
+							+ length
+							+ "] is < 1 and does not represent a valid HUGE numeric value; it is an empty buffer with no characters.");
+
 		// Write header
-		if (huge.length < 255) {
+		if (length < 255) {
 			write(HUGE_COMPACT);
-			write(huge.length);
+			write(length);
 		} else {
 			write(HUGE);
-			writeInt32Impl(huge.length);
+			writeInt32Impl(length);
 		}
 
 		// Write body
-		encoder.encode(CharBuffer.wrap(huge), out);
+		encoder.encode(huge, out);
 	}
 
 	public void writeHuge(BigInteger huge) throws IllegalArgumentException,
@@ -187,20 +190,7 @@ public class UBJOutputStream extends FilterOutputStream {
 		if (huge == null)
 			throw new IllegalArgumentException("huge cannot be null");
 
-		String hugeText = huge.toString();
-		int length = hugeText.length();
-
-		// Write header
-		if (length < 255) {
-			write(HUGE_COMPACT);
-			write(length);
-		} else {
-			write(HUGE);
-			writeInt32Impl(length);
-		}
-
-		// Write body
-		encoder.encode(CharBuffer.wrap(hugeText), out);
+		writeHuge(CharBuffer.wrap(huge.toString()));
 	}
 
 	public void writeHuge(BigDecimal huge) throws IllegalArgumentException,
@@ -208,20 +198,7 @@ public class UBJOutputStream extends FilterOutputStream {
 		if (huge == null)
 			throw new IllegalArgumentException("huge cannot be null");
 
-		String hugeText = huge.toString();
-		int length = hugeText.length();
-
-		// Write header
-		if (length < 255) {
-			write(HUGE_COMPACT);
-			write(length);
-		} else {
-			write(HUGE);
-			writeInt32Impl(length);
-		}
-
-		// Write body
-		encoder.encode(CharBuffer.wrap(hugeText), out);
+		writeHuge(CharBuffer.wrap(huge.toString()));
 	}
 
 	public void writeString(char[] text) throws IllegalArgumentException,
