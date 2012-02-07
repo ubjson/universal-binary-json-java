@@ -98,7 +98,7 @@ public class StreamDecoder {
 							+ length
 							+ "] is larger than the capacity ["
 							+ dest.capacity()
-							+ "] of the given target CharBuffer; the given CharBuffer must be big enough to contain all the characters decoded from the given InputStream.");
+							+ "] of the given dest CharBuffer; the dest CharBuffer must be big enough to contain all the characters decoded from the given InputStream.");
 
 		// short-circuit
 		if (length == 0)
