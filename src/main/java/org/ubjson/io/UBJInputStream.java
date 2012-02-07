@@ -279,6 +279,11 @@ public class UBJInputStream extends FilterInputStream {
 		return new String(buffer.array(), buffer.position(), buffer.remaining());
 	}
 
+	/*
+	 * TODO: Provide another method impl that accepts a CharBuffer with a capacity
+	 * that is AT LEAST as big as length so it can be passed through and re-used
+	 * with the decoder over and over again for optimal performance.
+	 */
 	public CharBuffer readStringAsChars() throws IOException,
 			UBJFormatException {
 		byte type = checkType("STRING", STRING_COMPACT, STRING);

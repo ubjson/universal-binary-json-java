@@ -45,10 +45,10 @@ import java.nio.CharBuffer;
 import org.ubjson.io.charset.StreamEncoder;
 
 /*
- * TODO: Add amount-written tracking (to mirror input stream position tracking).
- * TODO: Make write methods safer for vetting arguments like IS impl did (throws IllegalArgument).
- * TODO: Normalize ALL custom write methods to call into the core 3 write methods and not
- * call the underlying stream directly.
+ * TODO: Remove all the char[] arguments and replace them with CharBuffer arguments
+ * so the detail of char[] being wrapped by a CharBuffer under the covers is not hidden
+ * from the caller so they can write more optimal code to re-use their existing CharBuffers instead
+ * of new ones being created on every single read/write call.
  */
 public class UBJOutputStream extends FilterOutputStream {
 	protected long count;
@@ -159,6 +159,11 @@ public class UBJOutputStream extends FilterOutputStream {
 		writeInt64Impl(Double.doubleToLongBits(value));
 	}
 
+	/*
+	 * TODO: Add a writeHuge that accepts a CharBuffer that passes right through
+	 * for easy re-use to the caller.
+	 */
+
 	public void writeHuge(char[] huge) throws IllegalArgumentException,
 			IOException {
 		if (huge == null)
@@ -236,6 +241,19 @@ public class UBJOutputStream extends FilterOutputStream {
 		// Write body
 		encoder.encode(CharBuffer.wrap(text), out);
 	}
+
+	/*
+	 * TODO: Add a writeHuge that accepts a CharBuffer that passes right through
+	 * for easy re-use to the caller.
+	 * 
+	 * Possibly replace this method since it has to perform a wrap of the
+	 * argument anyway into a CharBuffer, at least make that requirement clear
+	 * so that expense isn't hidden down here in this impl and the caller thinks
+	 * they are using the rawest/fastest method to write the values.
+	 * 
+	 * On that note, consider getting rid of all char[] arguments and replacing
+	 * them with the value that is really needed: CharBuffer args.
+	 */
 
 	public void writeString(char[] text, int index, int length)
 			throws IllegalArgumentException, IOException {
