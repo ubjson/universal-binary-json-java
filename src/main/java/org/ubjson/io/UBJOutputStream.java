@@ -44,12 +44,6 @@ import java.nio.CharBuffer;
 
 import org.ubjson.io.charset.StreamEncoder;
 
-/*
- * TODO: Remove all the char[] arguments and replace them with CharBuffer arguments
- * so the detail of char[] being wrapped by a CharBuffer under the covers is not hidden
- * from the caller so they can write more optimal code to re-use their existing CharBuffers instead
- * of new ones being created on every single read/write call.
- */
 public class UBJOutputStream extends FilterOutputStream {
 	protected long count;
 	protected byte[] buffer;
