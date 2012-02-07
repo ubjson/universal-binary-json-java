@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -252,7 +253,8 @@ public class ObjectWriter implements IObjectWriter {
 		if (sstack.peek() != ScopeType.ARRAY)
 			out.writeString(name);
 
-		out.writeString(value);
+		// TODO: Optimize this.
+		out.writeString(CharBuffer.wrap(value));
 	}
 
 	protected void writeString(UBJOutputStream out, String name, String value)
