@@ -40,6 +40,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.CharBuffer;
 
+// TODO: implement the new methods in UBJInputStream
 public class UBJInputStreamParser extends UBJInputStream {
 	private byte peek;
 
@@ -205,6 +206,13 @@ public class UBJInputStreamParser extends UBJInputStream {
 	}
 
 	@Override
+	public void readHugeAsChars(CharBuffer dest)
+			throws IllegalArgumentException, IOException, UBJFormatException {
+		super.readHugeAsChars(dest);
+		peek = -1;
+	}
+
+	@Override
 	public String readHugeAsString() throws IOException, UBJFormatException {
 		String huge = super.readHugeAsString();
 		peek = -1;
@@ -233,6 +241,13 @@ public class UBJInputStreamParser extends UBJInputStream {
 		CharBuffer buffer = super.readStringAsChars();
 		peek = -1;
 		return buffer;
+	}
+
+	@Override
+	public void readStringAsChars(CharBuffer dest)
+			throws IllegalArgumentException, IOException, UBJFormatException {
+		super.readStringAsChars(dest);
+		peek = -1;
 	}
 
 	@Override
