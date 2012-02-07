@@ -102,7 +102,9 @@ public class UBJInputStream extends FilterInputStream {
 			throw new IllegalArgumentException("amount [" + amount
 					+ "] must be >= 0");
 
-		return in.skip(amount);
+		long skipped = in.skip(amount);
+		pos += skipped;
+		return skipped;
 	}
 
 	@Override
