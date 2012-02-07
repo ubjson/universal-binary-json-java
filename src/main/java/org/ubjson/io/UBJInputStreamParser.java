@@ -40,7 +40,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.CharBuffer;
 
-// TODO: implement the new methods in UBJInputStream
 public class UBJInputStreamParser extends UBJInputStream {
 	private byte peek;
 
