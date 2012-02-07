@@ -254,7 +254,45 @@ public class UBJInputStream extends FilterInputStream {
 							+ "] specified for the HUGE value at stream position "
 							+ pos + ". Length must be >= 0.");
 
-		return decoder.decode(in, length);
+		CharBuffer dest = CharBuffer.allocate(length);
+		decoder.decode(in, length, dest);
+		return dest;
+	}
+
+	public void readHugeAsChars(CharBuffer dest)
+			throws IllegalArgumentException, IOException, UBJFormatException {
+		if (dest == null)
+			throw new IllegalArgumentException("dest cannot be null");
+
+		byte type = checkType("HUGE", HUGE_COMPACT, HUGE);
+		int length = 0;
+
+		switch (type) {
+		case HUGE_COMPACT:
+			length = read();
+			break;
+
+		case HUGE:
+			length = readInt32Impl();
+			break;
+		}
+
+		if (length < 0)
+			throw new UBJFormatException(
+					pos,
+					"Encountered a negative (invalid) length of ["
+							+ length
+							+ "] specified for the HUGE value at stream position "
+							+ pos + ". Length must be >= 0.");
+		if (length > dest.capacity())
+			throw new IllegalArgumentException(
+					"The length of HUGE value is ["
+							+ length
+							+ "] but capacity of provided CharBuffer is only ["
+							+ dest.capacity()
+							+ "]; a bigger CharBuffer must be used to properly read (decode) this HUGE numeric value.");
+
+		decoder.decode(in, length, dest);
 	}
 
 	public String readHugeAsString() throws IOException, UBJFormatException {
@@ -279,11 +317,6 @@ public class UBJInputStream extends FilterInputStream {
 		return new String(buffer.array(), buffer.position(), buffer.remaining());
 	}
 
-	/*
-	 * TODO: Provide another method impl that accepts a CharBuffer with a capacity
-	 * that is AT LEAST as big as length so it can be passed through and re-used
-	 * with the decoder over and over again for optimal performance.
-	 */
 	public CharBuffer readStringAsChars() throws IOException,
 			UBJFormatException {
 		byte type = checkType("STRING", STRING_COMPACT, STRING);
@@ -307,7 +340,45 @@ public class UBJInputStream extends FilterInputStream {
 							+ "] specified for the STRING value at stream position "
 							+ pos + ". Length must be >= 0.");
 
-		return decoder.decode(in, length);
+		CharBuffer dest = CharBuffer.allocate(length);
+		decoder.decode(in, length, dest);
+		return dest;
+	}
+
+	public void readStringAsChars(CharBuffer dest)
+			throws IllegalArgumentException, IOException, UBJFormatException {
+		if (dest == null)
+			throw new IllegalArgumentException("dest cannot be null");
+
+		byte type = checkType("STRING", STRING_COMPACT, STRING);
+		int length = 0;
+
+		switch (type) {
+		case STRING_COMPACT:
+			length = read();
+			break;
+
+		case STRING:
+			length = readInt32Impl();
+			break;
+		}
+
+		if (length < 0)
+			throw new UBJFormatException(
+					pos,
+					"Encountered a negative (invalid) length of ["
+							+ length
+							+ "] specified for the STRING value at stream position "
+							+ pos + ". Length must be >= 0.");
+		if (length > dest.capacity())
+			throw new IllegalArgumentException(
+					"The length of STRING value is ["
+							+ length
+							+ "] but capacity of provided CharBuffer is only ["
+							+ dest.capacity()
+							+ "]; a bigger CharBuffer must be used to properly read (decode) this STRING value.");
+
+		decoder.decode(in, length, dest);
 	}
 
 	public int readArrayLength() throws IOException, UBJFormatException {
