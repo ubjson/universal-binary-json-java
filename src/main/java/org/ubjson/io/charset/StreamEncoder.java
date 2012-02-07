@@ -57,6 +57,7 @@ public class StreamEncoder {
 	}
 
 	private byte[] buffer;
+	private ByteBuffer bbuffer;
 	private CharsetEncoder encoder;
 
 	public StreamEncoder() {
@@ -67,7 +68,16 @@ public class StreamEncoder {
 		if (charset == null)
 			throw new IllegalArgumentException("charset cannot be null");
 
+		/*
+		 * We need access to both the byte[] and the wrapping ByteBuffer.
+		 * 
+		 * Below in encode() we need the raw byte[] to write bytes to the
+		 * provided stream and we need access to the ByteBuffer to manipulate
+		 * its pointers to keep pointing it at the new data from the encoder.
+		 */
 		buffer = new byte[BUFFER_SIZE];
+		bbuffer = ByteBuffer.wrap(buffer);
+
 		encoder = charset.newEncoder();
 	}
 
@@ -80,7 +90,6 @@ public class StreamEncoder {
 			return;
 
 		encoder.reset();
-		ByteBuffer dest = ByteBuffer.wrap(buffer);
 
 		/*
 		 * Encode all the remaining chars in the given buffer; the buffer's
@@ -88,19 +97,25 @@ public class StreamEncoder {
 		 * process.
 		 */
 		while (text.hasRemaining()) {
-			dest.clear();
-			encoder.encode(text, dest, false);
+			bbuffer.clear();
 
-			stream.write(buffer, 0, dest.position());
+			// Encoder the text into our temporary write buffer.
+			encoder.encode(text, bbuffer, false);
+
+			/*
+			 * Using direct access to the underlying byte[], write the bytes
+			 * that the decode operation produced to the output stream.
+			 */
+			stream.write(buffer, 0, bbuffer.position());
 		}
 
 		// Perform the decoding finalization.
-		dest.clear();
-		encoder.encode(text, dest, true);
-		encoder.flush(dest);
+		bbuffer.clear();
+		encoder.encode(text, bbuffer, true);
+		encoder.flush(bbuffer);
 
 		// Write out any additional bytes finalization resulted in.
-		if (dest.position() > 0)
-			stream.write(buffer, 0, dest.position());
+		if (bbuffer.position() > 0)
+			stream.write(buffer, 0, bbuffer.position());
 	}
 }
