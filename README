@@ -14,13 +14,15 @@ I/O is handled through the following core classes:
 	* UBJInputStreamParser
 	
 Additionally, if you are working with Java's NIO and need byte[]-based
-results, you can wrap any of the above I/O classes around one of the provided
+results, you can wrap any of the above I/O classes around one of the highly
+optimized custom byte[]-stream impls:
 
 	* ByteArrayInputStream	(optimized for reuse, not from JDK)
 	* ByteArrayOutputStream (optimized for reuse, not from JDK)
 
-And reuse the streams over and over again in a pool of streams for high 
-performance I/O using Java's NIO classes.
+This allows you to re-use the streams over and over again in a pool of reusable
+streams for high-performance I/O with no object creation and garbage collection
+overhead; a perfect match for high frequency NIO-based communication.
 
 All of the core I/O classes have been stable for a while, with tweaks to make the
 performance tighter and the error messages more informative over the last few
@@ -30,19 +32,51 @@ More Java-convenient reflection-based I/O classes are available in the
 org.ubjson.io.reflect package, but they are under active development.
 
 There are other efforts (like utilities) in other sub portions of the source
-tree. This project intends to eventually contain a multitude of UBJSON abstraction
-layers, I/O methods and utilities.
+tree. This project intends to eventually contain a multitude of UBJSON 
+abstraction layers, I/O methods and utilities.
 
 
 Changelog
 ---------
+02-07-12
+	More Memory and CPU optimizations across all the I/O impls.
+	
+	* StreamDecoder was rewritten to no longer create a ByteBuffer on every
+	invocation and instead re-use the same one to decode from on every single call.
+	
+	* StreamDecoder now requires the call to pass in a CharBuffer instance to hold
+	the result of the decode operation. This avoids the creation of a CharBuffer
+	and allows for large-scale optimization by re-using existing buffers between
+	calls.
+	
+	* StreamEncoder was rewritten to no longer create a ByteBuffer on every
+	invocation either and now re-uses the same single instance over and over
+	again.
+	
+	* UBJOutputStream writeHuge and writeString series of methods were all
+	rewritten to accept a CharBuffer in the rawest form (no longer char[]) to stop
+	hiding the fact that the underlying encode operation required one.
+	
+	This gives the caller an opportunity to cache and re-use CharBuffers over 
+	and over again if they can; otherwise this just pushes the CharBuffer.wrap() 
+	call up to the caller instead of hiding it secretly in the method impl under 
+	the guise of accepting a raw char[] (that it couldn't use directly).
+	
+	For callers that can re-use buffers, this will lead to big performance gains
+	now that were previously impossible.
+	
+	* UBJInputStream added readHuge and readString methods that accept an existing
+	CharBuffer argument to make use of the optimizations made in the Stream encoder
+	and decoder impls.
+
 01-15-12
 	Huge performance boost for deserialization!
 	
 	StreamDecoder previously used separate read and write buffers for decoding 
-	as well as the resulting char[] that was returned to the caller. This at
-	least 1 full array copy before returning a result in the best case and
-	2x full array copies before returning the result in the worst case.
+	bytes to chars including the resulting char[] that was returned to the caller. 
+	This design required at least 1 full array copy before returning a result in 
+	the best case and 2x full array copies before returning the result in the 
+	worst case.
 	
 	The rewrite removed the need for a write buffer entire as well as ALL array
 	copies; in the best OR worse case they never occur anymore.
