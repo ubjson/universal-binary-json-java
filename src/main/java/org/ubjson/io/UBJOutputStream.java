@@ -166,12 +166,6 @@ public class UBJOutputStream extends FilterOutputStream {
 
 		int length = huge.remaining();
 
-		if (length < 1)
-			throw new IllegalArgumentException(
-					"huge.remaining() ["
-							+ length
-							+ "] is < 1 and does not represent a valid HUGE numeric value; it is an empty buffer with no characters.");
-
 		// Write header
 		if (length < 255) {
 			write(HUGE_COMPACT);
@@ -190,6 +184,10 @@ public class UBJOutputStream extends FilterOutputStream {
 		if (huge == null)
 			throw new IllegalArgumentException("huge cannot be null");
 
+		/*
+		 * Write body - CharBuffer uses a reflection-optimized wrapper for
+		 * String instances specifically.
+		 */
 		writeHuge(CharBuffer.wrap(huge.toString()));
 	}
 
@@ -198,44 +196,19 @@ public class UBJOutputStream extends FilterOutputStream {
 		if (huge == null)
 			throw new IllegalArgumentException("huge cannot be null");
 
+		/*
+		 * Write body - CharBuffer uses a reflection-optimized wrapper for
+		 * String instances specifically.
+		 */
 		writeHuge(CharBuffer.wrap(huge.toString()));
 	}
 
-	public void writeString(char[] text) throws IllegalArgumentException,
+	public void writeString(CharBuffer text) throws IllegalArgumentException,
 			IOException {
 		if (text == null)
 			throw new IllegalArgumentException("text cannot be null");
 
-		// Write header
-		if (text.length < 255) {
-			write(STRING_COMPACT);
-			write(text.length);
-		} else {
-			write(STRING);
-			writeInt32Impl(text.length);
-		}
-
-		// Write body
-		encoder.encode(CharBuffer.wrap(text), out);
-	}
-
-	/*
-	 * TODO: Add a writeHuge that accepts a CharBuffer that passes right through
-	 * for easy re-use to the caller.
-	 * 
-	 * Possibly replace this method since it has to perform a wrap of the
-	 * argument anyway into a CharBuffer, at least make that requirement clear
-	 * so that expense isn't hidden down here in this impl and the caller thinks
-	 * they are using the rawest/fastest method to write the values.
-	 * 
-	 * On that note, consider getting rid of all char[] arguments and replacing
-	 * them with the value that is really needed: CharBuffer args.
-	 */
-
-	public void writeString(char[] text, int index, int length)
-			throws IllegalArgumentException, IOException {
-		if (text == null)
-			throw new IllegalArgumentException("text cannot be null");
+		int length = text.remaining();
 
 		// Write header
 		if (length < 255) {
@@ -247,7 +220,7 @@ public class UBJOutputStream extends FilterOutputStream {
 		}
 
 		// Write body
-		encoder.encode(CharBuffer.wrap(text, index, length), out);
+		encoder.encode(text, out);
 	}
 
 	public void writeString(String text) throws IllegalArgumentException,
@@ -255,19 +228,11 @@ public class UBJOutputStream extends FilterOutputStream {
 		if (text == null)
 			throw new IllegalArgumentException("text cannot be null");
 
-		int length = text.length();
-
-		// Write header
-		if (length < 255) {
-			write(STRING_COMPACT);
-			write(length);
-		} else {
-			write(STRING);
-			writeInt32Impl(length);
-		}
-
-		// Write body - CB uses a reflection-optimized wrapper for String.
-		encoder.encode(CharBuffer.wrap(text), out);
+		/*
+		 * Write body - CharBuffer uses a reflection-optimized wrapper for
+		 * String instances specifically.
+		 */
+		writeString(CharBuffer.wrap(text));
 	}
 
 	public void writeArrayHeader(int elementCount)
