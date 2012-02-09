@@ -115,7 +115,7 @@ public class StreamDecoder {
 			bbuffer.clear();
 
 			/*
-			 * Reset the dest CharBuffer.
+			 * Reset the destination CharBuffer.
 			 * 
 			 * This is the target we are decoding the bytes into. We have
 			 * confirmed its capacity is large enough to hold the maximum
@@ -154,9 +154,6 @@ public class StreamDecoder {
 
 			// Flush any remaining state from the decoder to our result.
 			decoder.flush(dest);
-
-			// Prepare the result buffer to be read by the caller.
-			dest.flip();
 		}
 	}
 }
