@@ -81,28 +81,28 @@ public class StreamDecoder {
 		decoder = charset.newDecoder();
 	}
 
-	public void decode(InputStream stream, int length, CharBuffer out)
+	public void decode(InputStream stream, int length, CharBuffer dest)
 			throws IllegalArgumentException, IOException {
 		if (stream == null)
 			throw new IllegalArgumentException("stream cannot be null");
 		if (length < 0)
 			throw new IllegalArgumentException("length [" + length
 					+ "] must be >= 0.");
-		if (out == null)
+		if (dest == null)
 			throw new IllegalArgumentException(
-					"out cannot be null and must be a CharBuffer with a large enough capacity to hold at least 'length' ("
+					"dest cannot be null and must be a CharBuffer with a large enough capacity to hold at least 'length' ("
 							+ length + ") characters.");
-		if (length > out.capacity())
+		if (length > dest.capacity())
 			throw new IllegalArgumentException(
 					"length ["
 							+ length
 							+ "] is larger than the capacity ["
-							+ out.capacity()
-							+ "] of the given CharBuffer; the CharBuffer must be big enough to contain all the characters decoded from the given InputStream.");
+							+ dest.capacity()
+							+ "] of the given CharBuffer; the dest CharBuffer must be big enough to contain all the characters decoded from the given InputStream.");
 
 		// short-circuit
 		if (length == 0)
-			out.clear();
+			dest.clear();
 		else {
 			/*
 			 * Reset the ByteBuffer.
@@ -122,7 +122,7 @@ public class StreamDecoder {
 			 * possible number of chars we will decode (when 1-byte=1-char, e.g.
 			 * ASCII). Decoding will *never* result in more chars than bytes.
 			 */
-			out.clear();
+			dest.clear();
 
 			// Reset the decoder to prepare it for new work.
 			decoder.reset();
@@ -142,7 +142,7 @@ public class StreamDecoder {
 				bbuffer.limit(read);
 
 				// Decode the read bytes to our output buffer.
-				decoder.decode(bbuffer, out, (length == 0));
+				decoder.decode(bbuffer, dest, (length == 0));
 			}
 
 			if (length > 0)
@@ -153,7 +153,7 @@ public class StreamDecoder {
 								+ length + " remaining bytes.");
 
 			// Flush any remaining state from the decoder to our result.
-			decoder.flush(out);
+			decoder.flush(dest);
 		}
 	}
 }
