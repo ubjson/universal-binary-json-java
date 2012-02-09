@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
 import org.ubjson.io.charset.StreamDecoder;
@@ -187,112 +188,45 @@ public class UBJInputStream extends FilterInputStream {
 		return Double.longBitsToDouble(readInt64Impl());
 	}
 
-	public byte[] readHugeAsBytes() throws IOException, UBJFormatException {
-		byte type = checkType("HUGE", HUGE_COMPACT, HUGE);
-		int length = 0;
+	public Number readHuge() throws IOException, UBJFormatException {
+		String huge = readHugeAsString();
 
-		switch (type) {
-		case HUGE_COMPACT:
-			length = read();
-			break;
+		if (huge.indexOf('.') == -1)
+			return new BigInteger(huge);
+		else
+			return new BigDecimal(huge);
+	}
 
-		case HUGE:
-			length = readInt32Impl();
-			break;
-		}
-
-		if (length < 0)
-			throw new UBJFormatException(
-					pos,
-					"Encountered a negative (invalid) length of ["
-							+ length
-							+ "] specified for the HUGE value at stream position "
-							+ pos + ". Length must be >= 0.");
-
-		int read = 0;
-		int total = 0;
-		byte[] buffer = new byte[length];
-
-		/*
-		 * Keep reading from the stream until we have collected all the bytes
-		 * necessary to reconstitute the BigInteger.
-		 */
-		while ((read = read(buffer, total, length - read)) > -1)
-			total += read;
-
-		// Make sure we got all the bytes we were promised.
-		if (total < length)
-			throw new IOException(
-					"End of Stream was encountered at stream position "
-							+ pos
-							+ " while trying to read all of the bytes representing this HUGE value ("
-							+ length + " bytes). Only " + total
-							+ " bytes could be read.");
+	public ByteBuffer readHugeAsBytes() throws IOException, UBJFormatException {
+		ByteBuffer buffer = ByteBuffer.allocate(readHugeHeaderImpl());
+		readHugeBodyAsBytesImpl(buffer.capacity(), buffer);
 
 		return buffer;
 	}
 
-	public CharBuffer readHugeAsChars() throws IOException, UBJFormatException {
-		byte type = checkType("HUGE", HUGE_COMPACT, HUGE);
-		int length = 0;
+	public void readHugeAsBytes(ByteBuffer buffer)
+			throws IllegalArgumentException, IOException, UBJFormatException {
+		if (buffer == null)
+			throw new IllegalArgumentException("buffer cannot be null");
 
-		switch (type) {
-		case HUGE_COMPACT:
-			length = read();
-			break;
-
-		case HUGE:
-			length = readInt32Impl();
-			break;
-		}
-
-		if (length < 0)
-			throw new UBJFormatException(
-					pos,
-					"Encountered a negative (invalid) length of ["
-							+ length
-							+ "] specified for the HUGE value at stream position "
-							+ pos + ". Length must be >= 0.");
-
-		CharBuffer dest = CharBuffer.allocate(length);
-		decoder.decode(in, length, dest);
-		return dest;
+		// Read bytes directly from stream into the provided buffer.
+		readHugeBodyAsBytesImpl(readHugeHeaderImpl(), buffer);
 	}
 
-	public void readHugeAsChars(CharBuffer dest)
+	public CharBuffer readHugeAsChars() throws IOException, UBJFormatException {
+		CharBuffer buffer = CharBuffer.allocate(readHugeHeaderImpl());
+		readHugeBodyAsCharsImpl(buffer.capacity(), buffer);
+
+		return buffer;
+	}
+
+	public void readHugeAsChars(CharBuffer buffer)
 			throws IllegalArgumentException, IOException, UBJFormatException {
-		if (dest == null)
-			throw new IllegalArgumentException("dest cannot be null");
+		if (buffer == null)
+			throw new IllegalArgumentException("buffer cannot be null");
 
-		byte type = checkType("HUGE", HUGE_COMPACT, HUGE);
-		int length = 0;
-
-		switch (type) {
-		case HUGE_COMPACT:
-			length = read();
-			break;
-
-		case HUGE:
-			length = readInt32Impl();
-			break;
-		}
-
-		if (length < 0)
-			throw new UBJFormatException(
-					pos,
-					"Encountered a negative (invalid) length of ["
-							+ length
-							+ "] specified for the HUGE value at stream position "
-							+ pos + ". Length must be >= 0.");
-		if (length > dest.capacity())
-			throw new IllegalArgumentException(
-					"The length of HUGE value is ["
-							+ length
-							+ "] but capacity of provided CharBuffer is only ["
-							+ dest.capacity()
-							+ "]; a bigger CharBuffer must be used to properly read (decode) this HUGE numeric value.");
-
-		decoder.decode(in, length, dest);
+		// Decode bytes directly from stream into the provided buffer.
+		readHugeBodyAsCharsImpl(readHugeHeaderImpl(), buffer);
 	}
 
 	public String readHugeAsString() throws IOException, UBJFormatException {
@@ -300,85 +234,43 @@ public class UBJInputStream extends FilterInputStream {
 		return new String(buffer.array(), buffer.position(), buffer.remaining());
 	}
 
-	public BigInteger readHugeAsBigInteger() throws IOException,
-			UBJFormatException {
-		return new BigInteger(readHugeAsBytes());
-	}
-
-	public BigDecimal readHugeAsBigDecimal() throws IOException,
-			UBJFormatException {
-		CharBuffer buffer = readHugeAsChars();
-		return new BigDecimal(buffer.array(), buffer.position(),
-				buffer.remaining());
-	}
-
 	public String readString() throws IOException, UBJFormatException {
 		CharBuffer buffer = readStringAsChars();
 		return new String(buffer.array(), buffer.position(), buffer.remaining());
 	}
 
-	public CharBuffer readStringAsChars() throws IOException,
+	public ByteBuffer readStringAsBytes() throws IOException,
 			UBJFormatException {
-		byte type = checkType("STRING", STRING_COMPACT, STRING);
-		int length = 0;
+		ByteBuffer buffer = ByteBuffer.allocate(readStringHeaderImpl());
+		readStringBodyAsBytesImpl(buffer.capacity(), buffer);
 
-		switch (type) {
-		case STRING_COMPACT:
-			length = read();
-			break;
-
-		case STRING:
-			length = readInt32Impl();
-			break;
-		}
-
-		if (length < 0)
-			throw new UBJFormatException(
-					pos,
-					"Encountered a negative (invalid) length of ["
-							+ length
-							+ "] specified for the STRING value at stream position "
-							+ pos + ". Length must be >= 0.");
-
-		CharBuffer dest = CharBuffer.allocate(length);
-		decoder.decode(in, length, dest);
-		return dest;
+		return buffer;
 	}
 
-	public void readStringAsChars(CharBuffer dest)
+	public void readStringAsBytes(ByteBuffer buffer)
 			throws IllegalArgumentException, IOException, UBJFormatException {
-		if (dest == null)
-			throw new IllegalArgumentException("dest cannot be null");
+		if (buffer == null)
+			throw new IllegalArgumentException("buffer cannot be null");
 
-		byte type = checkType("STRING", STRING_COMPACT, STRING);
-		int length = 0;
+		// Read bytes directly from stream into the provided buffer.
+		readStringBodyAsBytesImpl(readStringHeaderImpl(), buffer);
+	}
 
-		switch (type) {
-		case STRING_COMPACT:
-			length = read();
-			break;
+	public CharBuffer readStringAsChars() throws IOException,
+			UBJFormatException {
+		CharBuffer buffer = CharBuffer.allocate(readStringHeaderImpl());
+		readStringBodyAsCharsImpl(buffer.capacity(), buffer);
 
-		case STRING:
-			length = readInt32Impl();
-			break;
-		}
+		return buffer;
+	}
 
-		if (length < 0)
-			throw new UBJFormatException(
-					pos,
-					"Encountered a negative (invalid) length of ["
-							+ length
-							+ "] specified for the STRING value at stream position "
-							+ pos + ". Length must be >= 0.");
-		if (length > dest.capacity())
-			throw new IllegalArgumentException(
-					"The length of STRING value is ["
-							+ length
-							+ "] but capacity of provided CharBuffer is only ["
-							+ dest.capacity()
-							+ "]; a bigger CharBuffer must be used to properly read (decode) this STRING value.");
+	public void readStringAsChars(CharBuffer buffer)
+			throws IllegalArgumentException, IOException, UBJFormatException {
+		if (buffer == null)
+			throw new IllegalArgumentException("buffer cannot be null");
 
-		decoder.decode(in, length, dest);
+		// Decode bytes directly from stream into the provided buffer.
+		readStringBodyAsCharsImpl(readStringHeaderImpl(), buffer);
 	}
 
 	public int readArrayLength() throws IOException, UBJFormatException {
@@ -468,7 +360,7 @@ public class UBJInputStream extends FilterInputStream {
 	}
 
 	protected byte checkType(String name, byte expected, byte expectedOpt)
-			throws UBJFormatException, IOException {
+			throws IOException, UBJFormatException {
 		byte type = nextType();
 
 		if (type != expected && (expectedOpt != INVALID && type != expectedOpt)) {
@@ -579,5 +471,156 @@ public class UBJInputStream extends FilterInputStream {
 		 * segments together (bit operation) and return the resulting number.
 		 */
 		return (l1 | l2 | l3 | l4 | l5 | l6 | l7 | l8);
+	}
+
+	protected int readHugeHeaderImpl() throws IOException, UBJFormatException {
+		// Ensure we are reading a HUGE or HUGE_COMPACT type.
+		byte type = checkType("HUGE", HUGE_COMPACT, HUGE);
+		int length = 0;
+
+		// Get the length of the HUGE.
+		switch (type) {
+		case HUGE_COMPACT:
+			length = read();
+			break;
+
+		case HUGE:
+			length = readInt32Impl();
+			break;
+		}
+
+		// Confirm the length is not negative.
+		if (length < 0)
+			throw new UBJFormatException(
+					pos,
+					"Encountered a negative (invalid) length of ["
+							+ length
+							+ "] specified for the HUGE value at stream position "
+							+ pos + ". Length must be >= 0.");
+
+		// Return the length of the HUGE to the caller.
+		return length;
+	}
+
+	protected void readHugeBodyAsBytesImpl(int length, ByteBuffer buffer)
+			throws IllegalArgumentException, IOException, UBJFormatException {
+		if (buffer.capacity() < length)
+			throw new IllegalArgumentException(
+					"buffer capacity is "
+							+ buffer.capacity()
+							+ " but length of HUGE to be read is "
+							+ length
+							+ " bytes; destination buffer must be big enough to contain at least all the bytes for the HUGE value being read.");
+
+		// Read the raw bytes from the stream directly into the backing byte[]
+		int read = read(buffer.array(), 0, length);
+
+		// Make sure we got all the bytes we were promised.
+		if (read < length)
+			throw new IOException(
+					"The End-of-Stream was encountered at stream position "
+							+ pos
+							+ " while trying to read all of the bytes representing this HUGE value ("
+							+ length + " bytes). Only " + read
+							+ " bytes could be read.");
+
+		/*
+		 * Simulate the clear/put/flip ops for the wrapping ByteBuffer so the
+		 * caller can read the result.
+		 */
+		buffer.position(0);
+		buffer.limit(read);
+	}
+
+	protected void readHugeBodyAsCharsImpl(int length, CharBuffer buffer)
+			throws IllegalArgumentException, IOException, UBJFormatException {
+		if (buffer.capacity() < length)
+			throw new IllegalArgumentException(
+					"buffer capacity is "
+							+ buffer.capacity()
+							+ " but length of HUGE to be read is "
+							+ length
+							+ " bytes; destination buffer must be big enough to contain at least all the bytes for the HUGE value being read.");
+
+		// Decode the HUGE from our byte stream into our CharBuffer.
+		decoder.decode(in, length, buffer);
+
+		// Prepare the buffer to be read by the caller.
+		buffer.flip();
+	}
+
+	protected int readStringHeaderImpl() throws IOException, UBJFormatException {
+		// Ensure we are reading a STRING or STRING_COMPACT type.
+		byte type = checkType("STRING", STRING_COMPACT, STRING);
+		int length = 0;
+
+		// Get the length of the STRING.
+		switch (type) {
+		case STRING_COMPACT:
+			length = read();
+			break;
+
+		case STRING:
+			length = readInt32Impl();
+			break;
+		}
+
+		// Confirm the length is not negative.
+		if (length < 0)
+			throw new UBJFormatException(
+					pos,
+					"Encountered a negative (invalid) length of ["
+							+ length
+							+ "] specified for the STRING value at stream position "
+							+ pos + ". Length must be >= 0.");
+
+		return length;
+	}
+
+	protected void readStringBodyAsBytesImpl(int length, ByteBuffer buffer)
+			throws IllegalArgumentException, IOException, UBJFormatException {
+		if (buffer.capacity() < length)
+			throw new IllegalArgumentException(
+					"buffer capacity is "
+							+ buffer.capacity()
+							+ " but length of STRING to be read is "
+							+ length
+							+ " bytes; destination buffer must be big enough to contain at least all the bytes for the HUGE value being read.");
+
+		// Read the raw bytes from the stream directly into the backing byte[]
+		int read = read(buffer.array(), 0, length);
+
+		// Make sure we got all the bytes we were promised.
+		if (read < length)
+			throw new IOException(
+					"The End-of-Stream was encountered at stream position "
+							+ pos
+							+ " while trying to read all of the bytes representing this STRING value ("
+							+ length + " bytes). Only " + read
+							+ " bytes could be read.");
+
+		/*
+		 * Simulate the clear/put/flip ops for the wrapping ByteBuffer so the
+		 * caller can read the result.
+		 */
+		buffer.position(0);
+		buffer.limit(read);
+	}
+
+	protected void readStringBodyAsCharsImpl(int length, CharBuffer buffer)
+			throws IllegalArgumentException, IOException, UBJFormatException {
+		if (buffer.capacity() < length)
+			throw new IllegalArgumentException(
+					"buffer capacity is "
+							+ buffer.capacity()
+							+ " but length of STRING to be read is "
+							+ length
+							+ " bytes; destination buffer must be big enough to contain at least all of the bytes for the STRING value being read.");
+
+		// Decode the STRING from our byte stream to our CharBuffer.
+		decoder.decode(in, length, buffer);
+
+		// Prepare the buffer to be read by the caller.
+		buffer.flip();
 	}
 }

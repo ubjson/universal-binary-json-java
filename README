@@ -38,6 +38,24 @@ abstraction layers, I/O methods and utilities.
 
 Changelog
 ---------
+02-09-12
+	* Fixed bug with readHugeAsBigInteger returning an invalid value and not
+	treating the underlying bytes as a string-encoded value.
+	
+	* Removed implicit buffer.flip() at the end of StreamDecoder; there is no 
+	way	to know what the caller had planned for the buffer before reading all 
+	the data back out. Also the flip was in the wrong place and in the case of 
+	an empty decode request (length=0) the flip would not have been performed, 
+	providing the caller with a "full" buffer of nothing.
+	
+	* Rewrote all readHugeXXX method impls; now huge's can be read in as a 
+	simple Number (BigInteger or BigDecimal) as well as raw bytes and even
+	decoded chars. Additionally the methods can even accept and use existing
+	buffers to write into to allow for tighter optimizations.
+	
+	* Rewrote all readStringXXX methods using the same optimizations and
+	flexibility that readHuge methods now use.
+
 02-07-12
 	More Memory and CPU optimizations across all the I/O impls.
 	

@@ -36,8 +36,7 @@ import static org.ubjson.io.IUBJTypeMarker.TRUE;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
-import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
 public class UBJInputStreamParser extends UBJInputStream {
@@ -191,10 +190,24 @@ public class UBJInputStreamParser extends UBJInputStream {
 	}
 
 	@Override
-	public byte[] readHugeAsBytes() throws IOException, UBJFormatException {
-		byte[] h = super.readHugeAsBytes();
+	public Number readHuge() throws IOException, UBJFormatException {
+		Number h = super.readHuge();
 		peek = -1;
 		return h;
+	}
+
+	@Override
+	public ByteBuffer readHugeAsBytes() throws IOException, UBJFormatException {
+		ByteBuffer h = super.readHugeAsBytes();
+		peek = -1;
+		return h;
+	}
+
+	@Override
+	public void readHugeAsBytes(ByteBuffer buffer)
+			throws IllegalArgumentException, IOException, UBJFormatException {
+		super.readHugeAsBytes(buffer);
+		peek = -1;
 	}
 
 	@Override
@@ -219,19 +232,25 @@ public class UBJInputStreamParser extends UBJInputStream {
 	}
 
 	@Override
-	public BigInteger readHugeAsBigInteger() throws IOException,
-			UBJFormatException {
-		BigInteger h = super.readHugeAsBigInteger();
+	public String readString() throws IOException, UBJFormatException {
+		String s = super.readString();
 		peek = -1;
-		return h;
+		return s;
 	}
 
 	@Override
-	public BigDecimal readHugeAsBigDecimal() throws IOException,
+	public ByteBuffer readStringAsBytes() throws IOException,
 			UBJFormatException {
-		BigDecimal h = super.readHugeAsBigDecimal();
+		ByteBuffer s = super.readStringAsBytes();
 		peek = -1;
-		return h;
+		return s;
+	}
+
+	@Override
+	public void readStringAsBytes(ByteBuffer buffer)
+			throws IllegalArgumentException, IOException, UBJFormatException {
+		super.readStringAsBytes(buffer);
+		peek = -1;
 	}
 
 	@Override
