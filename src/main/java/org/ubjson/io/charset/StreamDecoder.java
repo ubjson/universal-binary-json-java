@@ -56,8 +56,11 @@ public class StreamDecoder {
 					+ BUFFER_SIZE + "'.");
 	}
 
-	private byte[] buffer;
-	private ByteBuffer bbuffer;
+	// The raw wrapped buffer.
+	private byte[] rBuffer;
+
+	// The higher level ByteBuffer that wraps the rBuffer.
+	private ByteBuffer bBuffer;
 	private CharsetDecoder decoder;
 
 	public StreamDecoder() {
@@ -75,34 +78,34 @@ public class StreamDecoder {
 		 * provided stream and we need access to the ByteBuffer to manipulate
 		 * its pointers to keep pointing it at the new data from the stream.
 		 */
-		buffer = new byte[BUFFER_SIZE];
-		bbuffer = ByteBuffer.wrap(buffer);
+		rBuffer = new byte[BUFFER_SIZE];
+		bBuffer = ByteBuffer.wrap(rBuffer);
 
 		decoder = charset.newDecoder();
 	}
 
-	public void decode(InputStream stream, int length, CharBuffer dest)
+	public void decode(InputStream stream, int length, CharBuffer buffer)
 			throws IllegalArgumentException, IOException {
 		if (stream == null)
 			throw new IllegalArgumentException("stream cannot be null");
 		if (length < 0)
 			throw new IllegalArgumentException("length [" + length
 					+ "] must be >= 0.");
-		if (dest == null)
+		if (buffer == null)
 			throw new IllegalArgumentException(
-					"dest cannot be null and must be a CharBuffer with a large enough capacity to hold at least 'length' ("
+					"buffer cannot be null and must be a CharBuffer with a large enough capacity to hold at least 'length' ("
 							+ length + ") characters.");
-		if (length > dest.capacity())
+		if (length > buffer.capacity())
 			throw new IllegalArgumentException(
 					"length ["
 							+ length
 							+ "] is larger than the capacity ["
-							+ dest.capacity()
-							+ "] of the given CharBuffer; the dest CharBuffer must be big enough to contain all the characters decoded from the given InputStream.");
+							+ buffer.capacity()
+							+ "] of the given buffer; the CharBuffer must be big enough to contain all the characters decoded from the given InputStream.");
 
 		// short-circuit
 		if (length == 0)
-			dest.clear();
+			buffer.clear();
 		else {
 			/*
 			 * Reset the ByteBuffer.
@@ -112,7 +115,7 @@ public class StreamDecoder {
 			 * new data so the decode operation operates on the correct (new)
 			 * bytes.
 			 */
-			bbuffer.clear();
+			bBuffer.clear();
 
 			/*
 			 * Reset the destination CharBuffer.
@@ -122,14 +125,14 @@ public class StreamDecoder {
 			 * possible number of chars we will decode (when 1-byte=1-char, e.g.
 			 * ASCII). Decoding will *never* result in more chars than bytes.
 			 */
-			dest.clear();
+			buffer.clear();
 
 			// Reset the decoder to prepare it for new work.
 			decoder.reset();
 
 			int read = 0;
 
-			while (length > 0 && (read = stream.read(buffer, 0, length)) != -1) {
+			while (length > 0 && (read = stream.read(rBuffer, 0, length)) != -1) {
 				// Keep track of how many bytes remaining we need to read.
 				length -= read;
 
@@ -138,11 +141,11 @@ public class StreamDecoder {
 				 * point at the bytes just read in from the stream to the
 				 * backing array.
 				 */
-				bbuffer.position(0);
-				bbuffer.limit(read);
+				bBuffer.position(0);
+				bBuffer.limit(read);
 
 				// Decode the read bytes to our output buffer.
-				decoder.decode(bbuffer, dest, (length == 0));
+				decoder.decode(bBuffer, buffer, (length == 0));
 			}
 
 			if (length > 0)
@@ -153,7 +156,7 @@ public class StreamDecoder {
 								+ length + " remaining bytes.");
 
 			// Flush any remaining state from the decoder to our result.
-			decoder.flush(dest);
+			decoder.flush(buffer);
 		}
 	}
 }

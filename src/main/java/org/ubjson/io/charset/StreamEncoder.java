@@ -86,6 +86,7 @@ public class StreamEncoder {
 		if (stream == null)
 			throw new IllegalArgumentException("stream cannot be null");
 
+		// Short-circuit.
 		if (src == null || !src.hasRemaining())
 			return;
 
