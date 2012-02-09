@@ -61,6 +61,6 @@ public class BigIntegerHugeValue extends AbstractValue<BigInteger> {
 		if (in == null)
 			throw new IllegalArgumentException("in cannot be null");
 
-		value = in.readHugeAsBigInteger();
+		value = (BigInteger) in.readHuge();
 	}
 }

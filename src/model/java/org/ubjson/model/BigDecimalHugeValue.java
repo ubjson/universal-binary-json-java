@@ -61,6 +61,6 @@ public class BigDecimalHugeValue extends AbstractValue<BigDecimal> {
 		if (in == null)
 			throw new IllegalArgumentException("in cannot be null");
 
-		value = in.readHugeAsBigDecimal();
+		value = (BigDecimal) in.readHuge();
 	}
 }
