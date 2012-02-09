@@ -81,12 +81,12 @@ public class StreamEncoder {
 		encoder = charset.newEncoder();
 	}
 
-	public void encode(CharBuffer text, OutputStream stream)
+	public void encode(CharBuffer in, OutputStream stream)
 			throws IllegalArgumentException, IOException {
 		if (stream == null)
 			throw new IllegalArgumentException("stream cannot be null");
 
-		if (text == null || !text.hasRemaining())
+		if (in == null || !in.hasRemaining())
 			return;
 
 		encoder.reset();
@@ -96,11 +96,11 @@ public class StreamEncoder {
 		 * state (position, limit) will mark the range of chars we are meant to
 		 * process.
 		 */
-		while (text.hasRemaining()) {
+		while (in.hasRemaining()) {
 			bbuffer.clear();
 
 			// Encode the text into our temporary write buffer.
-			encoder.encode(text, bbuffer, false);
+			encoder.encode(in, bbuffer, false);
 
 			/*
 			 * Using direct access to the underlying byte[], write the bytes
@@ -111,7 +111,7 @@ public class StreamEncoder {
 
 		// Perform the decoding finalization.
 		bbuffer.clear();
-		encoder.encode(text, bbuffer, true);
+		encoder.encode(in, bbuffer, true);
 		encoder.flush(bbuffer);
 
 		// Write out any additional bytes finalization resulted in.
