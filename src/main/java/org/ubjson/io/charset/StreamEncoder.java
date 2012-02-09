@@ -99,7 +99,7 @@ public class StreamEncoder {
 		while (text.hasRemaining()) {
 			bbuffer.clear();
 
-			// Encoder the text into our temporary write buffer.
+			// Encode the text into our temporary write buffer.
 			encoder.encode(text, bbuffer, false);
 
 			/*
