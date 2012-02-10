@@ -151,7 +151,7 @@ import java.nio.ByteBuffer;
  */
 public class ByteArrayOutputStream extends OutputStream {
 	protected int i;
-	protected byte[] data;
+	protected byte[] bbuffer;
 
 	/**
 	 * Creates an stream backed by a <code>byte[]</code> with an initial length
@@ -178,19 +178,19 @@ public class ByteArrayOutputStream extends OutputStream {
 					+ "] must be >= 0");
 
 		i = 0;
-		data = new byte[initialSize];
+		bbuffer = new byte[initialSize];
 	}
 
 	@Override
 	public void write(int value) throws IOException {
 		ensureCapacity(i + 1);
-		data[i++] = (byte) value;
+		bbuffer[i++] = (byte) value;
 	}
 
 	@Override
-	public void write(byte[] buffer, int offset, int length) throws IOException {
+	public void write(byte[] data, int offset, int length) throws IOException {
 		ensureCapacity(i + length);
-		System.arraycopy(buffer, offset, data, i, length);
+		System.arraycopy(data, offset, bbuffer, i, length);
 		i += length;
 	}
 
@@ -214,7 +214,7 @@ public class ByteArrayOutputStream extends OutputStream {
 	 *         implementation.
 	 */
 	public byte[] getArray() {
-		return data;
+		return bbuffer;
 	}
 
 	/**
@@ -229,11 +229,11 @@ public class ByteArrayOutputStream extends OutputStream {
 	}
 
 	protected void ensureCapacity(int capacity) {
-		if (capacity <= data.length)
+		if (capacity <= bbuffer.length)
 			return;
 
 		byte[] tmp = new byte[capacity];
-		System.arraycopy(data, 0, tmp, 0, data.length);
-		data = tmp;
+		System.arraycopy(bbuffer, 0, tmp, 0, bbuffer.length);
+		bbuffer = tmp;
 	}
 }

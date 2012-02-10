@@ -134,7 +134,7 @@ import java.nio.ByteBuffer;
 public class ByteArrayInputStream extends InputStream {
 	protected int i;
 	protected int l;
-	protected byte[] data;
+	protected byte[] bbuffer;
 
 	public ByteArrayInputStream(byte[] data) throws IllegalArgumentException {
 		reset(data);
@@ -169,7 +169,7 @@ public class ByteArrayInputStream extends InputStream {
 
 	@Override
 	public int read() throws IOException {
-		return (i < l ? data[i++] & 0xFF : -1);
+		return (i < l ? bbuffer[i++] & 0xFF : -1);
 	}
 
 	@Override
@@ -201,7 +201,7 @@ public class ByteArrayInputStream extends InputStream {
 			length = (length < r ? length : r);
 
 			// Copy data into buffer.
-			System.arraycopy(data, i, buffer, offset, length);
+			System.arraycopy(bbuffer, i, buffer, offset, length);
 			i += length;
 		}
 
@@ -224,12 +224,12 @@ public class ByteArrayInputStream extends InputStream {
 	}
 
 	public void reset(int offset) throws IllegalArgumentException {
-		if (offset < 0 || (offset + l) > data.length)
+		if (offset < 0 || (offset + l) > bbuffer.length)
 			throw new IllegalArgumentException(
 					"offset ["
 							+ offset
 							+ "] must be >= 0 and (offset + getLength()) must be <= getArray().length ["
-							+ data.length + "]");
+							+ bbuffer.length + "]");
 
 		i = offset;
 	}
@@ -254,11 +254,11 @@ public class ByteArrayInputStream extends InputStream {
 
 		this.i = 0;
 		this.l = length;
-		this.data = data;
+		this.bbuffer = data;
 	}
 
 	public byte[] getArray() {
-		return data;
+		return bbuffer;
 	}
 
 	public int getOffset() {
