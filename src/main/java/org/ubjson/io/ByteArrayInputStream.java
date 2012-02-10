@@ -154,16 +154,16 @@ public class ByteArrayInputStream extends InputStream {
 	public long skip(long n) throws IllegalArgumentException, IOException {
 		if (n < 0)
 			throw new IllegalArgumentException("n [" + n + "] must be >= 0");
-	
+
 		// Calculate remaining skippable bytes.
 		int r = (l - i);
-	
+
 		// Trim to the smaller of the two values for our skip amount.
 		n = (n < r ? n : r);
-	
+
 		// Skip the bytes
 		i += n;
-	
+
 		return n;
 	}
 
@@ -176,7 +176,7 @@ public class ByteArrayInputStream extends InputStream {
 	public int read(byte[] buffer, int offset, int length)
 			throws IllegalArgumentException, IOException {
 		if (buffer == null)
-			throw new IllegalArgumentException("b cannot be null");
+			throw new IllegalArgumentException("buffer cannot be null");
 		if (offset < 0 || length < 0 || (offset + length) > buffer.length)
 			throw new IllegalArgumentException("offset [" + offset
 					+ "] and length [" + length
