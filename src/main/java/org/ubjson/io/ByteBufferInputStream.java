@@ -17,6 +17,7 @@ package org.ubjson.io;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 /**
@@ -93,22 +94,13 @@ public class ByteBufferInputStream extends InputStream {
 	}
 
 	@Override
-	public int read() throws IOException {
+	public int read() throws BufferUnderflowException {
 		return (bbuffer.hasRemaining() ? bbuffer.get() & 0xFF : -1);
 	}
 
 	@Override
 	public int read(byte[] buffer, int offset, int length)
-			throws IllegalArgumentException, IOException {
-		if (buffer == null)
-			throw new IllegalArgumentException("buffer cannot be null");
-		if (offset < 0 || length < 0 || (offset + length) > buffer.length)
-			throw new IllegalArgumentException("offset [" + offset
-					+ "] and length [" + length
-					+ "] must be >= 0 and (offset + length)["
-					+ (offset + length) + "] must be <= buffer.length ["
-					+ buffer.length + "]");
-
+			throws IndexOutOfBoundsException, BufferUnderflowException {
 		int r = bbuffer.remaining();
 
 		if (r < 1)
@@ -146,7 +138,7 @@ public class ByteBufferInputStream extends InputStream {
 	}
 
 	@Override
-	public synchronized void reset() throws IOException {
+	public void reset() throws IOException {
 		bbuffer.reset();
 	}
 
