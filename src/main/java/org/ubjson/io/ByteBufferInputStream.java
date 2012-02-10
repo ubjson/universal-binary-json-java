@@ -76,6 +76,10 @@ public class ByteBufferInputStream extends InputStream {
 
 		this.bbuffer = buffer;
 	}
+	
+	/*
+	 * TODO: Need to audit this impl for the correct re-usability workflow.
+	 */
 
 	@Override
 	public int available() throws IOException {

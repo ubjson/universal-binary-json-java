@@ -15,6 +15,10 @@ public class ByteBufferOuputStream extends OutputStream {
 
 		this.bbuffer = data;
 	}
+	
+	/*
+	 * TODO: Need to audit this impl for the correct re-usability workflow.
+	 */
 
 	@Override
 	public void write(int b) throws ReadOnlyBufferException,
