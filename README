@@ -38,6 +38,17 @@ abstraction layers, I/O methods and utilities.
 
 Changelog
 ---------
+02-10-12
+	* Added ByteBuffer input and output stream impls as compliments to the
+	re-usable byte[] stream impls.
+	
+	Provides a fast translation layer between standard Java stream-IO and the
+	new Buffer-based I/O in NIO (including transparent support for using
+	ultra-fast direct ByteBuffers).
+	
+	* Optimized some of the read/write methods by removing unnecessary bounds
+	checks that are done by subsequent Input or Output stream impls themselves.
+
 02-09-12
 	* Fixed bug with readHugeAsBigInteger returning an invalid value and not
 	treating the underlying bytes as a string-encoded value.
