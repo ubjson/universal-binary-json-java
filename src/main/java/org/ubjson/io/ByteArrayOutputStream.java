@@ -189,6 +189,15 @@ public class ByteArrayOutputStream extends OutputStream {
 
 	@Override
 	public void write(byte[] data, int offset, int length) throws IOException {
+		if (data == null)
+			throw new IllegalArgumentException("data cannot be null");
+		if (offset < 0 || length < 0 || (offset + length) > data.length)
+			throw new IllegalArgumentException("offset [" + offset
+					+ "] and length [" + length
+					+ "] must be >= 0 and (offset + length)["
+					+ (offset + length) + "] must be <= data.length ["
+					+ data.length + "]");
+
 		ensureCapacity(i + length);
 		System.arraycopy(data, offset, bbuffer, i, length);
 		i += length;
