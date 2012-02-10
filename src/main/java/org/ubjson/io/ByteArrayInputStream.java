@@ -146,6 +146,28 @@ public class ByteArrayInputStream extends InputStream {
 	}
 
 	@Override
+	public int available() throws IOException {
+		return (l - i);
+	}
+
+	@Override
+	public long skip(long n) throws IllegalArgumentException, IOException {
+		if (n < 0)
+			throw new IllegalArgumentException("n [" + n + "] must be >= 0");
+	
+		// Calculate remaining skippable bytes.
+		int r = (l - i);
+	
+		// Trim to the smaller of the two values for our skip amount.
+		n = (n < r ? n : r);
+	
+		// Skip the bytes
+		i += n;
+	
+		return n;
+	}
+
+	@Override
 	public int read() throws IOException {
 		return (i < l ? data[i++] & 0xFF : -1);
 	}
@@ -184,28 +206,6 @@ public class ByteArrayInputStream extends InputStream {
 		}
 
 		return length;
-	}
-
-	@Override
-	public long skip(long n) throws IllegalArgumentException, IOException {
-		if (n < 0)
-			throw new IllegalArgumentException("n [" + n + "] must be >= 0");
-
-		// Calculate remaining skippable bytes.
-		int r = (l - i);
-
-		// Trim to the smaller of the two values for our skip amount.
-		n = (n < r ? n : r);
-
-		// Skip the bytes
-		i += n;
-
-		return n;
-	}
-
-	@Override
-	public int available() throws IOException {
-		return (l - i);
 	}
 
 	@Override
