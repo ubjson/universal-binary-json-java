@@ -101,7 +101,7 @@ public class ByteBufferInputStream extends InputStream {
 	public int read(byte[] buffer, int offset, int length)
 			throws IllegalArgumentException, IOException {
 		if (buffer == null)
-			throw new IllegalArgumentException("b cannot be null");
+			throw new IllegalArgumentException("buffer cannot be null");
 		if (offset < 0 || length < 0 || (offset + length) > buffer.length)
 			throw new IllegalArgumentException("offset [" + offset
 					+ "] and length [" + length
