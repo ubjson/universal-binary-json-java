@@ -19,6 +19,17 @@ optimized custom byte[]-stream impls:
 
 	* ByteArrayInputStream	(optimized for reuse, not from JDK)
 	* ByteArrayOutputStream (optimized for reuse, not from JDK)
+	
+If you are working with NIO and want maximum performance by using (and reusing)
+direct ByteBuffers along with the UBJSON stream impls, take a look at the:
+
+	* ByteBufferInputStream
+	* ByteBufferOutputStream
+	
+classes. You can wrap any ByteBuffer source or destination with this stream type,
+then wrap that stream type with a UBJSON stream impl and utilize the full
+potential of Java's NIO with Universal Binary JSON without giving yourself an
+ulcer.
 
 This allows you to re-use the streams over and over again in a pool of reusable
 streams for high-performance I/O with no object creation and garbage collection
