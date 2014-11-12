@@ -1,0 +1,13 @@
+apply plugin: "java"
+apply plugin: "maven"
+
+group = "org.ubjson"
+version = "1-SNAPSHOT"
+
+dependencies {
+	testCompile "junit:junit:4.10"
+}
+
+repositories {
+	mavenCentral()
+}
